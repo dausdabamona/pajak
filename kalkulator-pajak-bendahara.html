@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator Pajak Bendahara</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117; --surface: #161b22; --surface2: #21262d;
+    --border: #30363d; --accent: #58a6ff; --accent2: #3fb950;
+    --accent3: #f78166; --accent4: #d2a8ff; --text: #e6edf3;
+    --text2: #8b949e; --text3: #6e7681; --yellow: #e3b341; --red: #f85149;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  header {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 24px 16px; position: sticky; top: 0; z-index: 100;
+  }
+  .header-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; gap: 14px; }
+  .logo { width: 40px; height: 40px; background: linear-gradient(135deg, #1f6feb, #58a6ff); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .header-text h1 { font-size: 16px; font-weight: 700; color: var(--text); }
+  .header-text p { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; margin-top: 1px; }
+  .badge { margin-left: auto; background: rgba(88,166,255,.15); border: 1px solid rgba(88,166,255,.3); color: var(--accent); font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 20px; font-family: 'DM Mono', monospace; white-space: nowrap; }
+
+  main { max-width: 900px; margin: 0 auto; padding: 24px 16px 60px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .card-title { font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--text3); text-transform: uppercase; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .card-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  @media(max-width: 600px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .05em; }
+  .field input, .field select { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; padding: 9px 12px; width: 100%; outline: none; transition: border-color .15s; }
+  .field input:focus, .field select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(88,166,255,.12); }
+  .field select option { background: #161b22; }
+
+  .toggle-group { display: flex; gap: 6px; flex-wrap: wrap; }
+  .toggle-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text2); cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 600; padding: 8px 14px; transition: all .15s; }
+  .toggle-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .toggle-btn.active { background: rgba(88,166,255,.15); border-color: var(--accent); color: var(--accent); }
+
+  .kegiatan-select { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; padding: 9px 12px; width: 100%; outline: none; transition: border-color .15s; cursor: pointer; }
+  .kegiatan-select:focus { border-color: var(--accent); }
+
+  .input-prefix { position: relative; }
+  .input-prefix span { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--text3); font-family: 'DM Mono', monospace; pointer-events: none; }
+  .input-prefix input { padding-left: 34px; }
+
+  .btn-hitung { width: 100%; background: linear-gradient(135deg, #1f6feb, #58a6ff); border: none; border-radius: 10px; color: #fff; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 700; padding: 14px; margin-top: 4px; transition: opacity .15s, transform .1s; letter-spacing: .02em; }
+  .btn-hitung:hover { opacity: .9; transform: translateY(-1px); }
+  .btn-hitung:active { transform: translateY(0); }
+
+  #hasil-section { display: none; }
+  .hasil-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  @media(max-width: 500px) { .hasil-grid { grid-template-columns: 1fr; } }
+
+  .hasil-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; position: relative; overflow: hidden; }
+  .hasil-box::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+  .hasil-box.pph::before { background: var(--accent); }
+  .hasil-box.ppn::before { background: var(--accent2); }
+  .hasil-box.bayar::before { background: var(--yellow); }
+  .hasil-box.dipotong::before { background: var(--accent3); }
+  .hasil-box .label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); margin-bottom: 4px; }
+  .hasil-box .value { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--text); }
+  .hasil-box .sub { font-size: 10px; color: var(--text3); margin-top: 3px; }
+  .nilai-highlight { color: var(--accent); }
+  .nilai-hijau { color: var(--accent2); }
+  .nilai-kuning { color: var(--yellow); }
+  .nilai-merah { color: var(--accent3); }
+
+  .info-pajak { background: rgba(88,166,255,.06); border: 1px solid rgba(88,166,255,.2); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+  .info-pajak .row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,.05); }
+  .info-pajak .row:last-child { border-bottom: none; }
+  .info-pajak .row .k { font-size: 11px; color: var(--text2); }
+  .info-pajak .row .v { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text); text-align: right; }
+  .info-pajak .row .v.accent { color: var(--accent); }
+  .info-pajak .row .v.green { color: var(--accent2); }
+
+  .uraian-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+  .uraian-box p { font-size: 12px; color: var(--text2); line-height: 1.6; }
+  .uraian-box strong { color: var(--text); }
+
+  .warn-box { background: rgba(231,179,65,.08); border: 1px solid rgba(231,179,65,.25); border-radius: 8px; padding: 10px 14px; font-size: 11px; color: var(--yellow); display: flex; gap: 8px; align-items: flex-start; margin-bottom: 12px; }
+
+  .divider { height: 1px; background: var(--border); margin: 14px 0; }
+  .terbilang { font-size: 11px; color: var(--text3); font-style: italic; margin-top: 5px; padding-left: 2px; }
+
+  .btn-reset { background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--text2); cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 600; padding: 9px 16px; margin-top: 8px; width: 100%; transition: all .15s; }
+  .btn-reset:hover { border-color: var(--text2); color: var(--text); }
+
+  /* CETAK BUTTONS */
+  .cetak-group { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .btn-cetak-pph { flex: 1; min-width: 160px; background: rgba(88,166,255,.12); border: 1px solid rgba(88,166,255,.4); border-radius: 10px; color: var(--accent); cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 700; padding: 12px; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-cetak-pph:hover { background: rgba(88,166,255,.2); }
+  .btn-cetak-ppn { flex: 1; min-width: 160px; background: rgba(63,185,80,.12); border: 1px solid rgba(63,185,80,.4); border-radius: 10px; color: var(--accent2); cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 700; padding: 12px; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-cetak-ppn:hover { background: rgba(63,185,80,.2); }
+  .btn-cetak-all { width: 100%; background: rgba(227,179,65,.12); border: 1px solid rgba(227,179,65,.4); border-radius: 10px; color: var(--yellow); cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 700; padding: 12px; margin-top: 8px; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-cetak-all:hover { background: rgba(227,179,65,.2); }
+
+  /* ===== SSP PRINT STYLES ===== */
+  @media print {
+    body > header, main > .card:not(#print-only) { display: none !important; }
+    #hasil-section { display: none !important; }
+    #print-container { display: block !important; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+  #print-container { display: none; }
+
+  /* SSP FORM */
+  .ssp-page {
+    width: 210mm; min-height: 140mm;
+    margin: 0 auto 8mm;
+    padding: 6mm 8mm;
+    border: 1.5px solid #333;
+    font-family: Arial, sans-serif;
+    font-size: 8pt;
+    background: #fff;
+    color: #000;
+    page-break-after: always;
+    position: relative;
+  }
+  .ssp-page:last-child { page-break-after: auto; }
+  .ssp-header { display: flex; align-items: flex-start; justify-content: space-between; border-bottom: 1px solid #000; padding-bottom: 3mm; margin-bottom: 3mm; }
+  .ssp-header-left { font-size: 8pt; font-weight: bold; }
+  .ssp-header-center { text-align: center; flex: 1; }
+  .ssp-header-center h2 { font-size: 13pt; font-weight: bold; letter-spacing: 2px; margin-bottom: 1px; }
+  .ssp-header-center p { font-size: 8pt; }
+  .ssp-header-right { text-align: right; font-size: 8pt; }
+  .ssp-lembar { font-size: 22pt; font-weight: bold; color: #333; }
+  .ssp-lembar-label { font-size: 7pt; }
+  .ssp-peruntukan { font-size: 7.5pt; font-style: italic; color: #444; }
+
+  .ssp-row { display: flex; align-items: flex-start; margin-bottom: 2.5mm; gap: 2mm; }
+  .ssp-row .key { width: 42mm; font-weight: bold; flex-shrink: 0; }
+  .ssp-row .colon { flex-shrink: 0; margin-right: 2mm; }
+  .ssp-row .val { flex: 1; border-bottom: 1px dotted #999; min-height: 5mm; padding-bottom: 0.5mm; }
+
+  .npwp-boxes { display: flex; gap: 1px; align-items: center; }
+  .npwp-box { width: 6.5mm; height: 6mm; border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-size: 9pt; font-weight: bold; }
+  .npwp-sep { width: 3mm; text-align: center; font-weight: bold; }
+
+  .kap-kjs-area { display: flex; gap: 6mm; align-items: center; margin-bottom: 3mm; }
+  .kap-box { border: 2px solid #000; padding: 2mm 3mm; }
+  .kap-box label { font-size: 7pt; display: block; margin-bottom: 1px; }
+  .kap-digits { display: flex; gap: 1px; }
+  .kap-digit { width: 7mm; height: 7mm; border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-size: 11pt; font-weight: bold; }
+
+  .masa-pajak { margin-bottom: 3mm; }
+  .masa-header { font-weight: bold; font-size: 7.5pt; margin-bottom: 1mm; display: flex; justify-content: space-between; }
+  .masa-boxes { display: flex; gap: 2mm; align-items: center; flex-wrap: nowrap; }
+  .masa-item { display: flex; flex-direction: column; align-items: center; gap: 0.5mm; }
+  .masa-item span { font-size: 6.5pt; }
+  .masa-cb { width: 5.5mm; height: 5.5mm; border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-size: 9pt; }
+  .masa-cb.checked { background: #222; color: #fff; }
+  .tahun-box { display: flex; gap: 1px; margin-left: 4mm; }
+  .tahun-digit { width: 6mm; height: 6mm; border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 9pt; }
+
+  .jumlah-row { border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 2mm 0; margin-bottom: 2mm; }
+  .jumlah-label { font-weight: bold; font-size: 8pt; }
+  .jumlah-value { font-size: 12pt; font-weight: bold; border: 1px solid #000; padding: 1.5mm 3mm; display: inline-block; min-width: 60mm; margin-top: 1mm; }
+  .terbilang-row { font-style: italic; font-size: 7.5pt; margin-bottom: 3mm; }
+
+  .ttd-area { display: flex; justify-content: space-between; margin-top: 2mm; }
+  .ttd-box { text-align: center; font-size: 7.5pt; width: 80mm; }
+  .ttd-line { border-top: 1px solid #000; margin-top: 18mm; padding-top: 1mm; font-size: 7.5pt; }
+  .ssp-footer { text-align: center; font-size: 7pt; font-style: italic; border-top: 1px solid #000; margin-top: 2mm; padding-top: 1.5mm; color: #555; }
+  .validasi-box { border: 1px solid #000; min-height: 12mm; margin-top: 1.5mm; padding: 1mm 2mm; font-size: 7pt; color: #999; }
+
+  .uraian-pembayaran { background: #f8f8f8; border: 1px solid #ccc; padding: 2mm; margin-bottom: 2mm; font-size: 8pt; }
+  .uraian-label { font-weight: bold; font-size: 7pt; margin-bottom: 1mm; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">🧮</div>
+    <div class="header-text">
+      <h1>Kalkulator Pajak Bendahara</h1>
+      <p>PPh 22 · PPh 23 · PPh Final 4(2) · PPN · Bendahara Pemerintah</p>
+    </div>
+    <div class="badge">APBN 2025</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- DATA BENDAHARA -->
+  <div class="card">
+    <div class="card-title">① Data Bendahara & Rekanan</div>
+    <div class="grid-2" style="margin-bottom:12px">
+      <div class="field">
+        <label>Nama Satker / Instansi</label>
+        <input type="text" id="nama_satker" placeholder="Politeknik KP Sorong" value="Politeknik Kelautan dan Perikanan Sorong">
+      </div>
+      <div class="field">
+        <label>NPWP Satker</label>
+        <input type="text" id="npwp_satker" placeholder="00.000.000.0-000.000" value="00.172.581.1-951.000">
+      </div>
+    </div>
+    <div class="grid-2" style="margin-bottom:12px">
+      <div class="field">
+        <label>Nama Bendahara</label>
+        <input type="text" id="nama_bendahara" placeholder="Nama Bendahara Pengeluaran">
+      </div>
+      <div class="field">
+        <label>Alamat Satker</label>
+        <input type="text" id="alamat_satker" placeholder="Jl. ..." value="Jl. Kapitan Pattimura No. 1, Sorong">
+      </div>
+    </div>
+    <div class="grid-2" style="margin-bottom:12px">
+      <div class="field">
+        <label>Nama Rekanan / Penyedia</label>
+        <input type="text" id="nama_rekanan" placeholder="CV. Contoh Jaya">
+      </div>
+      <div class="field">
+        <label>NPWP Rekanan</label>
+        <input type="text" id="npwp_rekanan" placeholder="00.000.000.0-000.000">
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="field">
+        <label>Status NPWP Rekanan</label>
+        <div class="toggle-group">
+          <button class="toggle-btn active" onclick="setNpwp('NPWP',this)">✓ Ber-NPWP</button>
+          <button class="toggle-btn" onclick="setNpwp('NON_NPWP',this)">✗ Non-NPWP</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Sumber Dana</label>
+        <div class="toggle-group">
+          <button class="toggle-btn active" onclick="setSumber('APBN',this)">APBN</button>
+          <button class="toggle-btn" onclick="setSumber('APBD',this)">APBD</button>
+          <button class="toggle-btn" onclick="setSumber('DESA',this)">Dana Desa</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Nilai Transaksi</label>
+        <div class="toggle-group">
+          <button class="toggle-btn active" onclick="setIncludePpn(true,this)">Sudah PPN</button>
+          <button class="toggle-btn" onclick="setIncludePpn(false,this)">Belum PPN</button>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2" style="margin-top:12px">
+      <div class="field">
+        <label>Tanggal Transaksi</label>
+        <input type="date" id="tgl_transaksi">
+      </div>
+      <div class="field">
+        <label>Tahun Pajak</label>
+        <input type="text" id="tahun_pajak" value="2025" maxlength="4">
+      </div>
+    </div>
+  </div>
+
+  <!-- JENIS KEGIATAN -->
+  <div class="card">
+    <div class="card-title">② Jenis Kegiatan / Pengadaan</div>
+    <div class="field">
+      <label>Pilih Jenis Kegiatan</label>
+      <select class="kegiatan-select" id="jenis_kegiatan">
+        <option value="">— Pilih Jenis Kegiatan —</option>
+        <optgroup label="Belanja Barang">
+          <option value="1">Belanja Barang / Modal (ATK, Meja, Mobil, Kapal, dll)</option>
+          <option value="2">Belanja Barang Tambang / Galian (Pasir, Batu belum dibentuk)</option>
+          <option value="3">Belanja BBM, Listrik, Air Minum / PDAM, Benda Pos</option>
+          <option value="4">Belanja Pelumas (Oli)</option>
+          <option value="5">Belanja Barang dengan Dana BOS</option>
+          <option value="6">Belanja Sembako (Beras, Sagu, dll belum diolah)</option>
+          <option value="7">Belanja Vaksin Polio (Pekan Imunisasi Nasional)</option>
+          <option value="8">Belanja Buku Pelajaran Umum, Kitab Suci, Buku Agama</option>
+          <option value="9">Belanja Pakan Ternak / Ikan</option>
+          <option value="10">Belanja Bibit / Benih</option>
+          <option value="11">Belanja Hasil Pertanian (dipetik langsung)</option>
+        </optgroup>
+        <optgroup label="Jasa">
+          <option value="14">Jasa (servis, instalasi, dll)</option>
+          <option value="15">Jasa Makan Minum (Rumah Makan, Katering)</option>
+          <option value="16">Jasa Kesenian &amp; Hiburan (kelompok)</option>
+          <option value="17">Jasa Pengiriman Surat dengan Perangko</option>
+          <option value="18">Jasa Pengiriman Surat tanpa Perangko</option>
+          <option value="19">Jasa Pengiriman Barang</option>
+          <option value="20">Jasa Penyiaran Non-Komersil</option>
+        </optgroup>
+        <optgroup label="Sewa">
+          <option value="21">Sewa Mobilitas Laut (perusahaan pelayaran dalam negeri)</option>
+          <option value="22">Sewa Mobilitas Udara (perusahaan penerbangan dalam negeri)</option>
+          <option value="23">Sewa Mobilitas Laut &amp; Udara (perusahaan luar negeri)</option>
+          <option value="24">Sewa Mobilitas Darat</option>
+          <option value="25">Sewa Mobilitas Laut Lainnya</option>
+          <option value="26">Sewa Mobilitas Udara Lainnya</option>
+          <option value="27">Sewa Tanah dan/atau Bangunan (selain Hotel)</option>
+          <option value="28">Sewa Tempat di Hotel</option>
+        </optgroup>
+        <optgroup label="Hak atas Tanah &amp; Bangunan">
+          <option value="12">Pembebasan Tanah/Bangunan — Kepentingan Umum (Jalan, Waduk, dll)</option>
+          <option value="13">Pembebasan Tanah/Bangunan — Bangunan Lainnya</option>
+          <option value="29">Pengalihan Hak atas Tanah dan/atau Bangunan</option>
+        </optgroup>
+        <optgroup label="Pekerjaan Konstruksi">
+          <option value="32">Pelaksana Konstruksi — Kualifikasi Kecil (Grade 1/2/3/4, CV)</option>
+          <option value="30">Pelaksana Konstruksi — Menengah Besar / PT</option>
+          <option value="31">Pelaksana Konstruksi — Grade 5/6/7</option>
+          <option value="33">Pelaksana Konstruksi — Non Kualifikasi</option>
+          <option value="34">Perencana/Pengawas Konstruksi — Berkualifikasi</option>
+          <option value="35">Perencana/Pengawas Konstruksi — Non Kualifikasi</option>
+        </optgroup>
+      </select>
+    </div>
+  </div>
+
+  <!-- NILAI -->
+  <div class="card">
+    <div class="card-title">③ Nilai Transaksi</div>
+    <div class="field">
+      <label>Nilai Kontrak / Pembayaran (Rp)</label>
+      <div class="input-prefix">
+        <span>Rp</span>
+        <input type="text" id="nilai_transaksi" placeholder="0"
+          oninput="formatRibuan(this)" style="padding-left:34px; font-family:'DM Mono',monospace; font-size:15px; font-weight:500;">
+      </div>
+      <div id="nilai_terbilang" class="terbilang">—</div>
+    </div>
+    <div style="margin-top:14px">
+      <button class="btn-hitung" onclick="hitung()">⚡ Hitung Pajak</button>
+    </div>
+  </div>
+
+  <!-- HASIL -->
+  <div id="hasil-section">
+    <div class="card">
+      <div class="card-title">④ Hasil Perhitungan Pajak</div>
+
+      <div id="warn_non_npwp" class="warn-box" style="display:none">
+        ⚠️ <span>Rekanan <strong>BELUM BER-NPWP</strong> — tarif PPh dikenakan <strong>2×</strong> tarif normal sesuai ketentuan perpajakan.</span>
+      </div>
+
+      <div class="hasil-grid">
+        <div class="hasil-box pph">
+          <div class="label">PPh yang Dipotong</div>
+          <div class="value nilai-highlight" id="r_pph">Rp 0</div>
+          <div class="sub" id="r_pph_sub">—</div>
+        </div>
+        <div class="hasil-box ppn">
+          <div class="label">PPN yang Dipungut</div>
+          <div class="value nilai-hijau" id="r_ppn">Rp 0</div>
+          <div class="sub" id="r_ppn_sub">—</div>
+        </div>
+        <div class="hasil-box bayar">
+          <div class="label">Nilai Dibayar ke Rekanan</div>
+          <div class="value nilai-kuning" id="r_bayar">Rp 0</div>
+          <div class="sub">Nilai kontrak dikurangi pajak</div>
+        </div>
+        <div class="hasil-box dipotong">
+          <div class="label">Total Pajak Disetor</div>
+          <div class="value nilai-merah" id="r_total_pajak">Rp 0</div>
+          <div class="sub">PPh + PPN</div>
+        </div>
+      </div>
+
+      <div id="info_pph_box" class="info-pajak">
+        <div class="row"><span class="k">Jenis PPh</span><span class="v accent" id="r_jenis_pph">—</span></div>
+        <div class="row"><span class="k">Kode Akun Pajak</span><span class="v" id="r_kap_pph">—</span></div>
+        <div class="row"><span class="k">Kode Jenis Setoran</span><span class="v" id="r_kjs_pph">—</span></div>
+        <div class="row"><span class="k">Tarif PPh</span><span class="v accent" id="r_tarif_pph">—</span></div>
+        <div class="row"><span class="k">DPP (Dasar Pengenaan Pajak)</span><span class="v" id="r_dppp">—</span></div>
+      </div>
+
+      <div id="info_ppn_box" class="info-pajak" style="background:rgba(63,185,80,.06); border-color:rgba(63,185,80,.2)">
+        <div class="row"><span class="k">Jenis PPN</span><span class="v green" id="r_jenis_ppn">—</span></div>
+        <div class="row"><span class="k">Kode Akun Pajak</span><span class="v" id="r_kap_ppn">411211</span></div>
+        <div class="row"><span class="k">Kode Jenis Setoran</span><span class="v" id="r_kjs_ppn">910</span></div>
+        <div class="row"><span class="k">Tarif PPN</span><span class="v green" id="r_tarif_ppn">—</span></div>
+        <div class="row"><span class="k">Keterangan</span><span class="v" id="r_ket_ppn">—</span></div>
+      </div>
+
+      <div class="uraian-box">
+        <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text3); margin-bottom:8px;">Uraian Pembayaran SSP/BPN</div>
+        <p id="r_uraian">—</p>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="uraian-box" style="background:transparent; border-color:var(--border)">
+        <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text3); margin-bottom:8px;">Ringkasan Transaksi</div>
+        <div id="r_ringkasan"></div>
+      </div>
+
+      <!-- TOMBOL CETAK -->
+      <div style="margin-top:16px">
+        <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text3); margin-bottom:10px;">🖨️ Cetak Surat Setoran Pajak (SSP)</div>
+        <div class="cetak-group">
+          <button class="btn-cetak-pph" id="btn_cetak_pph" onclick="cetakSSP('PPH')">🔵 Cetak SSP PPh (4 Lembar)</button>
+          <button class="btn-cetak-ppn" id="btn_cetak_ppn" onclick="cetakSSP('PPN')">🟢 Cetak SSP PPN (4 Lembar)</button>
+        </div>
+        <button class="btn-cetak-all" onclick="cetakSSP('BOTH')">🟡 Cetak SSP PPh + PPN Sekaligus</button>
+      </div>
+
+      <button class="btn-reset" onclick="reset()">↺ Hitung Ulang</button>
+    </div>
+  </div>
+
+</main>
+
+<!-- PRINT CONTAINER -->
+<div id="print-container"></div>
+
+<script>
+// ===== STATE =====
+let state = { npwp: 'NPWP', sumber: 'APBN', includePpn: true };
+let lastResult = null;
+
+// ===== DATA KEGIATAN =====
+const KEGIATAN = {
+  1:  { pph:'PPh Pasal 22', kap:'411122', kjs:'910', tarif:0.015,  ppn:0.11, pbebas:false, ket:'PPN normal 11%' },
+  2:  { pph:'PPh Pasal 22', kap:'411122', kjs:'910', tarif:0.015,  ppn:0,    pbebas:false, ket:'Bebas PPN (barang galian)' },
+  3:  { pph:'PPh Pasal 22', kap:'411122', kjs:'910', tarif:0,      ppn:0,    pbebas:false, ket:'Bebas PPh & PPN' },
+  4:  { pph:'PPh Pasal 22', kap:'411122', kjs:'910', tarif:0,      ppn:0.11, pbebas:false, ket:'Bebas PPh 22, PPN 11%' },
+  5:  { pph:'PPh Pasal 22', kap:'411122', kjs:'910', tarif:0,      ppn:0.11, pbebas:false, ket:'Dana BOS' },
+  6:  { pph:'PPh Pasal 22', kap:'411122', kjs:'910', tarif:0.015,  ppn:0,    pbebas:false, ket:'Sembako pokok — bebas PPN' },
+  7:  { pph:'PPh Pasal 22', kap:'411122', kjs:'910', tarif:0.015,  ppn:0,    pbebas:true,  ket:'Bebas PPN — Faktur dicap Bebas PPN' },
+  8:  { pph:'PPh Pasal 22', kap:'411122', kjs:'910', tarif:0.015,  ppn:0,    pbebas:true,  ket:'Bebas PPN — Faktur dicap Bebas PPN' },
+  9:  { pph:'PPh Pasal 22', kap:'411122', kjs:'910', tarif:0.015,  ppn:0,    pbebas:true,  ket:'Bebas PPN — Faktur dicap Bebas PPN' },
+  10: { pph:'PPh Pasal 22', kap:'411122', kjs:'910', tarif:0.015,  ppn:0,    pbebas:true,  ket:'Bebas PPN — Faktur dicap Bebas PPN' },
+  11: { pph:'PPh Pasal 22', kap:'411122', kjs:'910', tarif:0.015,  ppn:0,    pbebas:true,  ket:'Bebas PPN — Faktur dicap Bebas PPN' },
+  12: { pph:'PPh Final 4(2)', kap:'411128', kjs:'402', tarif:0,    ppn:0,    pbebas:false, ket:'Pembebasan tanah kepentingan umum' },
+  13: { pph:'PPh Final 4(2)', kap:'411128', kjs:'402', tarif:0,    ppn:0,    pbebas:false, ket:'Pembebasan tanah bangunan lainnya' },
+  14: { pph:'PPh Pasal 23',  kap:'411124', kjs:'104', tarif:0.02,  ppn:0.11, pbebas:false, ket:'Jasa — PPh 23 2%, PPN 11%' },
+  15: { pph:'PPh Pasal 23',  kap:'411124', kjs:'104', tarif:0.02,  ppn:0,    pbebas:false, ket:'Katering — PPh 23 2%, bebas PPN' },
+  16: { pph:'PPh Pasal 23',  kap:'411124', kjs:'104', tarif:0.02,  ppn:0,    pbebas:false, ket:'Jasa kesenian kelompok' },
+  17: { pph:'PPh Pasal 23',  kap:'411124', kjs:'104', tarif:0.02,  ppn:0,    pbebas:false, ket:'Pengiriman surat perangko' },
+  18: { pph:'PPh Pasal 23',  kap:'411124', kjs:'104', tarif:0.02,  ppn:0.11, pbebas:false, ket:'Pengiriman surat tanpa perangko' },
+  19: { pph:'PPh Pasal 23',  kap:'411124', kjs:'104', tarif:0,     ppn:0.01, pbebas:false, ket:'Pengiriman barang — PPN 1%' },
+  20: { pph:'PPh Pasal 23',  kap:'411124', kjs:'104', tarif:0.02,  ppn:0,    pbebas:false, ket:'Penyiaran non-komersil' },
+  21: { pph:'PPh Final Ps.15', kap:'411128', kjs:'410', tarif:0.012, ppn:0.11, pbebas:false, ket:'Sewa kapal dalam negeri' },
+  22: { pph:'PPh Non Migas Lain', kap:'411129', kjs:'101', tarif:0.018, ppn:0, pbebas:false, ket:'Sewa pesawat dalam negeri' },
+  23: { pph:'PPh Final Ps.15', kap:'411128', kjs:'411', tarif:0.026, ppn:0.11, pbebas:false, ket:'Sewa kapal/udara LN' },
+  24: { pph:'PPh Pasal 23',  kap:'411124', kjs:'104', tarif:0.02,  ppn:0.11, pbebas:false, ket:'Sewa kendaraan darat' },
+  25: { pph:'PPh Pasal 23',  kap:'411124', kjs:'104', tarif:0.02,  ppn:0.11, pbebas:false, ket:'Sewa kapal lainnya' },
+  26: { pph:'PPh Pasal 23',  kap:'411124', kjs:'104', tarif:0.02,  ppn:0.11, pbebas:false, ket:'Sewa pesawat lainnya' },
+  27: { pph:'PPh Final 4(2)', kap:'411128', kjs:'403', tarif:0.10,  ppn:0.11, pbebas:false, ket:'Sewa tanah/bangunan — Final 10%' },
+  28: { pph:'PPh Pasal 23',  kap:'411124', kjs:'104', tarif:0.02,  ppn:0,    pbebas:false, ket:'Sewa hotel — bebas PPN' },
+  29: { pph:'PPh Final 4(2)', kap:'411128', kjs:'402', tarif:0.05,  ppn:0.11, pbebas:false, ket:'Pengalihan hak tanah/bangunan — Final 5%' },
+  30: { pph:'PPh Final 4(2)', kap:'411128', kjs:'409', tarif:0.0265, ppn:0.11, pbebas:false, ket:'Konstruksi Menengah/Besar — Final 2,65%' },
+  31: { pph:'PPh Final 4(2)', kap:'411128', kjs:'409', tarif:0.0265, ppn:0.11, pbebas:false, ket:'Konstruksi Grade 5/6/7 — Final 2,65%' },
+  32: { pph:'PPh Final 4(2)', kap:'411128', kjs:'409', tarif:0.0175, ppn:0.11, pbebas:false, ket:'Konstruksi Kecil/CV — Final 1,75%' },
+  33: { pph:'PPh Final 4(2)', kap:'411128', kjs:'409', tarif:0.04,   ppn:0.11, pbebas:false, ket:'Konstruksi Non-Kualifikasi — Final 4%' },
+  34: { pph:'PPh Final 4(2)', kap:'411128', kjs:'409', tarif:0.04,   ppn:0.11, pbebas:false, ket:'Perencana/Pengawas Berkualifikasi — Final 4%' },
+  35: { pph:'PPh Final 4(2)', kap:'411128', kjs:'409', tarif:0.06,   ppn:0.11, pbebas:false, ket:'Perencana/Pengawas Non-Kualifikasi — Final 6%' },
+};
+
+// ===== HELPERS =====
+function fmt(n) { return 'Rp ' + Math.round(n).toLocaleString('id-ID'); }
+function fmtNum(n) { return Math.round(n).toLocaleString('id-ID'); }
+function pct(n) { return (n * 100).toFixed(n % 0.01 === 0 ? 0 : 2).replace('.', ',') + '%'; }
+function parseRp(str) { return parseFloat(str.replace(/\./g, '').replace(',', '.')) || 0; }
+
+const SATU = ['','satu','dua','tiga','empat','lima','enam','tujuh','delapan','sembilan',
+  'sepuluh','sebelas','dua belas','tiga belas','empat belas','lima belas','enam belas',
+  'tujuh belas','delapan belas','sembilan belas'];
+function terbilang(n) {
+  n = Math.round(n);
+  if (n === 0) return 'nol';
+  if (n < 0) return 'minus ' + terbilang(-n);
+  let r = '';
+  if (n >= 1e12) { r += terbilang(Math.floor(n/1e12)) + ' triliun '; n %= 1e12; }
+  if (n >= 1e9)  { r += terbilang(Math.floor(n/1e9))  + ' miliar ';  n %= 1e9;  }
+  if (n >= 1e6)  { r += terbilang(Math.floor(n/1e6))  + ' juta ';    n %= 1e6;  }
+  if (n >= 1e3)  { r += (Math.floor(n/1e3)===1?'seribu':terbilang(Math.floor(n/1e3))+' ribu') + ' '; n %= 1e3; }
+  if (n >= 100)  { r += (Math.floor(n/100)===1?'seratus':SATU[Math.floor(n/100)]+' ratus') + ' '; n %= 100; }
+  if (n > 0) { if (n<20) r += SATU[n]; else { r += SATU[Math.floor(n/10)]+' puluh'; if (n%10) r += ' '+SATU[n%10]; } }
+  return r.trim();
+}
+function tb(n) { let s = terbilang(n); return s.charAt(0).toUpperCase()+s.slice(1)+' Rupiah'; }
+
+function formatRibuan(el) {
+  let raw = el.value.replace(/\D/g,'');
+  if (!raw) { el.value=''; document.getElementById('nilai_terbilang').textContent='—'; return; }
+  let num = parseInt(raw,10);
+  el.value = num.toLocaleString('id-ID');
+  document.getElementById('nilai_terbilang').textContent = tb(num);
+}
+
+function setNpwp(val, btn) { state.npwp=val; setActive(btn); }
+function setSumber(val, btn) { state.sumber=val; setActive(btn); }
+function setIncludePpn(val, btn) { state.includePpn=val; setActive(btn); }
+function setActive(btn) { btn.closest('.toggle-group').querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
+
+// ===== HITUNG =====
+function hitung() {
+  const kode = document.getElementById('jenis_kegiatan').value;
+  const nilaiStr = document.getElementById('nilai_transaksi').value;
+  if (!kode) { alert('Pilih jenis kegiatan terlebih dahulu!'); return; }
+  if (!nilaiStr) { alert('Masukkan nilai transaksi!'); return; }
+
+  const k = KEGIATAN[kode];
+  const nilaiInput = parseRp(nilaiStr);
+  const ppnTarif = k.ppn;
+  let dpp, nilaiInclPpn;
+
+  if (state.includePpn) {
+    nilaiInclPpn = nilaiInput;
+    dpp = ppnTarif > 0 ? nilaiInput / (1 + ppnTarif) : nilaiInput;
+  } else {
+    dpp = nilaiInput;
+    nilaiInclPpn = ppnTarif > 0 ? nilaiInput * (1 + ppnTarif) : nilaiInput;
+  }
+
+  let tarifPph = k.tarif;
+  const isNonNpwp = state.npwp === 'NON_NPWP';
+  if (isNonNpwp && tarifPph > 0) tarifPph *= 2;
+
+  const pph = dpp * tarifPph;
+  const ppn = dpp * ppnTarif;
+  const totalPajak = pph + ppn;
+  const dibayar = nilaiInclPpn - pph - ppn;
+
+  let uraianPph = '';
+  if (k.pph.includes('Final 4(2)')) uraianPph = `${k.pph} dengan tarif ${pct(k.tarif)} atas ${document.getElementById('jenis_kegiatan').selectedOptions[0].text}`;
+  else if (k.pph.includes('22')) uraianPph = `PPh Pasal 22 atas pembelian barang oleh Bendahara Pemerintah`;
+  else if (k.pph.includes('23')) uraianPph = `PPh Pasal 23 atas jasa dari ${document.getElementById('nama_rekanan').value || 'rekanan'}`;
+  else uraianPph = `${k.pph} atas transaksi yang dilakukan`;
+
+  // Simpan hasil untuk cetak
+  lastResult = {
+    k, kode, nilaiInput, dpp, nilaiInclPpn, pph, ppn, totalPajak, dibayar,
+    tarifPph, isNonNpwp, ppnTarif, uraianPph,
+    namaSatker: document.getElementById('nama_satker').value,
+    npwpSatker: document.getElementById('npwp_satker').value,
+    namaBendahara: document.getElementById('nama_bendahara').value,
+    alamatSatker: document.getElementById('alamat_satker').value,
+    namaRekanan: document.getElementById('nama_rekanan').value,
+    npwpRekanan: document.getElementById('npwp_rekanan').value,
+    tglTransaksi: document.getElementById('tgl_transaksi').value,
+    tahunPajak: document.getElementById('tahun_pajak').value || '2025',
+    jenisKegiatan: document.getElementById('jenis_kegiatan').selectedOptions[0].text,
+    sumber: state.sumber,
+  };
+
+  // Update UI
+  document.getElementById('r_pph').textContent = fmt(pph);
+  document.getElementById('r_pph_sub').textContent = pph===0 ? 'Tidak ada pemotongan PPh' : `Tarif ${pct(tarifPph)} × DPP ${fmtNum(dpp)}`;
+  document.getElementById('r_ppn').textContent = fmt(ppn);
+  document.getElementById('r_ppn_sub').textContent = ppn===0 ? 'Tidak ada pemungutan PPN' : `Tarif ${pct(ppnTarif)} × DPP ${fmtNum(dpp)}`;
+  document.getElementById('r_bayar').textContent = fmt(dibayar);
+  document.getElementById('r_total_pajak').textContent = fmt(totalPajak);
+  document.getElementById('r_jenis_pph').textContent = tarifPph===0 ? `${k.pph} (0%)` : k.pph;
+  document.getElementById('r_kap_pph').textContent = k.kap;
+  document.getElementById('r_kjs_pph').textContent = k.kjs;
+  document.getElementById('r_tarif_pph').textContent = isNonNpwp && k.tarif>0 ? `${pct(k.tarif)} → ${pct(tarifPph)} (2× Non-NPWP)` : pct(k.tarif);
+  document.getElementById('r_dppp').textContent = fmtNum(dpp) + ' (belum PPN)';
+  document.getElementById('r_jenis_ppn').textContent = ppnTarif===0 ? 'Tidak dipungut PPN' : 'PPN';
+  document.getElementById('r_tarif_ppn').textContent = pct(ppnTarif);
+  document.getElementById('r_ket_ppn').textContent = k.pbebas ? '⚠️ Faktur Pajak dicap BEBAS PPN' : k.ket;
+  document.getElementById('r_uraian').innerHTML = `<strong>${uraianPph}</strong><br><span style="font-size:11px;color:var(--text3)">Satker: ${lastResult.namaSatker} | Rekanan: ${lastResult.namaRekanan} | ${state.sumber}</span>`;
+
+  const rows = [
+    ['Nilai Kontrak (input)', fmtNum(nilaiInput)],
+    ['Nilai termasuk PPN', fmtNum(nilaiInclPpn)],
+    ['DPP (belum PPN)', fmtNum(dpp)],
+    ['PPh dipotong', fmtNum(pph)],
+    ['PPN dipungut', fmtNum(ppn)],
+    ['Total disetor ke kas negara', fmtNum(totalPajak)],
+    ['Dibayarkan ke rekanan', fmtNum(dibayar)],
+  ];
+  document.getElementById('r_ringkasan').innerHTML = rows.map(([k,v]) =>
+    `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:11px;color:var(--text2)">${k}</span>
+      <span style="font-family:'DM Mono',monospace;font-size:11px">${v}</span>
+    </div>`).join('');
+
+  document.getElementById('warn_non_npwp').style.display = isNonNpwp && k.tarif>0 ? 'flex' : 'none';
+
+  // Toggle cetak buttons
+  document.getElementById('btn_cetak_pph').style.opacity = pph > 0 ? '1' : '0.4';
+  document.getElementById('btn_cetak_ppn').style.opacity = ppn > 0 ? '1' : '0.4';
+
+  document.getElementById('hasil-section').style.display = 'block';
+  document.getElementById('hasil-section').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+// ===== SSP GENERATOR =====
+function npwpBoxes(npwpStr) {
+  // Format: 00.000.000.0-000.000
+  const clean = (npwpStr || '').replace(/\D/g,'').padEnd(15,'0');
+  const groups = [
+    clean.slice(0,2), clean.slice(2,5), clean.slice(5,8),
+    clean.slice(8,9), clean.slice(9,12), clean.slice(12,15)
+  ];
+  const SEP = ['.','.','.', '-', '.'];
+  let html = '<div class="npwp-boxes">';
+  groups.forEach((g, gi) => {
+    [...g].forEach(ch => html += `<div class="npwp-box">${ch}</div>`);
+    if (gi < SEP.length) html += `<div class="npwp-sep">${SEP[gi]}</div>`;
+  });
+  html += '</div>';
+  return html;
+}
+
+function kapDigits(kap) {
+  return '<div class="kap-digits">' + [...(kap||'').padEnd(6,'_')].map(c=>`<div class="kap-digit">${c==='_'?'':c}</div>`).join('') + '</div>';
+}
+function kjsDigits(kjs) {
+  return '<div class="kap-digits">' + [...(kjs||'').padEnd(3,'_')].map(c=>`<div class="kap-digit">${c==='_'?'':c}</div>`).join('') + '</div>';
+}
+
+function masaPajakBoxes(tglStr, bulanCheck) {
+  const BULAN = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
+  let bulan = bulanCheck;
+  if (!bulan && tglStr) { bulan = new Date(tglStr).getMonth() + 1; }
+  if (!bulan) bulan = new Date().getMonth() + 1;
+
+  let html = '<div class="masa-boxes">';
+  BULAN.forEach((b,i) => {
+    const checked = (i+1) === bulan;
+    html += `<div class="masa-item"><span>${b}</span><div class="masa-cb${checked?' checked':''}">X</div></div>`;
+  });
+  html += '</div>';
+  return html;
+}
+
+function tahunBoxes(tahun) {
+  const t = (tahun||new Date().getFullYear().toString()).padEnd(4,'0');
+  return '<div class="tahun-box">' + [...t].map(c=>`<div class="tahun-digit">${c}</div>`).join('') + '</div>';
+}
+
+function formatTanggal(tglStr) {
+  if (!tglStr) { const d = new Date(); return `${d.getDate()} ${['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][d.getMonth()]} ${d.getFullYear()}`; }
+  const d = new Date(tglStr);
+  const BLN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  return `${d.getDate()} ${BLN[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function buatLembarSSP(r, jenis, nomorLembar, peruntukan) {
+  // jenis: 'PPH' atau 'PPN'
+  const isPph = jenis === 'PPH';
+  const jumlah = isPph ? r.pph : r.ppn;
+  const kap = isPph ? r.k.kap : '411211';
+  const kjs = isPph ? r.k.kjs : '910';
+  const uraianPembayaran = isPph
+    ? `${r.uraianPph} — ${r.jenisKegiatan}`
+    : `PPN atas ${r.jenisKegiatan}`;
+  const tglFormatted = formatTanggal(r.tglTransaksi);
+  const bulanTgl = r.tglTransaksi ? new Date(r.tglTransaksi).getMonth() + 1 : null;
+
+  return `
+<div class="ssp-page">
+  <div class="ssp-header">
+    <div class="ssp-header-left">
+      <div>KEMENTERIAN KEUANGAN R.I.</div>
+      <div>DIREKTORAT JENDERAL PAJAK</div>
+    </div>
+    <div class="ssp-header-center">
+      <h2>SURAT SETORAN PAJAK</h2>
+      <p>(SSP)</p>
+    </div>
+    <div class="ssp-header-right">
+      <div class="ssp-lembar">${nomorLembar}</div>
+      <div class="ssp-lembar-label">LEMBAR</div>
+      <div class="ssp-peruntukan">${peruntukan}</div>
+    </div>
+  </div>
+
+  <div class="ssp-row">
+    <span class="key">NPWP</span><span class="colon">:</span>
+    <span class="val">${npwpBoxes(r.npwpSatker)}</span>
+  </div>
+  <div class="ssp-row" style="margin-bottom:1mm">
+    <span class="key" style="font-size:7pt;font-weight:normal">Diisi sesuai dengan NPWP yang dimiliki</span>
+  </div>
+  <div class="ssp-row">
+    <span class="key">NAMA WP</span><span class="colon">:</span>
+    <span class="val"><strong>${r.namaSatker||'...'}</strong></span>
+  </div>
+  <div class="ssp-row">
+    <span class="key">ALAMAT WP</span><span class="colon">:</span>
+    <span class="val">${r.alamatSatker||'...'}</span>
+  </div>
+  <div class="ssp-row">
+    <span class="key">NOP</span><span class="colon">:</span>
+    <span class="val" style="border-bottom:1px dotted #999;min-height:5mm"></span>
+  </div>
+
+  <div style="margin: 3mm 0 2mm; display:flex; gap:8mm; align-items:flex-start">
+    <div class="kap-box">
+      <label>Kode Akun Pajak</label>
+      ${kapDigits(kap)}
+    </div>
+    <div class="kap-box">
+      <label>Kode Jenis Setoran</label>
+      ${kjsDigits(kjs)}
+    </div>
+    <div class="uraian-pembayaran" style="flex:1">
+      <div class="uraian-label">Uraian Pembayaran :</div>
+      <strong>${uraianPembayaran}</strong>
+    </div>
+  </div>
+
+  <div class="masa-pajak">
+    <div class="masa-header">
+      <span>Masa Pajak</span>
+      <span style="display:flex;align-items:center;gap:4mm">Tahun Pajak &nbsp; ${tahunBoxes(r.tahunPajak)}</span>
+    </div>
+    ${masaPajakBoxes(r.tglTransaksi, bulanTgl)}
+    <div style="font-size:7pt;color:#555;margin-top:1mm">Beri tanda silang (X) pada kolom bulan, sesuai dengan pembayaran untuk masa yang berkenaan</div>
+  </div>
+
+  <div class="ssp-row">
+    <span class="key">Nomor Ketetapan</span><span class="colon">:</span>
+    <span class="val" style="font-size:8pt">_______ / ______ / _____ / ______</span>
+  </div>
+
+  <div class="jumlah-row">
+    <div class="jumlah-label">Jumlah Pembayaran :</div>
+    <div class="jumlah-value">Rp ${fmtNum(jumlah)}</div>
+    <div style="font-size:7pt;color:#555;margin-top:1mm">Diisi dengan rupiah penuh</div>
+  </div>
+  <div class="terbilang-row">Terbilang : ( ${tb(jumlah)} )</div>
+
+  <div class="ttd-area">
+    <div class="ttd-box">
+      <div>Diterima oleh Kantor Penerima Pembayaran</div>
+      <div style="margin-top:1mm">Tanggal .........................................</div>
+      <div class="ttd-line">Cap dan tanda tangan</div>
+    </div>
+    <div class="ttd-box">
+      <div>Wajib Pajak / Penyetor</div>
+      <div style="margin-top:1mm">Sorong, ${tglFormatted}</div>
+      <div class="ttd-line">${r.namaBendahara||'( Nama Bendahara )'}</div>
+    </div>
+  </div>
+
+  <div class="ssp-footer">" Terima kasih Telah Membayar Pajak - Pajak Untuk Pembangunan Bangsa "</div>
+  <div class="validasi-box">Ruang Validasi Kantor Penerima Pembayaran</div>
+  <div style="font-size:7pt;text-align:right;color:#999;margin-top:1mm">F.2.0.32.01</div>
+</div>`;
+}
+
+function buatSSP(r, jenis) {
+  const lembarList = [
+    { no: 1, peruntukan: 'Untuk Arsip Wajib Pajak' },
+    { no: 2, peruntukan: 'Untuk KPPN' },
+    { no: 3, peruntukan: 'Untuk Dilaporkan ke KPP' },
+    { no: 4, peruntukan: 'Untuk Bank Persepsi / Kantor Pos' },
+  ];
+  return lembarList.map(l => buatLembarSSP(r, jenis, l.no, l.peruntukan)).join('');
+}
+
+function cetakSSP(jenis) {
+  if (!lastResult) { alert('Hitung pajak terlebih dahulu!'); return; }
+
+  const r = lastResult;
+  let html = '';
+
+  if (jenis === 'PPH' || jenis === 'BOTH') {
+    if (r.pph <= 0 && jenis === 'PPH') { alert('PPh = 0, tidak perlu cetak SSP PPh.'); return; }
+    if (r.pph > 0) html += buatSSP(r, 'PPH');
+  }
+  if (jenis === 'PPN' || jenis === 'BOTH') {
+    if (r.ppn <= 0 && jenis === 'PPN') { alert('PPN = 0, tidak perlu cetak SSP PPN.'); return; }
+    if (r.ppn > 0) html += buatSSP(r, 'PPN');
+  }
+
+  if (!html) { alert('Tidak ada pajak yang perlu dicetak.'); return; }
+
+  // Buka window print
+  const win = window.open('', '_blank', 'width=900,height=700');
+  win.document.write(`<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8">
+<title>SSP Pajak - ${r.namaSatker}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 10mm; }
+  .ssp-page { width: 210mm; min-height: 140mm; margin: 0 auto 8mm; padding: 6mm 8mm; border: 1.5px solid #333; font-family: Arial, sans-serif; font-size: 8pt; background: #fff; color: #000; page-break-after: always; }
+  .ssp-page:last-child { page-break-after: auto; }
+  .ssp-header { display: flex; align-items: flex-start; justify-content: space-between; border-bottom: 1px solid #000; padding-bottom: 3mm; margin-bottom: 3mm; }
+  .ssp-header-left { font-size: 8pt; font-weight: bold; }
+  .ssp-header-center { text-align: center; flex: 1; }
+  .ssp-header-center h2 { font-size: 13pt; font-weight: bold; letter-spacing: 2px; margin-bottom: 1px; }
+  .ssp-header-right { text-align: right; font-size: 8pt; }
+  .ssp-lembar { font-size: 22pt; font-weight: bold; color: #333; }
+  .ssp-lembar-label { font-size: 7pt; }
+  .ssp-peruntukan { font-size: 7.5pt; font-style: italic; color: #444; }
+  .ssp-row { display: flex; align-items: flex-start; margin-bottom: 2.5mm; gap: 2mm; }
+  .ssp-row .key { width: 42mm; font-weight: bold; flex-shrink: 0; }
+  .ssp-row .colon { flex-shrink: 0; margin-right: 2mm; }
+  .ssp-row .val { flex: 1; border-bottom: 1px dotted #999; min-height: 5mm; padding-bottom: 0.5mm; }
+  .npwp-boxes { display: flex; gap: 1px; align-items: center; }
+  .npwp-box { width: 6.5mm; height: 6mm; border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-size: 9pt; font-weight: bold; }
+  .npwp-sep { width: 3mm; text-align: center; font-weight: bold; }
+  .kap-box { border: 2px solid #000; padding: 2mm 3mm; }
+  .kap-box label { font-size: 7pt; display: block; margin-bottom: 1px; }
+  .kap-digits { display: flex; gap: 1px; }
+  .kap-digit { width: 7mm; height: 7mm; border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-size: 11pt; font-weight: bold; }
+  .masa-pajak { margin-bottom: 3mm; }
+  .masa-header { font-weight: bold; font-size: 7.5pt; margin-bottom: 1mm; display: flex; justify-content: space-between; }
+  .masa-boxes { display: flex; gap: 2mm; align-items: center; flex-wrap: nowrap; }
+  .masa-item { display: flex; flex-direction: column; align-items: center; gap: 0.5mm; }
+  .masa-item span { font-size: 6.5pt; }
+  .masa-cb { width: 5.5mm; height: 5.5mm; border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-size: 9pt; }
+  .masa-cb.checked { background: #222; color: #fff; }
+  .tahun-box { display: flex; gap: 1px; margin-left: 4mm; }
+  .tahun-digit { width: 6mm; height: 6mm; border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 9pt; }
+  .jumlah-row { border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 2mm 0; margin-bottom: 2mm; }
+  .jumlah-label { font-weight: bold; font-size: 8pt; }
+  .jumlah-value { font-size: 12pt; font-weight: bold; border: 1px solid #000; padding: 1.5mm 3mm; display: inline-block; min-width: 60mm; margin-top: 1mm; }
+  .terbilang-row { font-style: italic; font-size: 7.5pt; margin-bottom: 3mm; }
+  .ttd-area { display: flex; justify-content: space-between; margin-top: 2mm; }
+  .ttd-box { text-align: center; font-size: 7.5pt; width: 80mm; }
+  .ttd-line { border-top: 1px solid #000; margin-top: 18mm; padding-top: 1mm; font-size: 7.5pt; }
+  .ssp-footer { text-align: center; font-size: 7pt; font-style: italic; border-top: 1px solid #000; margin-top: 2mm; padding-top: 1.5mm; color: #555; }
+  .validasi-box { border: 1px solid #000; min-height: 12mm; margin-top: 1.5mm; padding: 1mm 2mm; font-size: 7pt; color: #999; }
+  .uraian-pembayaran { background: #f8f8f8; border: 1px solid #ccc; padding: 2mm; font-size: 8pt; }
+  .uraian-label { font-weight: bold; font-size: 7pt; margin-bottom: 1mm; }
+  .btn-print { position: fixed; top: 10px; right: 10px; background: #1a73e8; color: #fff; border: none; border-radius: 6px; padding: 10px 20px; font-size: 14px; font-weight: bold; cursor: pointer; z-index: 999; }
+  .btn-print:hover { background: #1557b0; }
+  @media print {
+    body { background: #fff; padding: 0; }
+    .btn-print { display: none; }
+    .ssp-page { border: 1.5px solid #333; margin: 0; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head><body>
+<button class="btn-print" onclick="window.print()">🖨️ Print / Simpan PDF</button>
+${html}
+</body></html>`);
+  win.document.close();
+  setTimeout(() => { win.focus(); }, 300);
+}
+
+function reset() {
+  document.getElementById('hasil-section').style.display = 'none';
+  lastResult = null;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Set default tanggal
+document.getElementById('tgl_transaksi').value = new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>

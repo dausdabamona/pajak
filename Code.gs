@@ -1,0 +1,276 @@
+/**
+ * Code.gs
+ * Entry point utama: doGet (Web App), doPost (API), onOpen (Sidebar menu)
+ */
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WEB APP ENTRY POINT
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Serve halaman Web App.
+ * Deploy → Web App → Execute as Me → Anyone with Google Account
+ */
+function doGet(e) {
+  const page = (e && e.parameter && e.parameter.page) ? e.parameter.page : 'WebApp'
+
+  try {
+    const template = HtmlService.createTemplateFromFile(page)
+    template.appName    = CONFIG.APP_NAME
+    template.appVersion = CONFIG.APP_VERSION
+    template.satker     = CONFIG.SATKER
+    template.userEmail  = Session.getActiveUser().getEmail()
+
+    // getSatkerConfig aman meski sheet CONFIG belum ada
+    try {
+      template.configSatker = getSatkerConfig()
+    } catch (_) {
+      template.configSatker = {
+        NAMA_SATKER:   CONFIG.SATKER,
+        NPWP_SATKER:   '',
+        ALAMAT_SATKER: '',
+        NAMA_BENDAHARA:'',
+      }
+    }
+
+    return template.evaluate()
+      .setTitle(`${CONFIG.APP_NAME} — ${CONFIG.SATKER}`)
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1.0')
+
+  } catch (err) {
+    Logger.log('[doGet] Error: ' + err.message)
+
+    // Tampilkan halaman error yang informatif
+    return HtmlService.createHtmlOutput(`
+      <!DOCTYPE html><html><head>
+      <meta charset="UTF-8">
+      <style>
+        body{font-family:Arial,sans-serif;padding:40px;background:#f8f9fa;color:#202124}
+        .box{background:#fff;border:1px solid #dadce0;border-radius:8px;padding:32px;max-width:500px;margin:0 auto}
+        h2{color:#d93025;margin-bottom:12px}
+        code{background:#f1f3f4;padding:2px 6px;border-radius:4px;font-size:13px}
+        ol{margin:16px 0;padding-left:20px;line-height:2}
+        .note{background:#e8f0fe;border-left:4px solid #1a73e8;padding:10px 14px;border-radius:4px;font-size:13px;margin-top:16px}
+      </style></head><body>
+      <div class="box">
+        <h2>⚠️ Setup Belum Selesai</h2>
+        <p>Error: <code>${err.message}</code></p>
+        <p style="margin-top:12px">Kemungkinan penyebab:</p>
+        <ol>
+          <li>File <code>WebApp.html</code> belum dibuat di Apps Script</li>
+          <li>Fungsi <code>initSheets()</code> belum dijalankan</li>
+          <li>Deployment belum diperbarui setelah menambah file HTML</li>
+        </ol>
+        <div class="note">
+          <b>Cara perbaiki:</b><br>
+          1. Buka Apps Script → tambah file HTML bernama <code>WebApp</code><br>
+          2. Jalankan fungsi <code>initSheets()</code><br>
+          3. Deploy ulang: <b>Deploy → Manage deployments → Edit → New version</b>
+        </div>
+      </div>
+      </body></html>
+    `)
+  }
+}
+
+/**
+ * API endpoint untuk semua aksi dari frontend.
+ * Format request: { action: 'nama.aksi', payload: {...} }
+ */
+function doPost(e) {
+  try {
+    const body    = JSON.parse(e.postData.contents)
+    const action  = body.action
+    const payload = body.payload || {}
+
+    Logger.log(`[doPost] action=${action}`)
+
+    const result = routeAction(action, payload)
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ ok: true, data: result }))
+      .setMimeType(ContentService.MimeType.JSON)
+
+  } catch (err) {
+    Logger.log('[doPost] Error: ' + err.message)
+    return ContentService
+      .createTextOutput(JSON.stringify({ ok: false, error: err.message }))
+      .setMimeType(ContentService.MimeType.JSON)
+  }
+}
+
+/**
+ * Helper include untuk template HTML (css, js, komponen).
+ */
+function include(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename).getContent()
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ROUTER — Semua action dari frontend diarahkan ke sini
+// ─────────────────────────────────────────────────────────────────────────────
+
+function routeAction(action, payload) {
+  switch (action) {
+
+    // ── Kalkulator ──
+    case 'kalkulator.hitung':  return hitungPajakServer(payload)
+    case 'kalkulator.list':    return getJenisKegiatanList()
+
+    // ── Setup & SSP ──
+    case 'setup.ssp':          return generateSSP(payload)
+
+    // ── Riwayat Transaksi ──
+    case 'riwayat.simpan':    return simpanTransaksi(payload)
+    case 'riwayat.list':      return getRiwayat(payload)
+    case 'riwayat.get':       return getRiwayatById(payload.id)
+    case 'riwayat.hapus':     return hapusRiwayat(payload.id)
+    case 'riwayat.export':    return exportRiwayat(payload)
+
+    // ── Master Penyedia ──
+    case 'penyedia.list':     return getPenyediaList(payload)
+    case 'penyedia.get':      return getPenyediaById(payload.id)
+    case 'penyedia.cari':     return cariPenyedia(payload.q)
+    case 'penyedia.simpan':   return simpanPenyedia(payload)
+    case 'penyedia.update':   return updatePenyedia(payload)
+    case 'penyedia.hapus':    return hapusPenyedia(payload.id)
+
+    // ── Dashboard & Rekap ──
+    case 'dashboard.rekap':   return getRekapDashboard(payload)
+    case 'dashboard.bulanan': return getRekapBulanan(payload.tahun)
+    case 'dashboard.tahunan': return getRekapTahunan()
+
+    // ── Kuitansi ──
+    case 'kuitansi.simpan':    return simpanKuitansi(payload)
+    case 'kuitansi.update':    return updateKuitansi(payload)
+    case 'kuitansi.list':      return getKuitansiList(payload)
+    case 'kuitansi.get':       return getKuitansiById(payload.id)
+    case 'kuitansi.hapus':     return hapusKuitansi(payload.id)
+    case 'kuitansi.cetak':     return generateKuitansiHTML(payload)
+    case 'kuitansi.nomor':     return { nomor: getNextNomorKuitansi(payload.tglKuitansi, payload.tahunAnggaran) }
+    case 'kuitansi.dariRiwayat': return buatDraftKuitansiDariRiwayat(payload.riwayatId)
+
+    // ── Config Satker ──
+    case 'config.get':        return getSatkerConfig()
+    case 'config.simpan':     return simpanSatkerConfig(payload)
+
+    // ── Setup ──
+    case 'setup.init':        return initSheets()
+
+    default:
+      throw new Error(`Action tidak dikenal: ${action}`)
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SIDEBAR (dipanggil dari menu GSheet)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Tambah menu custom ke Google Sheets.
+ * Otomatis dipanggil saat GSheet dibuka.
+ */
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('🧮 Pajak Bendahara')
+    .addItem('Buka Kalkulator (Sidebar)', 'bukaKalkulatorSidebar')
+    .addItem('Buka Web App (Browser)', 'bukaWebApp')
+    .addSeparator()
+    .addItem('Setup / Inisialisasi Sheet', 'jalankanSetup')
+    .addItem('Refresh Rekap', 'refreshRekap')
+    .addSeparator()
+    .addItem('Tentang Aplikasi', 'tentangAplikasi')
+    .addToUi()
+}
+
+function bukaKalkulatorSidebar() {
+  const template = HtmlService.createTemplateFromFile('Sidebar')
+  template.appName      = CONFIG.APP_NAME
+  template.userEmail    = Session.getActiveUser().getEmail()
+  template.configSatker = getSatkerConfig()
+
+  const html = template.evaluate()
+    .setTitle('Kalkulator Pajak')
+    .setWidth(380)
+
+  SpreadsheetApp.getUi().showSidebar(html)
+}
+
+function bukaWebApp() {
+  const url = ScriptApp.getService().getUrl()
+  const html = HtmlService.createHtmlOutput(
+    `<script>window.open('${url}', '_blank'); google.script.host.close();</script>`
+  )
+  SpreadsheetApp.getUi().showModalDialog(html, 'Membuka Web App...')
+}
+
+function jalankanSetup() {
+  const ui = SpreadsheetApp.getUi()
+  const resp = ui.alert(
+    'Setup Aplikasi',
+    'Ini akan membuat sheet RIWAYAT, MASTER_PENYEDIA, dan CONFIG jika belum ada.\n\nLanjutkan?',
+    ui.ButtonSet.YES_NO
+  )
+  if (resp === ui.Button.YES) {
+    initSheets()
+    ui.alert('✅ Setup selesai! Sheet sudah disiapkan.')
+  }
+}
+
+function refreshRekap() {
+  updateRekapSheet()
+  SpreadsheetApp.getUi().alert('✅ Rekap berhasil diperbarui!')
+}
+
+function tentangAplikasi() {
+  SpreadsheetApp.getUi().alert(
+    'Tentang Aplikasi',
+    `${CONFIG.APP_NAME} v${CONFIG.APP_VERSION}\n` +
+    `${CONFIG.SATKER}\n\n` +
+    `Fitur:\n` +
+    `• Kalkulator PPh 22 / 23 / Final 4(2) / PPN\n` +
+    `• Riwayat transaksi pajak\n` +
+    `• Master data penyedia\n` +
+    `• Dashboard rekap bulanan/tahunan\n` +
+    `• Cetak SSP PPh & PPN\n` +
+    `• Kuitansi Bukti Pembayaran (cetak & arsip)\n\n` +
+    `Dibuat: 2025 | Stack: Google Apps Script`,
+    SpreadsheetApp.getUi().ButtonSet.OK
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FUNGSI YANG BISA DIPANGGIL LANGSUNG DARI SIDEBAR (google.script.run)
+// ─────────────────────────────────────────────────────────────────────────────
+// Sidebar tidak bisa pakai doPost, jadi expose fungsi langsung:
+
+function ss_simpanTransaksi(payload)     { return simpanTransaksi(payload) }
+function ss_getRiwayat(payload)          { return getRiwayat(payload) }
+function ss_getRiwayatById(id)           { return getRiwayatById(id) }
+function ss_hapusRiwayat(id)             { return hapusRiwayat(id) }
+function ss_getPenyediaList(payload)     { return getPenyediaList(payload) }
+function ss_getPenyediaById(id)          { return getPenyediaById(id) }
+function ss_cariPenyedia(q)              { return cariPenyedia(q) }
+function ss_simpanPenyedia(payload)      { return simpanPenyedia(payload) }
+function ss_updatePenyedia(payload)      { return updatePenyedia(payload) }
+function ss_hapusPenyedia(id)            { return hapusPenyedia(id) }
+function ss_getRekapDashboard(payload)   { return getRekapDashboard(payload) }
+function ss_getRekapBulanan(tahun)       { return getRekapBulanan(tahun) }
+function ss_getSatkerConfig()            { return getSatkerConfig() }
+function ss_simpanSatkerConfig(payload)  { return simpanSatkerConfig(payload) }
+function ss_simpanKuitansi(payload)      { return simpanKuitansi(payload) }
+function ss_updateKuitansi(payload)      { return updateKuitansi(payload) }
+function ss_getKuitansiList(payload)     { return getKuitansiList(payload) }
+function ss_getKuitansiById(id)          { return getKuitansiById(id) }
+function ss_hapusKuitansi(id)            { return hapusKuitansi(id) }
+function ss_generateKuitansiHTML(payload){ return generateKuitansiHTML(payload) }
+function ss_buatDraftKuitansi(riwayatId) { return buatDraftKuitansiDariRiwayat(riwayatId) }
+
+/**
+ * Kembalikan URL Web App — dipakai Sidebar untuk buka browser.
+ */
+function getWebAppUrl() {
+  return ScriptApp.getService().getUrl()
+}
+

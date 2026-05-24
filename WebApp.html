@@ -1,0 +1,2309 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<base target="_top">
+<title>Pajak Bendahara — Poltek KP Sorong</title>
+<style>
+:root {
+  --bg:#f0f4f8; --surface:#ffffff; --surface2:#f7f9fc;
+  --border:#dde3ea; --accent:#1a73e8; --accent2:#188038;
+  --accent3:#d93025; --yellow:#f9ab00; --text:#202124;
+  --text2:#5f6368; --text3:#9aa0a6;
+  --radius:10px; --shadow:0 1px 4px rgba(0,0,0,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+
+/* ── NAV ── */
+nav{background:var(--accent);color:#fff;display:flex;align-items:center;gap:0;padding:0;position:sticky;top:0;z-index:200;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.nav-brand{padding:14px 20px;font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;border-right:1px solid rgba(255,255,255,.2)}
+.nav-tabs{display:flex;flex:1;overflow-x:auto}
+.nav-tab{padding:14px 18px;cursor:pointer;font-size:13px;font-weight:600;opacity:.7;border-bottom:3px solid transparent;white-space:nowrap;transition:all .15s}
+.nav-tab:hover{opacity:.9;background:rgba(255,255,255,.1)}
+.nav-tab.active{opacity:1;border-bottom-color:#fff}
+.nav-user{padding:8px 16px;font-size:11px;opacity:.7;margin-left:auto;white-space:nowrap}
+
+/* ── LAYOUT ── */
+.page{display:none;padding:20px;max-width:960px;margin:0 auto}
+.page.active{display:block}
+
+/* ── CARD ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.card-title{font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+
+/* ── FORM ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:600px){.grid-2,.grid-3{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em}
+.field input,.field select,.field textarea{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:13px;padding:9px 11px;width:100%;outline:none;transition:border-color .15s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,115,232,.12)}
+.field .hint{font-size:11px;color:var(--text3);margin-top:2px}
+.input-rp{position:relative}
+.input-rp span{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--text3);pointer-events:none}
+.input-rp input{padding-left:28px;font-size:15px;font-weight:600}
+
+/* ── TOGGLE ── */
+.toggle-group{display:flex;gap:6px;flex-wrap:wrap}
+.toggle-btn{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text2);cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;padding:7px 13px;transition:all .15s}
+.toggle-btn.active{background:rgba(26,115,232,.1);border-color:var(--accent);color:var(--accent)}
+
+/* ── BUTTONS ── */
+.btn{border:none;border-radius:7px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;padding:10px 20px;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#1557b0}
+.btn-success{background:var(--accent2);color:#fff}.btn-success:hover{background:#0d6b2e}
+.btn-danger{background:var(--accent3);color:#fff}.btn-danger:hover{background:#b31412}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text2)}.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.btn-full{width:100%;justify-content:center;padding:13px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* ── HASIL BOXES ── */
+.hasil-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+@media(max-width:700px){.hasil-grid{grid-template-columns:1fr 1fr}}
+.hasil-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;position:relative;overflow:hidden}
+.hasil-box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.hasil-box.h-pph::before{background:var(--accent)}
+.hasil-box.h-ppn::before{background:var(--accent2)}
+.hasil-box.h-bayar::before{background:var(--yellow)}
+.hasil-box.h-total::before{background:var(--accent3)}
+.hasil-box .hb-label{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.hasil-box .hb-value{font-size:17px;font-weight:700}
+.hasil-box .hb-sub{font-size:10px;color:var(--text3);margin-top:2px}
+.c-blue{color:var(--accent)}.c-green{color:var(--accent2)}.c-yellow{color:var(--yellow)}.c-red{color:var(--accent3)}
+
+/* ── INFO ROWS ── */
+.info-table{width:100%;border-collapse:collapse;margin-bottom:12px}
+.info-table td{padding:6px 8px;font-size:12px;border-bottom:1px solid var(--border)}
+.info-table td:first-child{color:var(--text2);width:45%}
+.info-table td:last-child{font-weight:600;text-align:right}
+
+/* ── TABEL RIWAYAT ── */
+.tbl-wrap{overflow-x:auto;margin-top:8px}
+table.data-tbl{width:100%;border-collapse:collapse;font-size:12px}
+table.data-tbl th{background:var(--accent);color:#fff;padding:9px 10px;text-align:left;font-weight:700;white-space:nowrap}
+table.data-tbl td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+table.data-tbl tr:hover td{background:var(--surface2)}
+table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;display:inline-block}
+.badge-green{background:#e6f4ea;color:#188038}
+.badge-red{background:#fce8e6;color:#d93025}
+.badge-blue{background:#e8f0fe;color:#1a73e8}
+.badge-yellow{background:#fef7e0;color:#b06000}
+
+/* ── DASHBOARD ── */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+@media(max-width:700px){.stat-grid{grid-template-columns:1fr 1fr}}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+.stat-card .sc-icon{font-size:22px;margin-bottom:6px}
+.stat-card .sc-val{font-size:20px;font-weight:800;color:var(--accent)}
+.stat-card .sc-label{font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;margin-top:2px}
+
+/* ── TERBILANG ── */
+.terbilang{font-size:11px;color:var(--text3);font-style:italic;margin-top:3px}
+
+/* ── CETAK BUTTONS ── */
+.cetak-group{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.btn-cetak-pph{flex:1;min-width:140px;background:#e8f0fe;border:1px solid #aecbfa;border-radius:8px;color:var(--accent);cursor:pointer;font-family:inherit;font-size:12px;font-weight:700;padding:11px;transition:all .15s}
+.btn-cetak-pph:hover{background:#d2e3fc}
+.btn-cetak-ppn{flex:1;min-width:140px;background:#e6f4ea;border:1px solid #81c995;border-radius:8px;color:var(--accent2);cursor:pointer;font-family:inherit;font-size:12px;font-weight:700;padding:11px;transition:all .15s}
+.btn-cetak-ppn:hover{background:#ceead6}
+.btn-cetak-all{width:100%;background:#fef7e0;border:1px solid #fdd663;border-radius:8px;color:#b06000;cursor:pointer;font-family:inherit;font-size:12px;font-weight:700;padding:11px;margin-top:6px;transition:all .15s}
+.btn-cetak-all:hover{background:#feefc3}
+
+/* ── AUTOCOMPLETE ── */
+.autocomplete-wrap{position:relative}
+.autocomplete-list{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:300;max-height:200px;overflow-y:auto;display:none}
+.autocomplete-list.show{display:block}
+.autocomplete-item{padding:9px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--border)}
+.autocomplete-item:hover{background:var(--surface2)}
+.autocomplete-item .ai-nama{font-weight:700}
+.autocomplete-item .ai-npwp{color:var(--text3);font-size:11px}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.show{display:flex}
+.modal-box{background:#fff;border-radius:12px;padding:24px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.modal-title{font-size:15px;font-weight:700;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3);padding:2px 6px}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:20px;right:20px;background:#323232;color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:600;z-index:999;display:none;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+#toast.show{display:block}
+#toast.toast-ok{background:#188038}
+#toast.toast-err{background:#d93025}
+
+/* ── FILTER BAR ── */
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
+.filter-bar .field{flex:1;min-width:120px}
+
+/* ── EMPTY / LOADING ── */
+.empty-state{text-align:center;padding:40px 20px;color:var(--text3)}
+.empty-state .es-icon{font-size:36px;margin-bottom:8px}
+.loading-spinner{text-align:center;padding:30px;color:var(--text3)}
+
+/* ── WARN ── */
+.warn-box{background:#fef7e0;border:1px solid #fdd663;border-radius:8px;padding:10px 14px;font-size:12px;color:#b06000;display:flex;gap:8px;margin-bottom:12px}
+.info-box{background:#e8f0fe;border:1px solid #aecbfa;border-radius:8px;padding:10px 14px;font-size:12px;color:var(--accent);margin-bottom:12px}
+
+/* ── CHART BAR SEDERHANA ── */
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:120px;padding-top:8px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar-fill{width:100%;background:var(--accent);border-radius:3px 3px 0 0;min-height:2px;transition:height .3s}
+.bar-label{font-size:9px;color:var(--text3);text-align:center}
+.bar-val{font-size:9px;color:var(--text2);font-weight:600}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">🧮 <span>Pajak Bendahara</span></div>
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="showPage('kalkulator',this)">⚡ Kalkulator</div>
+    <div class="nav-tab" onclick="showPage('riwayat',this)">📋 Riwayat</div>
+    <div class="nav-tab" onclick="showPage('kuitansi',this)">🧾 Kuitansi</div>
+    <div class="nav-tab" onclick="showPage('penyedia',this)">🏢 Penyedia</div>
+    <div class="nav-tab" onclick="showPage('dashboard',this)">📊 Dashboard</div>
+    <div class="nav-tab" onclick="showPage('pengaturan',this)">⚙️ Pengaturan</div>
+  </div>
+  <div class="nav-user" id="nav-user">—</div>
+</nav>
+
+<!-- ════════════════════════════════════════════════════════════
+     HALAMAN 1: KALKULATOR
+═════════════════════════════════════════════════════════════ -->
+<div class="page active" id="page-kalkulator">
+
+  <!-- Data Penyedia -->
+  <div class="card">
+    <div class="card-title">① Data Penyedia / Rekanan</div>
+    <div class="grid-2" style="margin-bottom:12px">
+      <div class="field">
+        <label>Nama Penyedia</label>
+        <div class="autocomplete-wrap">
+          <input type="text" id="k_nama_penyedia" placeholder="Ketik nama atau NPWP untuk cari..."
+            oninput="autocompletePenyedia(this.value)" autocomplete="off">
+          <div class="autocomplete-list" id="ac_list"></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>NPWP Penyedia</label>
+        <input type="text" id="k_npwp_penyedia" placeholder="00.000.000.0-000.000">
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:12px">
+      <label>Status NPWP</label>
+      <div class="toggle-group">
+        <button class="toggle-btn active" onclick="setToggle('npwp','BER-NPWP',this)">✓ Ber-NPWP</button>
+        <button class="toggle-btn" onclick="setToggle('npwp','NON-NPWP',this)">✗ Non-NPWP (tarif 2×)</button>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="field">
+        <label>Sumber Dana</label>
+        <div class="toggle-group">
+          <button class="toggle-btn active" onclick="setToggle('sumber','APBN',this)">APBN</button>
+          <button class="toggle-btn" onclick="setToggle('sumber','APBD',this)">APBD</button>
+          <button class="toggle-btn" onclick="setToggle('sumber','Dana Desa',this)">Dana Desa</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Tanggal Transaksi</label>
+        <input type="date" id="k_tgl_transaksi">
+      </div>
+      <div class="field">
+        <label>Tahun Pajak</label>
+        <input type="text" id="k_tahun_pajak" maxlength="4" value="">
+      </div>
+    </div>
+  </div>
+
+  <!-- Jenis Kegiatan -->
+  <div class="card">
+    <div class="card-title">② Jenis Kegiatan</div>
+    <div class="field">
+      <label>Pilih Jenis Kegiatan / Pengadaan</label>
+      <select id="k_jenis_kegiatan">
+        <option value="">— Memuat data... —</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Nilai -->
+  <div class="card">
+    <div class="card-title">③ Nilai Transaksi</div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Nilai Kontrak (Rp)</label>
+        <div class="input-rp"><span>Rp</span>
+          <input type="text" id="k_nilai" placeholder="0" oninput="onNilaiInput(this)">
+        </div>
+        <div class="terbilang" id="k_terbilang">—</div>
+      </div>
+      <div class="field">
+        <label>Nilai Sudah Termasuk PPN?</label>
+        <div class="toggle-group">
+          <button class="toggle-btn active" onclick="setToggle('incl_ppn',true,this)">Ya, sudah incl. PPN</button>
+          <button class="toggle-btn" onclick="setToggle('incl_ppn',false,this)">Belum incl. PPN</button>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:14px">
+      <button class="btn btn-primary btn-full" onclick="hitungPajak()">⚡ Hitung Pajak</button>
+    </div>
+  </div>
+
+  <!-- HASIL -->
+  <div id="hasil-section" style="display:none">
+    <div class="card">
+      <div class="card-title">④ Hasil Perhitungan</div>
+      <div id="warn_nonNpwp" class="warn-box" style="display:none">
+        ⚠️ Rekanan <b>NON-NPWP</b> — tarif PPh dikenakan <b>2×</b> lipat dari tarif normal.
+      </div>
+
+      <div class="hasil-grid">
+        <div class="hasil-box h-pph">
+          <div class="hb-label">PPh Dipotong</div>
+          <div class="hb-value c-blue" id="r_pph">—</div>
+          <div class="hb-sub" id="r_pph_sub">—</div>
+        </div>
+        <div class="hasil-box h-ppn">
+          <div class="hb-label">PPN Dipungut</div>
+          <div class="hb-value c-green" id="r_ppn">—</div>
+          <div class="hb-sub" id="r_ppn_sub">—</div>
+        </div>
+        <div class="hasil-box h-bayar">
+          <div class="hb-label">Dibayar ke Penyedia</div>
+          <div class="hb-value c-yellow" id="r_bayar">—</div>
+          <div class="hb-sub">Setelah dipotong pajak</div>
+        </div>
+        <div class="hasil-box h-total">
+          <div class="hb-label">Total Pajak Disetor</div>
+          <div class="hb-value c-red" id="r_total">—</div>
+          <div class="hb-sub">PPh + PPN</div>
+        </div>
+      </div>
+
+      <!-- Info PPh -->
+      <div style="background:#e8f0fe;border:1px solid #aecbfa;border-radius:8px;padding:12px;margin-bottom:10px">
+        <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px;text-transform:uppercase">Detail PPh</div>
+        <table class="info-table">
+          <tr><td>Jenis PPh</td><td id="r_jenis_pph">—</td></tr>
+          <tr><td>Kode Akun Pajak</td><td id="r_kap_pph">—</td></tr>
+          <tr><td>Kode Jenis Setoran</td><td id="r_kjs_pph">—</td></tr>
+          <tr><td>Tarif PPh</td><td id="r_tarif_pph">—</td></tr>
+          <tr><td>DPP (Dasar Pengenaan Pajak)</td><td id="r_dpp">—</td></tr>
+        </table>
+      </div>
+
+      <!-- Info PPN -->
+      <div style="background:#e6f4ea;border:1px solid #81c995;border-radius:8px;padding:12px;margin-bottom:12px">
+        <div style="font-size:11px;font-weight:700;color:var(--accent2);margin-bottom:6px;text-transform:uppercase">Detail PPN</div>
+        <table class="info-table">
+          <tr><td>Jenis PPN</td><td id="r_jenis_ppn">—</td></tr>
+          <tr><td>Kode Akun Pajak</td><td>411211</td></tr>
+          <tr><td>Kode Jenis Setoran</td><td>910</td></tr>
+          <tr><td>Tarif PPN</td><td id="r_tarif_ppn">—</td></tr>
+          <tr><td>Keterangan</td><td id="r_ket_ppn">—</td></tr>
+        </table>
+      </div>
+
+      <!-- Simpan + Cetak -->
+      <div class="field" style="margin-bottom:10px">
+        <label>Keterangan / Catatan (opsional)</label>
+        <input type="text" id="k_keterangan" placeholder="Misal: SPK No. 001/2025, Pekerjaan pengecatan...">
+      </div>
+
+      <button class="btn btn-success btn-full" style="margin-bottom:8px" onclick="simpanTransaksi()">
+        💾 Simpan ke Riwayat
+      </button>
+
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;margin-bottom:8px">🖨️ Cetak SSP</div>
+      <div class="cetak-group">
+        <button class="btn-cetak-pph" id="btn_cetak_pph" onclick="cetakSSP('PPH')">🔵 Cetak SSP PPh (4 Lembar)</button>
+        <button class="btn-cetak-ppn" id="btn_cetak_ppn" onclick="cetakSSP('PPN')">🟢 Cetak SSP PPN (4 Lembar)</button>
+      </div>
+      <button class="btn-cetak-all" onclick="cetakSSP('BOTH')">🟡 Cetak SSP PPh + PPN Sekaligus</button>
+
+      <button class="btn btn-outline btn-full" style="margin-top:10px" onclick="resetKalkulator()">↺ Hitung Ulang</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     HALAMAN 2: RIWAYAT
+═════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-riwayat">
+  <div class="card">
+    <div class="card-title">Riwayat Transaksi Pajak</div>
+    <div class="filter-bar">
+      <div class="field">
+        <label>Tahun</label>
+        <select id="f_tahun" onchange="loadRiwayat()">
+          <option value="">Semua</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Bulan</label>
+        <select id="f_bulan" onchange="loadRiwayat()">
+          <option value="">Semua</option>
+          <option value="1">Januari</option><option value="2">Februari</option>
+          <option value="3">Maret</option><option value="4">April</option>
+          <option value="5">Mei</option><option value="6">Juni</option>
+          <option value="7">Juli</option><option value="8">Agustus</option>
+          <option value="9">September</option><option value="10">Oktober</option>
+          <option value="11">November</option><option value="12">Desember</option>
+        </select>
+      </div>
+      <div class="field" style="flex:2">
+        <label>Cari Penyedia</label>
+        <input type="text" id="f_penyedia" placeholder="Nama penyedia..." oninput="debounceLoadRiwayat()">
+      </div>
+      <button class="btn btn-primary" onclick="loadRiwayat()">🔍 Filter</button>
+      <button class="btn btn-outline" onclick="exportCSV()">📥 Export CSV</button>
+    </div>
+
+    <div id="riwayat-info" style="font-size:12px;color:var(--text3);margin-bottom:8px"></div>
+    <div class="tbl-wrap">
+      <table class="data-tbl">
+        <thead>
+          <tr>
+            <th>Tgl</th><th>Penyedia</th><th>Jenis Kegiatan</th>
+            <th>Nilai Kontrak</th><th>PPh</th><th>PPN</th>
+            <th>Total Pajak</th><th>Dibayar</th><th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="riwayat-tbody">
+          <tr><td colspan="9" class="loading-spinner">Memuat data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="riwayat-pagination" style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     HALAMAN 2b: KUITANSI
+═════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-kuitansi">
+  <!-- LIST -->
+  <div class="card" id="kw-list-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <div class="card-title" style="margin-bottom:0">🧾 Daftar Kuitansi Bukti Pembayaran</div>
+      <button class="btn btn-primary" onclick="openFormKuitansi()">+ Buat Kuitansi Baru</button>
+    </div>
+    <div class="filter-bar">
+      <div class="field">
+        <label>T.A</label>
+        <select id="fkw_tahun" onchange="loadKuitansi()"></select>
+      </div>
+      <div class="field">
+        <label>Bulan</label>
+        <select id="fkw_bulan" onchange="loadKuitansi()">
+          <option value="">Semua</option>
+          <option value="1">Januari</option><option value="2">Februari</option>
+          <option value="3">Maret</option><option value="4">April</option>
+          <option value="5">Mei</option><option value="6">Juni</option>
+          <option value="7">Juli</option><option value="8">Agustus</option>
+          <option value="9">September</option><option value="10">Oktober</option>
+          <option value="11">November</option><option value="12">Desember</option>
+        </select>
+      </div>
+      <div class="field" style="flex:2">
+        <label>Cari (No / Penerima / Untuk Pembayaran)</label>
+        <input type="text" id="fkw_q" placeholder="Ketik untuk mencari..." oninput="debounceLoadKuitansi()">
+      </div>
+      <button class="btn btn-outline" onclick="loadKuitansi()">🔍 Filter</button>
+    </div>
+
+    <div id="kuitansi-info" style="font-size:12px;color:var(--text3);margin-bottom:8px"></div>
+    <div class="tbl-wrap">
+      <table class="data-tbl">
+        <thead>
+          <tr>
+            <th>No Kuitansi</th><th>Tgl</th><th>Penerima</th>
+            <th>Untuk Pembayaran</th><th>Jumlah</th><th>Diterima</th><th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="kuitansi-tbody">
+          <tr><td colspan="7" class="loading-spinner">Memuat data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FORM (disembunyikan default) -->
+  <div class="card" id="kw-form-card" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <div class="card-title" style="margin-bottom:0"><span id="kw-form-mode">Buat Kuitansi Baru</span></div>
+      <button class="btn btn-outline" onclick="closeFormKuitansi()">← Kembali ke Daftar</button>
+    </div>
+
+    <input type="hidden" id="kw_id">
+    <input type="hidden" id="kw_riwayat_id">
+
+    <div class="info-box" id="kw_info_riwayat" style="display:none">
+      🔗 Kuitansi ini terkait dengan transaksi riwayat: <b id="kw_info_riwayat_text"></b>
+    </div>
+
+    <!-- Identitas kuitansi -->
+    <div class="grid-3" style="margin-bottom:12px">
+      <div class="field">
+        <label>No Kuitansi</label>
+        <input type="text" id="kw_no_kuitansi" placeholder="otomatis: KWT-xxx/V/2026">
+        <div class="hint">Kosongkan untuk auto-generate</div>
+      </div>
+      <div class="field">
+        <label>Tahun Anggaran</label>
+        <input type="text" id="kw_ta" maxlength="4">
+      </div>
+      <div class="field">
+        <label>Tgl Kuitansi</label>
+        <input type="date" id="kw_tgl">
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:12px">
+      <label>Telah terima dari</label>
+      <input type="text" id="kw_terima_dari" placeholder="Pejabat Pembuat Komitmen...">
+    </div>
+
+    <!-- Nominal -->
+    <div class="grid-2" style="margin-bottom:12px">
+      <div class="field">
+        <label>Uang Sejumlah (Rp)</label>
+        <div class="input-rp"><span>Rp</span>
+          <input type="text" id="kw_uang" placeholder="0" oninput="onUangKuitansi(this)">
+        </div>
+      </div>
+      <div class="field">
+        <label>Terbilang</label>
+        <input type="text" id="kw_terbilang" placeholder="otomatis dari nominal" readonly style="font-style:italic">
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:12px">
+      <label>Untuk Pembayaran</label>
+      <textarea id="kw_untuk" rows="2" placeholder="Pembayaran Tagihan ..."></textarea>
+    </div>
+
+    <!-- Auto-hitung pajak terintegrasi -->
+    <div style="background:#e8f0fe;border:1px solid #aecbfa;border-radius:8px;padding:14px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase">⚡ Hitung Pajak Otomatis (opsional)</div>
+        <div style="font-size:11px;color:var(--text3)">Isi 3 field di bawah → klik Hitung → PPN/PPh/Yang Diterima terisi otomatis</div>
+      </div>
+      <div class="grid-2" style="margin-bottom:10px">
+        <div class="field">
+          <label>Jenis Kegiatan</label>
+          <select id="kw_ah_jenis">
+            <option value="">— Pilih Jenis Kegiatan —</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Nilai Kontrak (Rp)</label>
+          <div class="input-rp"><span>Rp</span>
+            <input type="text" id="kw_ah_nilai" placeholder="0" oninput="kwOnNilaiInput(this)">
+          </div>
+        </div>
+      </div>
+      <div class="grid-2" style="margin-bottom:10px">
+        <div class="field">
+          <label>Status NPWP Penyedia</label>
+          <div class="toggle-group">
+            <button class="toggle-btn active" type="button" onclick="setToggle('kw_npwp','BER-NPWP',this)">✓ Ber-NPWP</button>
+            <button class="toggle-btn" type="button" onclick="setToggle('kw_npwp','NON-NPWP',this)">✗ Non-NPWP (2×)</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Nilai sudah termasuk PPN?</label>
+          <div class="toggle-group">
+            <button class="toggle-btn active" type="button" onclick="setToggle('kw_incl_ppn',true,this)">Ya, incl. PPN</button>
+            <button class="toggle-btn" type="button" onclick="setToggle('kw_incl_ppn',false,this)">Belum incl. PPN</button>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" type="button" onclick="kwHitungPajak()">⚡ Hitung Pajak & Auto-isi Form</button>
+
+      <div id="kw_ah_hasil" style="display:none;margin-top:12px;padding:10px;background:#fff;border-radius:6px;border:1px solid var(--accent)">
+        <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px">HASIL PERHITUNGAN</div>
+        <table class="info-table">
+          <tr><td>DPP / Jenis</td><td id="kw_ah_dpp">—</td></tr>
+          <tr><td>PPh dipotong</td><td id="kw_ah_pph" style="color:var(--accent);font-weight:700">—</td></tr>
+          <tr><td>PPN dipungut</td><td id="kw_ah_ppn" style="color:var(--accent2);font-weight:700">—</td></tr>
+          <tr><td>Diterima Penyedia</td><td id="kw_ah_bayar" style="color:var(--yellow);font-weight:700">—</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Rincian pajak -->
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;margin-bottom:10px">Rincian Pembayaran (bisa edit manual)</div>
+      <div class="grid-2" style="margin-bottom:10px">
+        <div class="field">
+          <label>Besarnya Pembayaran (Rp)</label>
+          <div class="input-rp"><span>Rp</span>
+            <input type="text" id="kw_besarnya" placeholder="0" oninput="onRincianInput()">
+          </div>
+        </div>
+        <div class="field">
+          <label>PPN (Rp)</label>
+          <div class="input-rp"><span>Rp</span>
+            <input type="text" id="kw_ppn" placeholder="0" oninput="onRincianInput()">
+          </div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label>PPh (Rp)</label>
+          <div class="input-rp"><span>Rp</span>
+            <input type="text" id="kw_pph" placeholder="0" oninput="onRincianInput()">
+          </div>
+        </div>
+        <div class="field">
+          <label>Yang Diterima (Rp)</label>
+          <div class="input-rp"><span>Rp</span>
+            <input type="text" id="kw_diterima" placeholder="0" readonly style="font-weight:700;color:var(--accent2)">
+          </div>
+          <div class="hint">Otomatis = Besarnya − PPN − PPh</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Penerima & Tempat -->
+    <div class="grid-2" style="margin-bottom:12px">
+      <div class="field">
+        <label>Yang Menerima (Nama Penerima)</label>
+        <input type="text" id="kw_penerima" placeholder="Nama penerima uang">
+      </div>
+      <div class="field">
+        <label>Tempat (Kota)</label>
+        <input type="text" id="kw_tempat" placeholder="Sorong">
+      </div>
+    </div>
+
+    <!-- Pejabat -->
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;margin-bottom:10px">Pejabat Penandatangan</div>
+      <div class="grid-2" style="margin-bottom:10px">
+        <div class="field"><label>Nama PPK</label><input type="text" id="kw_ppk_nama"></div>
+        <div class="field"><label>NIP PPK</label><input type="text" id="kw_ppk_nip"></div>
+      </div>
+      <div class="grid-2">
+        <div class="field"><label>Nama Bendahara Pengeluaran</label><input type="text" id="kw_bend_nama"></div>
+        <div class="field"><label>NIP Bendahara</label><input type="text" id="kw_bend_nip"></div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:14px">
+      <div class="field">
+        <label>MAK</label>
+        <input type="text" id="kw_mak" placeholder="1">
+      </div>
+      <div class="field">
+        <label>Keterangan Internal (tidak dicetak)</label>
+        <input type="text" id="kw_ket" placeholder="catatan...">
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-success" style="flex:1;min-width:160px" onclick="simpanKuitansi()">💾 Simpan</button>
+      <button class="btn btn-primary" style="flex:1;min-width:160px" onclick="previewKuitansi()">👁️ Preview / Cetak</button>
+      <button class="btn btn-outline" style="flex:1;min-width:160px" onclick="resetFormKuitansi()">↺ Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     HALAMAN 3: MASTER PENYEDIA
+═════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-penyedia">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="card-title" style="margin-bottom:0">Master Data Penyedia / Rekanan</div>
+      <button class="btn btn-primary" onclick="openModalPenyedia()">+ Tambah Penyedia</button>
+    </div>
+    <div class="filter-bar">
+      <div class="field" style="flex:1">
+        <label>Cari</label>
+        <input type="text" id="p_cari" placeholder="Nama atau NPWP..." oninput="debounceLoadPenyedia()">
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <select id="p_status" onchange="loadPenyedia()">
+          <option value="aktif">Aktif</option>
+          <option value="semua">Semua</option>
+        </select>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table class="data-tbl">
+        <thead>
+          <tr><th>Nama</th><th>NPWP</th><th>Status NPWP</th><th>Kota</th><th>Kualifikasi</th><th>Aksi</th></tr>
+        </thead>
+        <tbody id="penyedia-tbody">
+          <tr><td colspan="6" class="loading-spinner">Memuat data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     HALAMAN 4: DASHBOARD
+═════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-dashboard">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+    <div style="font-size:16px;font-weight:700">📊 Dashboard Pajak</div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <select id="d_tahun" onchange="loadDashboard()" style="padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px"></select>
+      <button class="btn btn-outline" onclick="loadDashboard()">🔄 Refresh</button>
+    </div>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="stat-grid">
+    <div class="stat-card"><div class="sc-icon">📝</div><div class="sc-val" id="d_jml">—</div><div class="sc-label">Transaksi Tahun Ini</div></div>
+    <div class="stat-card"><div class="sc-icon">🔵</div><div class="sc-val c-blue" id="d_pph">—</div><div class="sc-label">Total PPh Dipotong</div></div>
+    <div class="stat-card"><div class="sc-icon">🟢</div><div class="sc-val c-green" id="d_ppn">—</div><div class="sc-label">Total PPN Dipungut</div></div>
+    <div class="stat-card"><div class="sc-icon">💰</div><div class="sc-val c-red" id="d_total">—</div><div class="sc-label">Total Pajak Disetor</div></div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Tren 6 bulan -->
+    <div class="card">
+      <div class="card-title">Tren 6 Bulan Terakhir</div>
+      <div class="bar-chart" id="d_chart_tren"></div>
+      <div style="display:flex;gap:8px;font-size:10px;color:var(--text3);margin-top:8px;justify-content:center">
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:var(--accent);border-radius:2px;display:inline-block"></span>PPh</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:var(--accent2);border-radius:2px;display:inline-block"></span>PPN</span>
+      </div>
+    </div>
+
+    <!-- Per jenis PPh -->
+    <div class="card">
+      <div class="card-title">Rekap per Jenis PPh</div>
+      <div id="d_per_jenis_pph">
+        <div class="loading-spinner">Memuat...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Top 5 penyedia -->
+    <div class="card">
+      <div class="card-title">Top 5 Penyedia (Total Pajak)</div>
+      <table class="data-tbl">
+        <thead><tr><th>#</th><th>Penyedia</th><th>Transaksi</th><th>Total Pajak</th></tr></thead>
+        <tbody id="d_top5_tbody">
+          <tr><td colspan="4" class="loading-spinner">Memuat...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Bulan ini -->
+    <div class="card">
+      <div class="card-title">Bulan Ini</div>
+      <div class="stat-grid" style="grid-template-columns:1fr 1fr">
+        <div class="stat-card"><div class="sc-val c-blue" id="d_bln_pph">—</div><div class="sc-label">PPh Bulan Ini</div></div>
+        <div class="stat-card"><div class="sc-val c-green" id="d_bln_ppn">—</div><div class="sc-label">PPN Bulan Ini</div></div>
+        <div class="stat-card"><div class="sc-val c-red" id="d_bln_total">—</div><div class="sc-label">Total Pajak Bulan Ini</div></div>
+        <div class="stat-card"><div class="sc-val" id="d_bln_jml">—</div><div class="sc-label">Transaksi Bulan Ini</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     HALAMAN 5: PENGATURAN
+═════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-pengaturan">
+  <div class="card">
+    <div class="card-title">⚙️ Konfigurasi Satker</div>
+    <div class="info-box">Pengaturan ini digunakan untuk mengisi data SSP, header laporan, dan identitas instansi.</div>
+    <div class="grid-2" style="margin-bottom:12px">
+      <div class="field"><label>Nama Satker</label><input type="text" id="cfg_nama_satker" placeholder="Politeknik KP Sorong"></div>
+      <div class="field"><label>NPWP Satker</label><input type="text" id="cfg_npwp_satker" placeholder="00.000.000.0-000.000"></div>
+    </div>
+    <div class="field" style="margin-bottom:12px">
+      <label>Alamat Satker</label>
+      <input type="text" id="cfg_alamat_satker" placeholder="Jl. ...">
+    </div>
+    <div class="grid-2" style="margin-bottom:12px">
+      <div class="field"><label>Nama Bendahara Pengeluaran</label><input type="text" id="cfg_nama_bendahara" placeholder="Nama bendahara"></div>
+      <div class="field"><label>NIP Bendahara</label><input type="text" id="cfg_nip_bendahara" placeholder="NIP"></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:12px">
+      <div class="field"><label>Nama KPA / Direktur</label><input type="text" id="cfg_nama_kpa" placeholder="Nama KPA"></div>
+      <div class="field"><label>NIP KPA</label><input type="text" id="cfg_nip_kpa" placeholder="NIP KPA"></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:12px">
+      <div class="field"><label>Nama PPK</label><input type="text" id="cfg_nama_ppk" placeholder="Nama PPK"></div>
+      <div class="field"><label>NIP PPK</label><input type="text" id="cfg_nip_ppk" placeholder="NIP PPK"></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:16px">
+      <div class="field"><label>KPPN</label><input type="text" id="cfg_kppn" placeholder="KPPN Sorong"></div>
+      <div class="field"><label>Tahun Anggaran</label><input type="text" id="cfg_tahun_anggaran" maxlength="4" placeholder="2025"></div>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="simpanConfig()">💾 Simpan Konfigurasi</button>
+  </div>
+
+  <!-- ── KOP SURAT KUITANSI ── -->
+  <div class="card">
+    <div class="card-title">🧾 Kop Surat Kuitansi & Default</div>
+    <div class="info-box">Pengaturan ini muncul di header kuitansi bukti pembayaran yang dicetak.</div>
+    <div class="field" style="margin-bottom:10px"><label>Kop Baris 1 (Kementerian)</label><input type="text" id="cfg_kop_b1" placeholder="KEMENTERIAN KELAUTAN DAN PERIKANAN"></div>
+    <div class="field" style="margin-bottom:10px"><label>Kop Baris 2 (Badan/Direktorat)</label><input type="text" id="cfg_kop_b2"></div>
+    <div class="field" style="margin-bottom:10px"><label>Kop Baris 3 (Pusat/Unit)</label><input type="text" id="cfg_kop_b3"></div>
+    <div class="field" style="margin-bottom:10px"><label>Kop Baris 4 (Satker)</label><input type="text" id="cfg_kop_b4"></div>
+    <div class="field" style="margin-bottom:10px"><label>Alamat (baris 1)</label><input type="text" id="cfg_kop_alamat"></div>
+    <div class="field" style="margin-bottom:10px"><label>Alamat (baris 2 / Kotak Pos)</label><input type="text" id="cfg_kop_kotak_pos"></div>
+    <div class="grid-2" style="margin-bottom:10px">
+      <div class="field"><label>Laman (Website)</label><input type="text" id="cfg_kop_laman" placeholder="www.example.ac.id"></div>
+      <div class="field"><label>Surel (Email)</label><input type="text" id="cfg_kop_surel" placeholder="email@example.go.id"></div>
+    </div>
+    <div class="field" style="margin-bottom:10px">
+      <label>URL Logo (opsional)</label>
+      <input type="text" id="cfg_kop_logo" placeholder="https://...">
+      <div class="hint">URL gambar logo (PNG/SVG). Kosongkan jika tidak ada.</div>
+    </div>
+    <div class="field" style="margin-bottom:10px">
+      <label>Default "Telah terima dari"</label>
+      <input type="text" id="cfg_kw_terima_dari" placeholder="Pejabat Pembuat Komitmen ...">
+    </div>
+    <div class="grid-2" style="margin-bottom:16px">
+      <div class="field"><label>MAK Default</label><input type="text" id="cfg_kw_mak" placeholder="1"></div>
+      <div class="field"><label>Prefix No Kuitansi</label><input type="text" id="cfg_kw_prefix" placeholder="KWT" maxlength="6"></div>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="simpanConfigKop()">💾 Simpan Kop Surat & Default Kuitansi</button>
+  </div>
+</div>
+
+<!-- MODAL TAMBAH/EDIT PENYEDIA -->
+<div class="modal-overlay" id="modal-penyedia">
+  <div class="modal-box">
+    <div class="modal-title">
+      <span id="modal-penyedia-title">Tambah Penyedia Baru</span>
+      <button class="modal-close" onclick="closeModal('modal-penyedia')">✕</button>
+    </div>
+    <input type="hidden" id="mp_id">
+    <div class="grid-2" style="margin-bottom:10px">
+      <div class="field"><label>Nama Penyedia *</label><input type="text" id="mp_nama" placeholder="CV. / PT. / Nama Perorangan"></div>
+      <div class="field"><label>NPWP</label><input type="text" id="mp_npwp" placeholder="00.000.000.0-000.000"></div>
+    </div>
+    <div class="field" style="margin-bottom:10px">
+      <label>Status NPWP</label>
+      <div class="toggle-group">
+        <button class="toggle-btn active" onclick="setToggle('mp_npwp_status','BER-NPWP',this)">✓ Ber-NPWP</button>
+        <button class="toggle-btn" onclick="setToggle('mp_npwp_status','NON-NPWP',this)">✗ Non-NPWP</button>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:10px"><label>Alamat</label><input type="text" id="mp_alamat" placeholder="Jl. ..."></div>
+    <div class="grid-2" style="margin-bottom:10px">
+      <div class="field"><label>Kota</label><input type="text" id="mp_kota" placeholder="Sorong"></div>
+      <div class="field"><label>No. Telp</label><input type="text" id="mp_telp" placeholder="08..."></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:10px">
+      <div class="field"><label>Bank</label><input type="text" id="mp_bank" placeholder="BRI / BNI / Mandiri"></div>
+      <div class="field"><label>No. Rekening</label><input type="text" id="mp_rekening" placeholder="No rekening"></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:10px">
+      <div class="field"><label>Atas Nama Rekening</label><input type="text" id="mp_atas_nama" placeholder="Nama pemilik rekening"></div>
+      <div class="field">
+        <label>Kualifikasi (Konstruksi)</label>
+        <select id="mp_kualifikasi">
+          <option value="">— Bukan Konstruksi —</option>
+          <option value="Kecil (Grade 1/2/3/4)">Kecil (Grade 1/2/3/4)</option>
+          <option value="Grade 5/6/7">Grade 5/6/7</option>
+          <option value="Menengah Besar / PT">Menengah Besar / PT</option>
+          <option value="Non-Kualifikasi">Non-Kualifikasi</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="simpanPenyedia()">💾 Simpan Penyedia</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────
+const S = {
+  npwp: 'BER-NPWP', sumber: 'APBN', incl_ppn: true,
+  mp_npwp_status: 'BER-NPWP',
+  kw_npwp: 'BER-NPWP', kw_incl_ppn: true,
+  lastHasil: null,
+  riwayatOffset: 0, riwayatTotal: 0,
+  cfgSatker: {},
+}
+
+// ─────────────────────────────────────────────────────────────
+// API HELPER — doPost ke Web App URL
+// ─────────────────────────────────────────────────────────────
+// Di Web App GAS, frontend memanggil fungsi server via google.script.run
+// TIDAK melalui fetch/doPost. Ini karena file ini di-serve oleh GAS sendiri.
+
+function api(action, payload) {
+  return new Promise((resolve, reject) => {
+    google.script.run
+      .withSuccessHandler(res => {
+        if (res && res.ok === false) reject(new Error(res.error || 'Gagal'))
+        else resolve(res)
+      })
+      .withFailureHandler(err => reject(err))
+      .routeAction(action, payload || {})
+  })
+}
+
+// ─────────────────────────────────────────────────────────────
+// NAVIGASI
+// ─────────────────────────────────────────────────────────────
+function showPage(name, tabEl) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'))
+  document.getElementById('page-' + name).classList.add('active')
+  if (tabEl) tabEl.classList.add('active')
+
+  if (name === 'riwayat')     loadRiwayat()
+  if (name === 'kuitansi')    loadKuitansi()
+  if (name === 'penyedia')    loadPenyedia()
+  if (name === 'dashboard')   loadDashboard()
+  if (name === 'pengaturan')  loadConfig()
+}
+
+// ─────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Tanggal & tahun default
+  const now = new Date()
+  document.getElementById('k_tgl_transaksi').value = now.toISOString().split('T')[0]
+  document.getElementById('k_tahun_pajak').value   = now.getFullYear()
+
+  // Isi nav user
+  try {
+    document.getElementById('nav-user').textContent = '<?= userEmail ?>'
+  } catch(_) {}
+
+  // Load config satker
+  api('config.get').then(cfg => {
+    S.cfgSatker = cfg || {}
+  }).catch(() => {})
+
+  // Load dropdown jenis kegiatan
+  loadJenisKegiatan()
+
+  // Init filter tahun
+  initTahunFilter()
+})
+
+function initTahunFilter() {
+  const now = new Date().getFullYear()
+  const selTahun  = document.getElementById('f_tahun')
+  const selDTahun = document.getElementById('d_tahun')
+  const selKwTahun = document.getElementById('fkw_tahun')
+  for (let y = now; y >= now - 5; y--) {
+    selTahun.add(new Option(y, y))
+    selDTahun.add(new Option(y, y))
+    if (selKwTahun) selKwTahun.add(new Option(y, y))
+  }
+  selTahun.value  = now
+  selDTahun.value = now
+  if (selKwTahun) {
+    // tambahkan opsi "Semua" di atas
+    selKwTahun.insertBefore(new Option('Semua', ''), selKwTahun.firstChild)
+    selKwTahun.value = now
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// TOGGLE HELPER
+// ─────────────────────────────────────────────────────────────
+function setToggle(key, val, btn) {
+  S[key] = val
+  btn.closest('.toggle-group').querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+}
+
+// ─────────────────────────────────────────────────────────────
+// FORMAT HELPERS
+// ─────────────────────────────────────────────────────────────
+function fmtRp(n) {
+  return 'Rp ' + Math.round(Number(n) || 0).toLocaleString('id-ID')
+}
+function fmtRpShort(n) {
+  n = Math.round(Number(n) || 0)
+  if (n >= 1e9) return 'Rp ' + (n/1e9).toFixed(1) + 'M'
+  if (n >= 1e6) return 'Rp ' + (n/1e6).toFixed(1) + 'jt'
+  if (n >= 1e3) return 'Rp ' + (n/1e3).toFixed(0) + 'rb'
+  return 'Rp ' + n
+}
+function pctStr(n) {
+  const v = Number(n) * 100
+  return (v % 1 === 0 ? v.toFixed(0) : v.toFixed(2)).replace('.', ',') + '%'
+}
+function parseRp(str) {
+  return parseFloat(String(str).replace(/\./g,'').replace(',','.')) || 0
+}
+
+const TB_SATU = ['','satu','dua','tiga','empat','lima','enam','tujuh','delapan','sembilan',
+  'sepuluh','sebelas','dua belas','tiga belas','empat belas','lima belas',
+  'enam belas','tujuh belas','delapan belas','sembilan belas']
+function terbilangNum(n) {
+  n = Math.round(n)
+  if (n === 0) return 'nol'
+  if (n < 0) return 'minus ' + terbilangNum(-n)
+  let r = ''
+  if (n>=1e12){r+=terbilangNum(Math.floor(n/1e12))+' triliun ';n%=1e12}
+  if (n>=1e9){r+=terbilangNum(Math.floor(n/1e9))+' miliar ';n%=1e9}
+  if (n>=1e6){r+=terbilangNum(Math.floor(n/1e6))+' juta ';n%=1e6}
+  if (n>=1e3){r+=(Math.floor(n/1e3)===1?'seribu':terbilangNum(Math.floor(n/1e3))+' ribu')+' ';n%=1e3}
+  if (n>=100){r+=(Math.floor(n/100)===1?'seratus':TB_SATU[Math.floor(n/100)]+' ratus')+' ';n%=100}
+  if (n>0){r+=n<20?TB_SATU[n]:TB_SATU[Math.floor(n/10)]+' puluh'+(n%10?' '+TB_SATU[n%10]:'')}
+  return r.trim()
+}
+function terbilangRp(n) {
+  const s = terbilangNum(Math.round(n))
+  return s.charAt(0).toUpperCase() + s.slice(1) + ' Rupiah'
+}
+
+function onNilaiInput(el) {
+  const raw = el.value.replace(/\D/g,'')
+  if (!raw) { el.value=''; document.getElementById('k_terbilang').textContent='—'; return }
+  const num = parseInt(raw,10)
+  el.value = num.toLocaleString('id-ID')
+  document.getElementById('k_terbilang').textContent = terbilangRp(num)
+}
+
+// ─────────────────────────────────────────────────────────────
+// KALKULATOR — LOAD DROPDOWN
+// ─────────────────────────────────────────────────────────────
+function loadJenisKegiatan() {
+  api('kalkulator.list').then(list => {
+    const sel = document.getElementById('k_jenis_kegiatan')
+    sel.innerHTML = '<option value="">— Pilih Jenis Kegiatan —</option>'
+
+    const groups = {
+      'Belanja Barang':          [],
+      'Jasa':                    [],
+      'Sewa':                    [],
+      'Hak atas Tanah/Bangunan': [],
+      'Pekerjaan Konstruksi':    [],
+    }
+
+    ;(list || []).forEach(item => {
+      const k = parseInt(item.kode)
+      if (k>=1&&k<=11)       groups['Belanja Barang'].push(item)
+      else if (k>=14&&k<=20) groups['Jasa'].push(item)
+      else if (k>=21&&k<=28) groups['Sewa'].push(item)
+      else if ([12,13,29].includes(k)) groups['Hak atas Tanah/Bangunan'].push(item)
+      else if (k>=30&&k<=35) groups['Pekerjaan Konstruksi'].push(item)
+    })
+
+    Object.entries(groups).forEach(([grp, items]) => {
+      if (!items.length) return
+      const og = document.createElement('optgroup')
+      og.label = grp
+      items.forEach(item => {
+        const opt = document.createElement('option')
+        opt.value = item.kode
+        opt.textContent = item.label
+        og.appendChild(opt)
+      })
+      sel.appendChild(og)
+    })
+
+    // Duplikasi opsi ke dropdown form kuitansi
+    const kwSel = document.getElementById('kw_ah_jenis')
+    if (kwSel) {
+      kwSel.innerHTML = sel.innerHTML
+    }
+  }).catch(() => {
+    // Fallback: pakai data lokal jika API gagal
+    loadJenisKegiatanLokal()
+  })
+}
+
+// Fallback jika google.script.run belum siap (preview mode)
+function loadJenisKegiatanLokal() {
+  const ITEMS = [
+    {kode:'1',label:'Barang/Modal (ATK, Meja, Mobil, Kapal, dll)'},{kode:'2',label:'Barang Tambang/Galian'},
+    {kode:'3',label:'BBM, Listrik, Air Minum/PDAM, Benda Pos'},{kode:'4',label:'Pelumas (Oli)'},
+    {kode:'6',label:'Sembako (Beras, Sagu, dll)'},{kode:'14',label:'Jasa (servis, instalasi, dll)'},
+    {kode:'15',label:'Jasa Makan Minum / Katering'},{kode:'24',label:'Sewa Mobilitas Darat (kendaraan)'},
+    {kode:'27',label:'Sewa Tanah dan/atau Bangunan'},{kode:'28',label:'Sewa Tempat di Hotel'},
+    {kode:'32',label:'Pelaksana Konstruksi — Kualifikasi Kecil (CV)'},{kode:'30',label:'Pelaksana Konstruksi — Menengah Besar / PT'},
+    {kode:'34',label:'Perencana/Pengawas — Berkualifikasi'},{kode:'35',label:'Perencana/Pengawas — Non Kualifikasi'},
+  ]
+  const sel = document.getElementById('k_jenis_kegiatan')
+  sel.innerHTML = '<option value="">— Pilih Jenis Kegiatan —</option>'
+  ITEMS.forEach(({kode,label}) => sel.add(new Option(label, kode)))
+}
+
+// ─────────────────────────────────────────────────────────────
+// KALKULATOR — HITUNG
+// ─────────────────────────────────────────────────────────────
+function hitungPajak() {
+  const kode  = document.getElementById('k_jenis_kegiatan').value
+  const nilai = parseRp(document.getElementById('k_nilai').value)
+
+  if (!kode)     { showToast('Pilih jenis kegiatan terlebih dahulu', 'err'); return }
+  if (nilai <= 0){ showToast('Masukkan nilai transaksi', 'err'); return }
+
+  api('kalkulator.hitung', {
+    kodeKegiatan: kode,
+    nilaiKontrak: nilai,
+    inclPpn:      S.incl_ppn,
+    statusNpwp:   S.npwp,
+  }).then(h => {
+    S.lastHasil = h
+    tampilkanHasil(h)
+  }).catch(err => {
+    // Fallback hitung lokal
+    const h = hitungLokal(kode, nilai, S.incl_ppn, S.npwp)
+    S.lastHasil = h
+    tampilkanHasil(h)
+  })
+}
+
+function tampilkanHasil(h) {
+  document.getElementById('hasil-section').style.display = 'block'
+  document.getElementById('warn_nonNpwp').style.display = h.isNonNpwp && h.nilaiPph > 0 ? 'flex' : 'none'
+
+  document.getElementById('r_pph').textContent = fmtRp(h.nilaiPph)
+  document.getElementById('r_pph_sub').textContent = h.nilaiPph === 0
+    ? 'Tidak ada pemotongan PPh'
+    : `${pctStr(h.tarifPphEfektif)} × DPP ${fmtRp(h.dpp)}`
+  document.getElementById('r_ppn').textContent = fmtRp(h.nilaiPpn)
+  document.getElementById('r_ppn_sub').textContent = h.nilaiPpn === 0
+    ? 'Tidak ada pemungutan PPN'
+    : `${pctStr(h.tarifPpn)} × DPP ${fmtRp(h.dpp)}`
+  document.getElementById('r_bayar').textContent  = fmtRp(h.nilaiDibayar)
+  document.getElementById('r_total').textContent  = fmtRp(h.totalPajak)
+
+  document.getElementById('r_jenis_pph').textContent  = h.tarifPphEfektif === 0 ? `${h.jenisPph} (0%)` : h.jenisPph
+  document.getElementById('r_kap_pph').textContent    = h.kapPph
+  document.getElementById('r_kjs_pph').textContent    = h.kjsPph
+  document.getElementById('r_tarif_pph').textContent  = h.isNonNpwp && h.tarifPphNormal > 0
+    ? `${pctStr(h.tarifPphNormal)} → ${pctStr(h.tarifPphEfektif)} (2× Non-NPWP)`
+    : pctStr(h.tarifPphNormal)
+  document.getElementById('r_dpp').textContent        = fmtRp(h.dpp) + ' (belum PPN)'
+
+  document.getElementById('r_jenis_ppn').textContent  = h.tarifPpn === 0 ? 'Tidak dipungut PPN' : 'PPN'
+  document.getElementById('r_tarif_ppn').textContent  = pctStr(h.tarifPpn)
+  document.getElementById('r_ket_ppn').textContent    = h.bebasPpn ? '⚠️ Faktur dicap BEBAS PPN' : h.ket
+
+  document.getElementById('btn_cetak_pph').style.opacity = h.nilaiPph > 0 ? '1' : '.4'
+  document.getElementById('btn_cetak_ppn').style.opacity = h.nilaiPpn > 0 ? '1' : '.4'
+
+  document.getElementById('hasil-section').scrollIntoView({behavior:'smooth', block:'start'})
+}
+
+// Hitung lokal (fallback jika google.script.run belum tersedia)
+const TARIF_LOKAL = {
+  '1':{pph:'PPh Pasal 22',kap:'411122',kjs:'910',tarif:0.015,ppn:0.11,bebas:false,ket:'PPh 22 1,5%, PPN 11%'},
+  '2':{pph:'PPh Pasal 22',kap:'411122',kjs:'910',tarif:0.015,ppn:0,bebas:false,ket:'Bebas PPN'},
+  '3':{pph:'PPh Pasal 22',kap:'411122',kjs:'910',tarif:0,ppn:0,bebas:false,ket:'Bebas PPh & PPN'},
+  '4':{pph:'PPh Pasal 22',kap:'411122',kjs:'910',tarif:0,ppn:0.11,bebas:false,ket:'Bebas PPh, PPN 11%'},
+  '6':{pph:'PPh Pasal 22',kap:'411122',kjs:'910',tarif:0.015,ppn:0,bebas:false,ket:'Sembako — bebas PPN'},
+  '14':{pph:'PPh Pasal 23',kap:'411124',kjs:'104',tarif:0.02,ppn:0.11,bebas:false,ket:'Jasa — PPh 23 2%, PPN 11%'},
+  '15':{pph:'PPh Pasal 23',kap:'411124',kjs:'104',tarif:0.02,ppn:0,bebas:false,ket:'Katering — PPh 23 2%, bebas PPN'},
+  '24':{pph:'PPh Pasal 23',kap:'411124',kjs:'104',tarif:0.02,ppn:0.11,bebas:false,ket:'Sewa kendaraan — PPh 23 2%, PPN 11%'},
+  '27':{pph:'PPh Final 4(2)',kap:'411128',kjs:'403',tarif:0.10,ppn:0.11,bebas:false,ket:'Sewa tanah/bangunan — Final 10%'},
+  '28':{pph:'PPh Pasal 23',kap:'411124',kjs:'104',tarif:0.02,ppn:0,bebas:false,ket:'Hotel — bebas PPN'},
+  '30':{pph:'PPh Final 4(2)',kap:'411128',kjs:'409',tarif:0.0265,ppn:0.11,bebas:false,ket:'Konstruksi Menengah/Besar — Final 2,65%'},
+  '32':{pph:'PPh Final 4(2)',kap:'411128',kjs:'409',tarif:0.0175,ppn:0.11,bebas:false,ket:'Konstruksi Kecil/CV — Final 1,75%'},
+  '34':{pph:'PPh Final 4(2)',kap:'411128',kjs:'409',tarif:0.04,ppn:0.11,bebas:false,ket:'Perencana/Pengawas — Final 4%'},
+  '35':{pph:'PPh Final 4(2)',kap:'411128',kjs:'409',tarif:0.06,ppn:0.11,bebas:false,ket:'Perencana/Pengawas NK — Final 6%'},
+}
+function hitungLokal(kode, nilai, inclPpn, statusNpwp) {
+  const k = TARIF_LOKAL[kode] || {pph:'—',kap:'—',kjs:'—',tarif:0,ppn:0,bebas:false,ket:'—'}
+  const isNon = String(statusNpwp).includes('NON')
+  let tEfektif = k.tarif
+  if (isNon && tEfektif > 0) tEfektif *= 2
+  const dpp = inclPpn && k.ppn > 0 ? nilai/(1+k.ppn) : nilai
+  const nilaiInclPpn = !inclPpn && k.ppn > 0 ? nilai*(1+k.ppn) : (inclPpn ? nilai : nilai)
+  const nilaiPph  = Math.round(dpp * tEfektif)
+  const nilaiPpn  = Math.round(dpp * k.ppn)
+  return {
+    kodeKegiatan:kode, labelKegiatan:k.ket, nilaiKontrak:nilai,
+    inclPpn, statusNpwp, isNonNpwp:isNon,
+    dpp:Math.round(dpp), nilaiInclPpn:Math.round(nilaiInclPpn),
+    jenisPph:k.pph, kapPph:k.kap, kjsPph:k.kjs,
+    tarifPphNormal:k.tarif, tarifPphEfektif:tEfektif, nilaiPph,
+    tarifPpn:k.ppn, nilaiPpn, kapPpn:'411211', kjsPpn:'910',
+    bebasPpn:k.bebas, ket:k.ket,
+    totalPajak:nilaiPph+nilaiPpn,
+    nilaiDibayar:Math.round(nilaiInclPpn)-nilaiPph-nilaiPpn,
+    uraianPph:`${k.pph} atas ${k.ket}`,
+    uraianPpn:`PPN atas ${k.ket}`,
+  }
+}
+
+function resetKalkulator() {
+  document.getElementById('hasil-section').style.display = 'none'
+  S.lastHasil = null
+  window.scrollTo({top:0, behavior:'smooth'})
+}
+
+// ─────────────────────────────────────────────────────────────
+// SIMPAN TRANSAKSI
+// ─────────────────────────────────────────────────────────────
+function simpanTransaksi() {
+  if (!S.lastHasil) { showToast('Hitung pajak terlebih dahulu', 'err'); return }
+  const payload = {
+    hasil:        S.lastHasil,
+    namaPenyedia: document.getElementById('k_nama_penyedia').value,
+    npwpPenyedia: document.getElementById('k_npwp_penyedia').value,
+    tglTransaksi: document.getElementById('k_tgl_transaksi').value,
+    tahunPajak:   document.getElementById('k_tahun_pajak').value,
+    masaPajak:    new Date(document.getElementById('k_tgl_transaksi').value).getMonth()+1,
+    sumberDana:   S.sumber,
+    keterangan:   document.getElementById('k_keterangan').value,
+  }
+  api('riwayat.simpan', payload)
+    .then(() => showToast('✅ Transaksi berhasil disimpan ke Riwayat', 'ok'))
+    .catch(err => showToast('❌ Gagal simpan: ' + err.message, 'err'))
+}
+
+// ─────────────────────────────────────────────────────────────
+// CETAK SSP
+// ─────────────────────────────────────────────────────────────
+function cetakSSP(jenis) {
+  if (!S.lastHasil) { showToast('Hitung pajak terlebih dahulu', 'err'); return }
+  if (jenis==='PPH' && S.lastHasil.nilaiPph===0) { showToast('PPh = 0, tidak perlu cetak SSP PPh', 'err'); return }
+  if (jenis==='PPN' && S.lastHasil.nilaiPpn===0) { showToast('PPN = 0, tidak perlu cetak SSP PPN', 'err'); return }
+
+  const payload = {
+    hasil:        S.lastHasil,
+    jenisSSP:     jenis,
+    namaPenyedia: document.getElementById('k_nama_penyedia').value,
+    npwpPenyedia: document.getElementById('k_npwp_penyedia').value,
+    tglTransaksi: document.getElementById('k_tgl_transaksi').value,
+    tahunPajak:   document.getElementById('k_tahun_pajak').value,
+  }
+
+  api('setup.ssp', payload).then(res => {
+    bukaWindowCetak(res.html, payload)
+  }).catch(() => {
+    // Fallback: generate HTML SSP di client
+    const html = generateSSPClient(payload, S.cfgSatker)
+    bukaWindowCetak(html, payload)
+  })
+}
+
+function bukaWindowCetak(htmlPages, payload) {
+  const win = window.open('', '_blank', 'width=900,height=720')
+  win.document.write(buildSSPWindow(htmlPages, payload))
+  win.document.close()
+}
+
+function buildSSPWindow(pages, d) {
+  return `<!DOCTYPE html><html><head>
+<meta charset="UTF-8"><title>SSP Pajak</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#eee;padding:10mm}
+.ssp-page{width:210mm;margin:0 auto 8mm;padding:6mm 8mm;border:1.5px solid #333;background:#fff;font-size:8pt;page-break-after:always}
+.ssp-page:last-child{page-break-after:auto}
+.ssp-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #000;padding-bottom:3mm;margin-bottom:3mm}
+.ssp-left{font-size:8pt;font-weight:bold}
+.ssp-center{text-align:center;flex:1}
+.ssp-title{font-size:13pt;font-weight:bold;letter-spacing:2px}
+.ssp-sub{font-size:8pt}
+.ssp-right{text-align:right}
+.ssp-lembar{font-size:22pt;font-weight:bold}
+.ssp-peruntukan{font-size:7.5pt;font-style:italic;color:#555}
+.ssp-row{display:flex;align-items:flex-start;margin-bottom:2.5mm;gap:2mm}
+.ssp-key{width:42mm;font-weight:bold;flex-shrink:0}
+.ssp-colon{flex-shrink:0;margin-right:2mm}
+.ssp-val{flex:1;border-bottom:1px dotted #999;min-height:5mm;padding-bottom:0.5mm}
+.ssp-bold{font-weight:bold}
+.ssp-note{font-size:7pt;color:#666;margin-bottom:2mm;margin-left:46mm}
+.ssp-kap-area{display:flex;gap:6mm;align-items:flex-start;margin-bottom:3mm}
+.ssp-kap-box{border:2px solid #000;padding:2mm 3mm}
+.ssp-kap-label{font-size:7pt;margin-bottom:1px}
+.ssp-uraian-box{flex:1;border:1px solid #ccc;background:#f9f9f9;padding:2mm;font-size:8pt}
+.ssp-uraian-label{font-weight:bold;font-size:7pt;margin-bottom:1mm}
+.masa-section{margin-bottom:3mm}
+.masa-header-row{font-weight:bold;font-size:7.5pt;margin-bottom:1mm;display:flex;justify-content:space-between}
+.masa-note{font-size:7pt;color:#666;margin-top:1mm}
+.jumlah-section{border-top:1px solid #000;border-bottom:1px solid #000;padding:2mm 0;margin-bottom:2mm}
+.jumlah-label{font-weight:bold;font-size:8pt}
+.jumlah-value{font-size:12pt;font-weight:bold;border:1px solid #000;padding:1.5mm 3mm;display:inline-block;min-width:60mm;margin-top:1mm}
+.terbilang-row{font-style:italic;font-size:7.5pt;margin-bottom:3mm}
+.ttd-area{display:flex;justify-content:space-between;margin-top:2mm}
+.ttd-box{text-align:center;font-size:7.5pt;width:80mm}
+.ttd-line{border-top:1px solid #000;margin-top:18mm;padding-top:1mm}
+.ssp-footer{text-align:center;font-size:7pt;font-style:italic;border-top:1px solid #000;margin-top:2mm;padding-top:1.5mm;color:#666}
+.validasi-box{border:1px solid #000;min-height:12mm;margin-top:1.5mm;padding:1mm;font-size:7pt;color:#aaa}
+.ssp-kode{font-size:7pt;text-align:right;color:#aaa;margin-top:1mm}
+.btn-print{position:fixed;top:10px;right:10px;background:#1a73e8;color:#fff;border:none;border-radius:6px;padding:10px 22px;font-size:14px;font-weight:bold;cursor:pointer;z-index:999}
+@media print{body{background:#fff;padding:0}.btn-print{display:none}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style></head><body>
+<button class="btn-print" onclick="window.print()">🖨️ Print / Simpan PDF</button>
+${pages}
+</body></html>`
+}
+
+// Generate SSP di sisi client (fallback)
+function generateSSPClient(payload, cfg) {
+  const h     = payload.hasil
+  const lembar = [{no:1,unt:'Untuk Arsip Wajib Pajak'},{no:2,unt:'Untuk KPPN'},
+                  {no:3,unt:'Untuk Dilaporkan ke KPP'},{no:4,unt:'Untuk Bank Persepsi / Kantor Pos'}]
+  let pages = ''
+
+  function makePage(jenis, lNo, lUnt) {
+    const isPph   = jenis === 'PPH'
+    const jumlah  = isPph ? h.nilaiPph : h.nilaiPpn
+    const kap     = isPph ? h.kapPph : '411211'
+    const kjs     = isPph ? h.kjsPph : '910'
+    const uraian  = isPph ? h.uraianPph : h.uraianPpn
+    const tgl     = payload.tglTransaksi ? formatTglID(payload.tglTransaksi) : formatTglID(new Date().toISOString().split('T')[0])
+    const bulan   = payload.tglTransaksi ? new Date(payload.tglTransaksi).getMonth()+1 : new Date().getMonth()+1
+    const tahun   = payload.tahunPajak || new Date().getFullYear()
+    const BULAN   = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des']
+
+    const masaBoxes = BULAN.map((b,i)=>
+      `<div style="display:flex;flex-direction:column;align-items:center;gap:0.5mm">
+        <span style="font-size:6.5pt">${b}</span>
+        <div style="width:5.5mm;height:5.5mm;border:1px solid #333;display:flex;align-items:center;justify-content:center;${i+1===bulan?'background:#222;color:#fff':''}">${i+1===bulan?'X':''}</div>
+      </div>`).join('')
+
+    const tahunBoxes = String(tahun).split('').map(c=>
+      `<div style="width:6mm;height:6mm;border:1px solid #333;display:flex;align-items:center;justify-content:center;font-weight:bold">${c}</div>`).join('')
+
+    const npwpClean = String(cfg.NPWP_SATKER||'').replace(/\D/g,'').padEnd(15,'0')
+    const g = [npwpClean.slice(0,2),npwpClean.slice(2,5),npwpClean.slice(5,8),npwpClean.slice(8,9),npwpClean.slice(9,12),npwpClean.slice(12,15)]
+    const seps = ['.','.','.', '-','.']
+    let npwpHtml = '<div style="display:flex;align-items:center;gap:1px">'
+    g.forEach((grp,gi)=>{
+      ;[...grp].forEach(c=>{npwpHtml+=`<div style="width:6.5mm;height:6mm;border:1px solid #333;display:flex;align-items:center;justify-content:center;font-weight:bold">${c}</div>`})
+      if(gi<seps.length)npwpHtml+=`<div style="width:3mm;text-align:center;font-weight:bold">${seps[gi]}</div>`
+    })
+    npwpHtml+='</div>'
+
+    const kapBoxes = String(kap).padEnd(6,' ').split('').map(c=>
+      `<div style="width:7mm;height:7mm;border:1px solid #333;display:flex;align-items:center;justify-content:center;font-size:11pt;font-weight:bold">${c.trim()}</div>`).join('')
+    const kjsBoxes = String(kjs).padEnd(3,' ').split('').map(c=>
+      `<div style="width:7mm;height:7mm;border:1px solid #333;display:flex;align-items:center;justify-content:center;font-size:11pt;font-weight:bold">${c.trim()}</div>`).join('')
+
+    const tb_ = terbilangRp(jumlah)
+    return `<div class="ssp-page">
+  <div class="ssp-header">
+    <div class="ssp-left">KEMENTERIAN KEUANGAN R.I.<br>DIREKTORAT JENDERAL PAJAK</div>
+    <div class="ssp-center"><div class="ssp-title">SURAT SETORAN PAJAK</div><div class="ssp-sub">(SSP)</div></div>
+    <div class="ssp-right"><div class="ssp-lembar">${lNo}</div><div>LEMBAR</div><div class="ssp-peruntukan">${lUnt}</div></div>
+  </div>
+  <div class="ssp-row"><div class="ssp-key">NPWP</div><div class="ssp-colon">:</div><div class="ssp-val">${npwpHtml}</div></div>
+  <div class="ssp-note">Diisi sesuai dengan NPWP yang dimiliki</div>
+  <div class="ssp-row"><div class="ssp-key">NAMA WP</div><div class="ssp-colon">:</div><div class="ssp-val ssp-bold">${cfg.NAMA_SATKER||'—'}</div></div>
+  <div class="ssp-row"><div class="ssp-key">ALAMAT WP</div><div class="ssp-colon">:</div><div class="ssp-val">${cfg.ALAMAT_SATKER||''}</div></div>
+  <div class="ssp-row"><div class="ssp-key">NOP</div><div class="ssp-colon">:</div><div class="ssp-val"></div></div>
+  <div class="ssp-kap-area">
+    <div class="ssp-kap-box"><div class="ssp-kap-label">Kode Akun Pajak</div><div style="display:flex;gap:1px">${kapBoxes}</div></div>
+    <div class="ssp-kap-box"><div class="ssp-kap-label">Kode Jenis Setoran</div><div style="display:flex;gap:1px">${kjsBoxes}</div></div>
+    <div class="ssp-uraian-box"><div class="ssp-uraian-label">Uraian Pembayaran :</div><b>${uraian}</b></div>
+  </div>
+  <div class="masa-section">
+    <div class="masa-header-row"><span><b>Masa Pajak</b></span><span style="display:flex;align-items:center;gap:4mm">Tahun Pajak &nbsp; <div style="display:flex;gap:1px">${tahunBoxes}</div></span></div>
+    <div style="display:flex;gap:2.5mm;align-items:center">${masaBoxes}</div>
+    <div class="masa-note">Beri tanda silang (X) pada kolom bulan sesuai masa yang berkenaan</div>
+  </div>
+  <div class="ssp-row"><div class="ssp-key">Nomor Ketetapan</div><div class="ssp-colon">:</div><div class="ssp-val">_______ / _______ / _______ / _______</div></div>
+  <div class="jumlah-section">
+    <div class="jumlah-label">Jumlah Pembayaran :</div>
+    <div class="jumlah-value">Rp ${Math.round(jumlah).toLocaleString('id-ID')}</div>
+    <div style="font-size:7pt;color:#666;margin-top:1mm">Diisi dengan rupiah penuh</div>
+  </div>
+  <div class="terbilang-row">Terbilang : ( ${tb_} )</div>
+  <div class="ttd-area">
+    <div class="ttd-box"><div>Diterima oleh Kantor Penerima Pembayaran</div><div style="margin-top:1mm">Tanggal ............................................</div><div class="ttd-line">Cap dan tanda tangan</div></div>
+    <div class="ttd-box"><div>Wajib Pajak / Penyetor</div><div style="margin-top:1mm">Sorong, ${tgl}</div><div class="ttd-line">${cfg.NAMA_BENDAHARA||'( Nama Bendahara Pengeluaran )'}</div></div>
+  </div>
+  <div class="ssp-footer">" Terima kasih Telah Membayar Pajak - Pajak Untuk Pembangunan Bangsa "</div>
+  <div class="validasi-box">Ruang Validasi Kantor Penerima Pembayaran</div>
+  <div class="ssp-kode">F.2.0.32.01</div>
+</div>`
+  }
+
+  if ((payload.jenisSSP==='PPH'||payload.jenisSSP==='BOTH') && h.nilaiPph>0)
+    lembar.forEach(l=>{ pages+=makePage('PPH',l.no,l.unt) })
+  if ((payload.jenisSSP==='PPN'||payload.jenisSSP==='BOTH') && h.nilaiPpn>0)
+    lembar.forEach(l=>{ pages+=makePage('PPN',l.no,l.unt) })
+
+  return pages
+}
+
+function formatTglID(str) {
+  const BLN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']
+  const d = new Date(str)
+  return `${d.getDate()} ${BLN[d.getMonth()]} ${d.getFullYear()}`
+}
+
+// ─────────────────────────────────────────────────────────────
+// AUTOCOMPLETE PENYEDIA
+// ─────────────────────────────────────────────────────────────
+let acTimer = null
+function autocompletePenyedia(q) {
+  clearTimeout(acTimer)
+  const list = document.getElementById('ac_list')
+  if (!q || q.length < 2) { list.classList.remove('show'); return }
+  acTimer = setTimeout(() => {
+    api('penyedia.cari', {q}).then(items => {
+      if (!items || !items.length) { list.classList.remove('show'); return }
+      list.innerHTML = items.map(p => `
+        <div class="autocomplete-item" onclick="pilihPenyedia(${JSON.stringify(p).replace(/"/g,'&quot;')})">
+          <div class="ai-nama">${p.nama}</div>
+          <div class="ai-npwp">${p.npwp||'—'} · ${p.statusNpwp||''} · ${p.kota||''}</div>
+        </div>`).join('')
+      list.classList.add('show')
+    }).catch(() => list.classList.remove('show'))
+  }, 300)
+}
+
+function pilihPenyedia(p) {
+  document.getElementById('k_nama_penyedia').value = p.nama
+  document.getElementById('k_npwp_penyedia').value = p.npwp || ''
+  // Set toggle status NPWP
+  const isNon = String(p.statusNpwp||'').includes('NON')
+  S.npwp = isNon ? 'NON-NPWP' : 'BER-NPWP'
+  document.querySelectorAll('#page-kalkulator .toggle-group')[0]
+    .querySelectorAll('.toggle-btn').forEach((btn,i) => btn.classList.toggle('active', isNon ? i===1 : i===0))
+  document.getElementById('ac_list').classList.remove('show')
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.autocomplete-wrap')) {
+    document.getElementById('ac_list').classList.remove('show')
+  }
+})
+
+// ─────────────────────────────────────────────────────────────
+// RIWAYAT
+// ─────────────────────────────────────────────────────────────
+let debounceRiwayatTimer = null
+function debounceLoadRiwayat() {
+  clearTimeout(debounceRiwayatTimer)
+  debounceRiwayatTimer = setTimeout(loadRiwayat, 400)
+}
+
+function loadRiwayat(offset = 0) {
+  S.riwayatOffset = offset
+  const tbody = document.getElementById('riwayat-tbody')
+  tbody.innerHTML = '<tr><td colspan="9" class="loading-spinner">Memuat data...</td></tr>'
+
+  const payload = {
+    tahun:    document.getElementById('f_tahun').value,
+    bulan:    document.getElementById('f_bulan').value,
+    penyedia: document.getElementById('f_penyedia').value,
+    limit: 50, offset,
+  }
+
+  api('riwayat.list', payload).then(res => {
+    S.riwayatTotal = res.total || 0
+    const data = res.data || []
+    document.getElementById('riwayat-info').textContent =
+      `Menampilkan ${data.length} dari ${res.total} transaksi`
+
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="9" class="empty-state"><div class="es-icon">📭</div>Belum ada data riwayat</td></tr>'
+      return
+    }
+
+    tbody.innerHTML = data.map(r => `
+      <tr>
+        <td style="white-space:nowrap">${r['Tgl Transaksi']||'—'}</td>
+        <td>
+          <div style="font-weight:600;font-size:12px">${r['Nama Penyedia']||'—'}</div>
+          <div style="font-size:10px;color:var(--text3)">${r['NPWP Penyedia']||''}</div>
+        </td>
+        <td style="max-width:180px;font-size:11px">${r['Jenis Kegiatan']||'—'}</td>
+        <td style="text-align:right;white-space:nowrap">${fmtRp(r['Nilai Kontrak'])}</td>
+        <td style="text-align:right;color:var(--accent);white-space:nowrap">${fmtRp(r['Nilai PPh'])}</td>
+        <td style="text-align:right;color:var(--accent2);white-space:nowrap">${fmtRp(r['Nilai PPN'])}</td>
+        <td style="text-align:right;font-weight:700;color:var(--accent3);white-space:nowrap">${fmtRp(r['Total Pajak'])}</td>
+        <td style="text-align:right;white-space:nowrap">${fmtRp(r['Nilai Dibayar'])}</td>
+        <td>
+          <button class="btn btn-outline" style="padding:4px 10px;font-size:11px"
+            onclick='lihatDetailRiwayat(${JSON.stringify(r).replace(/'/g,"&#39;")})'>Detail</button>
+          <button class="btn btn-danger" style="padding:4px 10px;font-size:11px;margin-top:2px"
+            onclick="hapusRiwayat('${r['ID']}')">Hapus</button>
+        </td>
+      </tr>`).join('')
+
+    // Pagination
+    renderPagination(res.total, offset, 50)
+  }).catch(err => {
+    tbody.innerHTML = `<tr><td colspan="9" class="empty-state">❌ Gagal memuat: ${err.message}</td></tr>`
+  })
+}
+
+function renderPagination(total, offset, limit) {
+  const pag = document.getElementById('riwayat-pagination')
+  pag.innerHTML = ''
+  if (total <= limit) return
+  const pages = Math.ceil(total / limit)
+  const cur   = Math.floor(offset / limit)
+  for (let i = 0; i < pages; i++) {
+    const btn = document.createElement('button')
+    btn.className = 'btn ' + (i === cur ? 'btn-primary' : 'btn-outline')
+    btn.style.padding = '6px 12px'
+    btn.textContent = i + 1
+    btn.onclick = () => loadRiwayat(i * limit)
+    pag.appendChild(btn)
+  }
+}
+
+function lihatDetailRiwayat(r) {
+  const html = `<div class="modal-box" style="max-width:600px">
+    <div class="modal-title">Detail Transaksi <button class="modal-close" onclick="this.closest('.modal-overlay').classList.remove('show')">✕</button></div>
+    <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="buatKuitansiDariRiwayat('${r['ID']}');this.closest('.modal-overlay').remove()">🧾 Buat Kuitansi dari Transaksi Ini</button>
+    </div>
+    <table class="info-table">
+      <tr><td>ID</td><td>${r['ID']||'—'}</td></tr>
+      <tr><td>Tanggal</td><td>${r['Tgl Transaksi']||'—'}</td></tr>
+      <tr><td>Penyedia</td><td>${r['Nama Penyedia']||'—'}</td></tr>
+      <tr><td>NPWP Penyedia</td><td>${r['NPWP Penyedia']||'—'}</td></tr>
+      <tr><td>Jenis Kegiatan</td><td>${r['Jenis Kegiatan']||'—'}</td></tr>
+      <tr><td>Nilai Kontrak</td><td>${fmtRp(r['Nilai Kontrak'])}</td></tr>
+      <tr><td>DPP</td><td>${fmtRp(r['DPP'])}</td></tr>
+      <tr><td>Jenis PPh</td><td>${r['Jenis PPh']||'—'}</td></tr>
+      <tr><td>KAP / KJS PPh</td><td>${r['KAP PPh']||'—'} / ${r['KJS PPh']||'—'}</td></tr>
+      <tr><td>Tarif PPh</td><td>${pctStr(r['Tarif PPh']||0)}</td></tr>
+      <tr><td>Nilai PPh</td><td style="color:var(--accent);font-weight:700">${fmtRp(r['Nilai PPh'])}</td></tr>
+      <tr><td>Tarif PPN</td><td>${pctStr(r['Tarif PPN']||0)}</td></tr>
+      <tr><td>Nilai PPN</td><td style="color:var(--accent2);font-weight:700">${fmtRp(r['Nilai PPN'])}</td></tr>
+      <tr><td>Total Pajak</td><td style="color:var(--accent3);font-weight:700">${fmtRp(r['Total Pajak'])}</td></tr>
+      <tr><td>Dibayar ke Penyedia</td><td style="font-weight:700">${fmtRp(r['Nilai Dibayar'])}</td></tr>
+      <tr><td>Sumber Dana</td><td>${r['Sumber Dana']||'—'}</td></tr>
+      <tr><td>Operator</td><td>${r['Operator']||'—'}</td></tr>
+      <tr><td>Keterangan</td><td>${r['Keterangan']||'—'}</td></tr>
+    </table>
+  </div>`
+  const ov = document.createElement('div')
+  ov.className = 'modal-overlay show'
+  ov.innerHTML = html
+  ov.onclick = e => { if(e.target===ov) ov.remove() }
+  document.body.appendChild(ov)
+}
+
+function hapusRiwayat(id) {
+  if (!confirm('Hapus transaksi ini? Tindakan tidak bisa dibatalkan.')) return
+  api('riwayat.hapus', {id})
+    .then(() => { showToast('✅ Riwayat dihapus', 'ok'); loadRiwayat() })
+    .catch(err => showToast('❌ ' + err.message, 'err'))
+}
+
+function exportCSV() {
+  api('riwayat.export', {
+    tahun:    document.getElementById('f_tahun').value,
+    bulan:    document.getElementById('f_bulan').value,
+    penyedia: document.getElementById('f_penyedia').value,
+  }).then(res => {
+    if (!res.csv) { showToast('Tidak ada data untuk diexport', 'err'); return }
+    const blob = new Blob(['\ufeff' + res.csv], {type:'text/csv;charset=utf-8;'})
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href     = url
+    a.download = `riwayat-pajak-${new Date().toISOString().split('T')[0]}.csv`
+    a.click()
+    showToast(`✅ Export ${res.count} baris berhasil`, 'ok')
+  }).catch(err => showToast('❌ ' + err.message, 'err'))
+}
+
+// ─────────────────────────────────────────────────────────────
+// KUITANSI
+// ─────────────────────────────────────────────────────────────
+let debounceKwTimer = null
+function debounceLoadKuitansi() {
+  clearTimeout(debounceKwTimer)
+  debounceKwTimer = setTimeout(loadKuitansi, 400)
+}
+
+function loadKuitansi() {
+  const tbody = document.getElementById('kuitansi-tbody')
+  tbody.innerHTML = '<tr><td colspan="7" class="loading-spinner">Memuat data...</td></tr>'
+
+  const payload = {
+    tahun: document.getElementById('fkw_tahun').value,
+    bulan: document.getElementById('fkw_bulan').value,
+    q:     document.getElementById('fkw_q').value,
+    limit: 100, offset: 0,
+  }
+
+  api('kuitansi.list', payload).then(res => {
+    const data = res.data || []
+    document.getElementById('kuitansi-info').textContent =
+      `Menampilkan ${data.length} dari ${res.total} kuitansi`
+
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="es-icon">🧾</div>Belum ada kuitansi. Klik "+ Buat Kuitansi Baru" di kanan atas.</td></tr>'
+      return
+    }
+
+    tbody.innerHTML = data.map(r => `
+      <tr>
+        <td style="white-space:nowrap;font-family:monospace;font-weight:600">${r['No Kuitansi']||'—'}</td>
+        <td style="white-space:nowrap">${r['Tgl Kuitansi']||'—'}</td>
+        <td>
+          <div style="font-weight:600;font-size:12px">${r['Penerima Nama']||'—'}</div>
+          <div style="font-size:10px;color:var(--text3)">T.A ${r['Tahun Anggaran']||'—'}</div>
+        </td>
+        <td style="max-width:220px;font-size:11px">${r['Untuk Pembayaran']||'—'}</td>
+        <td style="text-align:right;white-space:nowrap;font-weight:600">${fmtRp(r['Uang Sejumlah'])}</td>
+        <td style="text-align:right;white-space:nowrap;color:var(--accent2);font-weight:600">${fmtRp(r['Yang Diterima'])}</td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-primary" style="padding:4px 10px;font-size:11px" onclick="cetakKuitansiTersimpan('${r['ID']}')">🖨️</button>
+          <button class="btn btn-outline" style="padding:4px 10px;font-size:11px;margin-top:2px" onclick="editKuitansi('${r['ID']}')">✏️</button>
+          <button class="btn btn-danger" style="padding:4px 10px;font-size:11px;margin-top:2px" onclick="hapusKuitansi('${r['ID']}')">🗑</button>
+        </td>
+      </tr>`).join('')
+  }).catch(err => {
+    tbody.innerHTML = `<tr><td colspan="7" class="empty-state">❌ Gagal memuat: ${err.message}</td></tr>`
+  })
+}
+
+function openFormKuitansi() {
+  document.getElementById('kw-list-card').style.display = 'none'
+  document.getElementById('kw-form-card').style.display = 'block'
+  document.getElementById('kw-form-mode').textContent = 'Buat Kuitansi Baru'
+  resetFormKuitansi()
+  window.scrollTo({top:0, behavior:'smooth'})
+}
+
+function closeFormKuitansi() {
+  document.getElementById('kw-form-card').style.display = 'none'
+  document.getElementById('kw-list-card').style.display = 'block'
+  document.getElementById('kw_info_riwayat').style.display = 'none'
+  loadKuitansi()
+}
+
+function resetFormKuitansi() {
+  document.getElementById('kw_id').value = ''
+  document.getElementById('kw_riwayat_id').value = ''
+  document.getElementById('kw_no_kuitansi').value = ''
+  document.getElementById('kw_terbilang').value = ''
+  document.getElementById('kw_untuk').value = ''
+  document.getElementById('kw_uang').value = ''
+  document.getElementById('kw_besarnya').value = ''
+  document.getElementById('kw_ppn').value = ''
+  document.getElementById('kw_pph').value = ''
+  document.getElementById('kw_diterima').value = ''
+  document.getElementById('kw_penerima').value = ''
+  document.getElementById('kw_ket').value = ''
+  document.getElementById('kw_info_riwayat').style.display = 'none'
+
+  // Reset auto-hitung section
+  const ahJenis = document.getElementById('kw_ah_jenis')
+  if (ahJenis) ahJenis.value = ''
+  const ahNilai = document.getElementById('kw_ah_nilai')
+  if (ahNilai) ahNilai.value = ''
+  const ahHasil = document.getElementById('kw_ah_hasil')
+  if (ahHasil) ahHasil.style.display = 'none'
+
+  // Default dari config & tanggal hari ini
+  const now = new Date()
+  document.getElementById('kw_tgl').value = now.toISOString().split('T')[0]
+  document.getElementById('kw_ta').value  = S.cfgSatker.TAHUN_ANGGARAN || now.getFullYear()
+  document.getElementById('kw_terima_dari').value = S.cfgSatker.KUITANSI_TERIMA_DARI ||
+    `Pejabat Pembuat Komitmen ${S.cfgSatker.NAMA_SATKER || 'Politeknik Kelautan dan Perikanan Sorong'}`
+  document.getElementById('kw_tempat').value = S.cfgSatker.KOTA || 'Sorong'
+  document.getElementById('kw_ppk_nama').value  = S.cfgSatker.NAMA_PPK || ''
+  document.getElementById('kw_ppk_nip').value   = S.cfgSatker.NIP_PPK  || ''
+  document.getElementById('kw_bend_nama').value = S.cfgSatker.NAMA_BENDAHARA || ''
+  document.getElementById('kw_bend_nip').value  = S.cfgSatker.NIP_BENDAHARA  || ''
+  document.getElementById('kw_mak').value       = S.cfgSatker.KUITANSI_MAK || '1'
+
+  // Minta nomor auto
+  refreshNomorKuitansi()
+}
+
+function refreshNomorKuitansi() {
+  const tgl = document.getElementById('kw_tgl').value
+  const ta  = document.getElementById('kw_ta').value
+  api('kuitansi.nomor', { tglKuitansi: tgl, tahunAnggaran: ta })
+    .then(res => {
+      const el = document.getElementById('kw_no_kuitansi')
+      if (!el.value || el.dataset.auto === '1') {
+        el.value = res.nomor
+        el.dataset.auto = '1'
+      }
+    }).catch(() => {})
+}
+
+// Event listener form kuitansi
+document.addEventListener('DOMContentLoaded', () => {
+  const elNo = document.getElementById('kw_no_kuitansi')
+  if (elNo) elNo.addEventListener('input', () => { elNo.dataset.auto = '0' })
+  const elTgl = document.getElementById('kw_tgl')
+  const elTa  = document.getElementById('kw_ta')
+  if (elTgl) elTgl.addEventListener('change', refreshNomorKuitansi)
+  if (elTa)  elTa.addEventListener('change', refreshNomorKuitansi)
+})
+
+function onUangKuitansi(el) {
+  const raw = el.value.replace(/\D/g,'')
+  if (!raw) { el.value=''; document.getElementById('kw_terbilang').value=''; return }
+  const num = parseInt(raw,10)
+  el.value = num.toLocaleString('id-ID')
+  document.getElementById('kw_terbilang').value = terbilangRp(num)
+
+  // Auto-isi besarnya pembayaran jika kosong
+  const besarnyaEl = document.getElementById('kw_besarnya')
+  if (!besarnyaEl.value) {
+    besarnyaEl.value = num.toLocaleString('id-ID')
+    onRincianInput()
+  }
+}
+
+function onRincianInput() {
+  ;['kw_besarnya','kw_ppn','kw_pph'].forEach(id => {
+    const el = document.getElementById(id)
+    const raw = el.value.replace(/\D/g,'')
+    el.value = raw ? parseInt(raw,10).toLocaleString('id-ID') : ''
+  })
+  const b = parseRp(document.getElementById('kw_besarnya').value)
+  const ppn = parseRp(document.getElementById('kw_ppn').value)
+  const pph = parseRp(document.getElementById('kw_pph').value)
+  const diterima = Math.max(0, b - ppn - pph)
+  document.getElementById('kw_diterima').value = diterima.toLocaleString('id-ID')
+}
+
+function buildKuitansiPayload() {
+  return {
+    id:             document.getElementById('kw_id').value || undefined,
+    riwayatId:      document.getElementById('kw_riwayat_id').value || '',
+    noKuitansi:     document.getElementById('kw_no_kuitansi').value.trim(),
+    tahunAnggaran:  document.getElementById('kw_ta').value.trim(),
+    tglKuitansi:    document.getElementById('kw_tgl').value,
+    terimaDari:     document.getElementById('kw_terima_dari').value.trim(),
+    uangSejumlah:   parseRp(document.getElementById('kw_uang').value),
+    terbilang:      document.getElementById('kw_terbilang').value.trim(),
+    untukPembayaran: document.getElementById('kw_untuk').value.trim(),
+    besarnyaBayar:  parseRp(document.getElementById('kw_besarnya').value),
+    nilaiPpn:       parseRp(document.getElementById('kw_ppn').value),
+    nilaiPph:       parseRp(document.getElementById('kw_pph').value),
+    yangDiterima:   parseRp(document.getElementById('kw_diterima').value),
+    tempat:         document.getElementById('kw_tempat').value.trim(),
+    penerimaNama:   document.getElementById('kw_penerima').value.trim(),
+    ppkNama:        document.getElementById('kw_ppk_nama').value.trim(),
+    ppkNip:         document.getElementById('kw_ppk_nip').value.trim(),
+    bendaharaNama:  document.getElementById('kw_bend_nama').value.trim(),
+    bendaharaNip:   document.getElementById('kw_bend_nip').value.trim(),
+    mak:            document.getElementById('kw_mak').value.trim() || '1',
+    keterangan:     document.getElementById('kw_ket').value.trim(),
+  }
+}
+
+function simpanKuitansi() {
+  const payload = buildKuitansiPayload()
+  if (!payload.uangSejumlah || payload.uangSejumlah <= 0) {
+    showToast('Uang sejumlah harus diisi', 'err'); return
+  }
+  if (!payload.untukPembayaran) { showToast('Uraian "Untuk Pembayaran" wajib diisi', 'err'); return }
+  if (!payload.penerimaNama) { showToast('Nama penerima wajib diisi', 'err'); return }
+
+  const action = payload.id ? 'kuitansi.update' : 'kuitansi.simpan'
+  api(action, payload).then(saved => {
+    showToast('✅ Kuitansi tersimpan', 'ok')
+    document.getElementById('kw_id').value = saved['ID'] || payload.id || ''
+    document.getElementById('kw_no_kuitansi').value = saved['No Kuitansi'] || payload.noKuitansi
+    // Kembali ke list setelah jeda
+    setTimeout(closeFormKuitansi, 600)
+  }).catch(err => showToast('❌ ' + err.message, 'err'))
+}
+
+function previewKuitansi() {
+  const payload = buildKuitansiPayload()
+  if (!payload.uangSejumlah || payload.uangSejumlah <= 0) {
+    showToast('Isi nominal terlebih dahulu', 'err'); return
+  }
+  api('kuitansi.cetak', payload).then(res => {
+    bukaWindowCetakKuitansi(res.html)
+  }).catch(err => {
+    // Fallback: render di client
+    const html = generateKuitansiClient(payload, S.cfgSatker)
+    bukaWindowCetakKuitansi(html)
+  })
+}
+
+function cetakKuitansiTersimpan(id) {
+  api('kuitansi.get', { id }).then(r => {
+    const payload = { ...r, _stored: true }
+    return api('kuitansi.cetak', payload)
+  }).then(res => {
+    bukaWindowCetakKuitansi(res.html)
+  }).catch(err => showToast('❌ ' + err.message, 'err'))
+}
+
+function editKuitansi(id) {
+  api('kuitansi.get', { id }).then(r => {
+    openFormKuitansi()
+    document.getElementById('kw-form-mode').textContent = 'Edit Kuitansi'
+    document.getElementById('kw_id').value           = r['ID'] || ''
+    document.getElementById('kw_riwayat_id').value   = r['Riwayat ID'] || ''
+    document.getElementById('kw_no_kuitansi').value  = r['No Kuitansi'] || ''
+    document.getElementById('kw_no_kuitansi').dataset.auto = '0'
+    document.getElementById('kw_ta').value           = r['Tahun Anggaran'] || ''
+    // Konversi tgl dd/MM/yyyy → yyyy-MM-dd
+    const parts = String(r['Tgl Kuitansi']||'').split('/')
+    if (parts.length===3) {
+      document.getElementById('kw_tgl').value = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`
+    }
+    document.getElementById('kw_terima_dari').value = r['Terima Dari'] || ''
+    document.getElementById('kw_uang').value         = Number(r['Uang Sejumlah']||0).toLocaleString('id-ID')
+    document.getElementById('kw_terbilang').value    = r['Terbilang'] || ''
+    document.getElementById('kw_untuk').value        = r['Untuk Pembayaran'] || ''
+    document.getElementById('kw_besarnya').value     = Number(r['Besarnya Pembayaran']||0).toLocaleString('id-ID')
+    document.getElementById('kw_ppn').value          = Number(r['Nilai PPN']||0).toLocaleString('id-ID')
+    document.getElementById('kw_pph').value          = Number(r['Nilai PPh']||0).toLocaleString('id-ID')
+    document.getElementById('kw_diterima').value     = Number(r['Yang Diterima']||0).toLocaleString('id-ID')
+    document.getElementById('kw_penerima').value     = r['Penerima Nama'] || ''
+    document.getElementById('kw_tempat').value       = r['Tempat'] || ''
+    document.getElementById('kw_ppk_nama').value     = r['PPK Nama'] || ''
+    document.getElementById('kw_ppk_nip').value      = r['PPK NIP'] || ''
+    document.getElementById('kw_bend_nama').value    = r['Bendahara Nama'] || ''
+    document.getElementById('kw_bend_nip').value     = r['Bendahara NIP'] || ''
+    document.getElementById('kw_mak').value          = r['MAK'] || '1'
+    document.getElementById('kw_ket').value          = r['Keterangan'] || ''
+    if (r['Riwayat ID']) {
+      document.getElementById('kw_info_riwayat').style.display = 'block'
+      document.getElementById('kw_info_riwayat_text').textContent = r['Riwayat ID']
+    }
+  }).catch(err => showToast('❌ ' + err.message, 'err'))
+}
+
+function hapusKuitansi(id) {
+  if (!confirm('Hapus kuitansi ini? Tindakan tidak bisa dibatalkan.')) return
+  api('kuitansi.hapus', { id })
+    .then(() => { showToast('✅ Kuitansi dihapus', 'ok'); loadKuitansi() })
+    .catch(err => showToast('❌ ' + err.message, 'err'))
+}
+
+function buatKuitansiDariRiwayat(riwayatId) {
+  api('kuitansi.dariRiwayat', { riwayatId }).then(draft => {
+    // Switch ke tab Kuitansi
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'))
+    document.getElementById('page-kuitansi').classList.add('active')
+    document.querySelector('.nav-tab[onclick*="kuitansi"]').classList.add('active')
+
+    openFormKuitansi()
+    document.getElementById('kw_riwayat_id').value = draft.riwayatId || ''
+    if (draft.riwayatId) {
+      document.getElementById('kw_info_riwayat').style.display = 'block'
+      document.getElementById('kw_info_riwayat_text').textContent = draft.riwayatId
+    }
+    document.getElementById('kw_ta').value           = draft.tahunAnggaran || ''
+    document.getElementById('kw_tgl').value          = draft.tglKuitansi || ''
+    document.getElementById('kw_terima_dari').value  = draft.terimaDari || ''
+    document.getElementById('kw_uang').value         = Number(draft.uangSejumlah||0).toLocaleString('id-ID')
+    document.getElementById('kw_terbilang').value    = draft.terbilang || ''
+    document.getElementById('kw_untuk').value        = draft.untukPembayaran || ''
+    document.getElementById('kw_besarnya').value     = Number(draft.besarnyaBayar||0).toLocaleString('id-ID')
+    document.getElementById('kw_ppn').value          = Number(draft.nilaiPpn||0).toLocaleString('id-ID')
+    document.getElementById('kw_pph').value          = Number(draft.nilaiPph||0).toLocaleString('id-ID')
+    document.getElementById('kw_diterima').value     = Number(draft.yangDiterima||0).toLocaleString('id-ID')
+    document.getElementById('kw_penerima').value     = draft.penerimaNama || ''
+    document.getElementById('kw_tempat').value       = draft.tempat || ''
+    document.getElementById('kw_ppk_nama').value     = draft.ppkNama || ''
+    document.getElementById('kw_ppk_nip').value      = draft.ppkNip || ''
+    document.getElementById('kw_bend_nama').value    = draft.bendaharaNama || ''
+    document.getElementById('kw_bend_nip').value     = draft.bendaharaNip || ''
+    document.getElementById('kw_mak').value          = draft.mak || '1'
+    refreshNomorKuitansi()
+    showToast('✅ Draft kuitansi dibuat dari riwayat transaksi', 'ok')
+  }).catch(err => showToast('❌ ' + err.message, 'err'))
+}
+
+// ─────────────────────────────────────────────────────────────
+// KUITANSI — Auto-hitung pajak dari form
+// ─────────────────────────────────────────────────────────────
+function kwHitungPajak() {
+  const kode  = document.getElementById('kw_ah_jenis').value
+  const nilai = parseRp(document.getElementById('kw_ah_nilai').value)
+  const inclPpn = S.kw_incl_ppn !== false  // default true
+  const statusNpwp = S.kw_npwp || 'BER-NPWP'
+
+  if (!kode)      { showToast('Pilih jenis kegiatan dulu', 'err'); return }
+  if (nilai <= 0) { showToast('Isi nilai kontrak dulu', 'err'); return }
+
+  api('kalkulator.hitung', {
+    kodeKegiatan: kode, nilaiKontrak: nilai,
+    inclPpn, statusNpwp,
+  }).then(h => kwTerapkanHasil(h))
+    .catch(() => {
+      const h = hitungLokal(kode, nilai, inclPpn, statusNpwp)
+      kwTerapkanHasil(h)
+    })
+}
+
+function kwTerapkanHasil(h) {
+  // Tampilkan ringkasan
+  const hasilBox = document.getElementById('kw_ah_hasil')
+  hasilBox.style.display = 'block'
+  document.getElementById('kw_ah_pph').textContent = fmtRp(h.nilaiPph)
+  document.getElementById('kw_ah_ppn').textContent = fmtRp(h.nilaiPpn)
+  document.getElementById('kw_ah_bayar').textContent = fmtRp(h.nilaiDibayar)
+  document.getElementById('kw_ah_dpp').textContent = fmtRp(h.dpp) + ` (${h.labelKegiatan || ''})`
+
+  // Auto-isi field kuitansi (gunakan nilai total termasuk PPN sebagai "Uang Sejumlah")
+  const total = h.nilaiInclPpn || (h.dpp + h.nilaiPpn)
+  document.getElementById('kw_uang').value      = total.toLocaleString('id-ID')
+  document.getElementById('kw_terbilang').value = terbilangRp(total)
+  document.getElementById('kw_besarnya').value  = total.toLocaleString('id-ID')
+  document.getElementById('kw_ppn').value       = h.nilaiPpn.toLocaleString('id-ID')
+  document.getElementById('kw_pph').value       = h.nilaiPph.toLocaleString('id-ID')
+  document.getElementById('kw_diterima').value  = h.nilaiDibayar.toLocaleString('id-ID')
+
+  // Auto-isi untuk pembayaran jika kosong
+  const untukEl = document.getElementById('kw_untuk')
+  if (!untukEl.value.trim()) {
+    untukEl.value = `Pembayaran ${h.labelKegiatan || ''}`.trim()
+  }
+}
+
+function kwOnNilaiInput(el) {
+  const raw = el.value.replace(/\D/g,'')
+  if (!raw) { el.value=''; return }
+  el.value = parseInt(raw,10).toLocaleString('id-ID')
+}
+
+// ─────────────────────────────────────────────────────────────
+// KUITANSI — Window cetak
+// ─────────────────────────────────────────────────────────────
+function bukaWindowCetakKuitansi(html) {
+  const win = window.open('', '_blank', 'width=900,height=900')
+  win.document.write(buildKuitansiWindow(html))
+  win.document.close()
+}
+
+function buildKuitansiWindow(content) {
+  return `<!DOCTYPE html><html><head>
+<meta charset="UTF-8"><title>Kuitansi Bukti Pembayaran</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,'Helvetica Neue',sans-serif;background:#eee;padding:10mm;color:#000}
+.kw-page{width:210mm;min-height:297mm;margin:0 auto 8mm;padding:14mm 16mm;background:#fff;font-size:10pt;line-height:1.4;page-break-after:always;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.kw-page:last-child{page-break-after:auto}
+
+/* KOP */
+.kw-kop{display:flex;gap:8mm;align-items:center;margin-bottom:2mm}
+.kw-kop-logo{flex-shrink:0}
+.kw-kop-text{flex:1;text-align:center}
+.kw-kop-l1{font-size:13pt;font-weight:bold;line-height:1.25}
+.kw-kop-l2{font-size:12pt;font-weight:bold;line-height:1.25}
+.kw-kop-alamat{font-size:9pt;line-height:1.3}
+.kw-divider{border-bottom:2.5pt solid #000;margin:1mm 0 3mm;position:relative}
+.kw-divider::after{content:'';display:block;border-bottom:0.8pt solid #000;margin-top:1.2pt}
+
+/* META */
+.kw-meta{width:100%;border-collapse:collapse;margin-bottom:1mm}
+.kw-meta-label{width:32mm;font-size:10pt}
+.kw-meta-val{padding:1mm 4mm;font-size:11pt}
+.kw-meta-ta{text-align:right;font-size:10pt;width:30mm}
+
+/* TITLE */
+.kw-title{text-align:center;font-size:13pt;font-weight:bold;text-decoration:underline;margin:4mm 0 6mm}
+
+/* BODY */
+.kw-body{width:100%;border-collapse:collapse;margin-bottom:3mm}
+.kw-body td{padding:1.5mm 0;vertical-align:top}
+.kw-lbl{width:38mm;font-size:10pt}
+.kw-sep{width:4mm;font-size:10pt}
+.kw-fill{border-bottom:1px solid #999;padding-bottom:0.5mm;font-size:10pt}
+.kw-italic{font-style:italic}
+
+/* RINCIAN */
+.kw-rincian{margin-left:42mm;border-collapse:collapse;margin-bottom:4mm;width:calc(100% - 42mm)}
+.kw-rincian td{padding:0.8mm 2mm;font-size:10pt;border-bottom:1px dotted #ccc}
+.kw-r-lbl{width:60%}
+.kw-r-val{text-align:right;font-family:'Courier New',monospace}
+.kw-r-total td{border-top:1.5pt solid #000;border-bottom:1.5pt solid #000;padding-top:1.5mm;padding-bottom:1.5mm;font-size:11pt}
+
+/* TGL BLOCK */
+.kw-tgl-block{margin-left:50%;margin-bottom:3mm}
+.kw-tgl{font-size:10pt;margin-bottom:1mm;border-bottom:1px solid #999;padding-bottom:0.5mm}
+.kw-yg-terima{font-size:10pt}
+.kw-spasi-ttd{height:14mm}
+.kw-penerima{font-size:10pt;border-bottom:1px solid #999;padding-bottom:0.5mm}
+
+/* SETUJU */
+.kw-setuju{font-size:9.5pt;margin-bottom:1mm;border-top:1px solid #000;padding-top:1.5mm}
+.kw-ttd-area{width:100%;border-collapse:collapse;margin-bottom:6mm}
+.kw-ttd-col{width:50%;font-size:10pt;padding-right:6mm;vertical-align:top}
+.kw-ttd-nama{border-top:1px solid #999;padding-top:0.5mm;font-size:10pt}
+.kw-ttd-nip{font-size:9pt;color:#222}
+
+/* MAK */
+.kw-mak{font-size:9.5pt;margin-top:8mm}
+.kw-mak-val{font-size:10pt;font-weight:bold;border:1px solid #000;display:inline-block;padding:0.5mm 5mm;min-width:14mm;text-align:center}
+
+/* BUTTON CETAK */
+.btn-print{position:fixed;top:10px;right:10px;background:#1a73e8;color:#fff;border:none;border-radius:6px;padding:10px 22px;font-size:14px;font-weight:bold;cursor:pointer;z-index:999;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+@media print{body{background:#fff;padding:0}.btn-print{display:none}.kw-page{box-shadow:none;margin:0}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style></head><body>
+<button class="btn-print" onclick="window.print()">🖨️ Print / Simpan PDF</button>
+${content}
+</body></html>`
+}
+
+// Generate kuitansi HTML di sisi client (fallback)
+function generateKuitansiClient(p, cfg) {
+  cfg = cfg || {}
+  const fmtRp_ = n => Math.round(Number(n)||0).toLocaleString('id-ID')
+  const fmtRpKoma = n => fmtRp_(n) + ',00'
+  const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  const tgl = p.tglKuitansi || new Date().toISOString().split('T')[0]
+  const tglIndo = formatTglID(tgl)
+  const uang = Math.round(Number(p.uangSejumlah)||0)
+  const besarnya = Math.round(Number(p.besarnyaBayar)||uang)
+  const ppn = Math.round(Number(p.nilaiPpn)||0)
+  const pph = Math.round(Number(p.nilaiPph)||0)
+  const diterima = p.yangDiterima != null ? Math.round(Number(p.yangDiterima)) : besarnya - ppn - pph
+  const no = p.noKuitansi || `KWT-?/?/${p.tahunAnggaran || new Date().getFullYear()}`
+  const ta = p.tahunAnggaran || new Date().getFullYear()
+  const terbilang = p.terbilang || terbilangRp(uang)
+
+  const logoBlock = cfg.KOP_LOGO_URL
+    ? `<img src="${esc(cfg.KOP_LOGO_URL)}" style="width:22mm;height:22mm;object-fit:contain">`
+    : `<div style="width:22mm;height:22mm;border:1px solid #999;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7pt;color:#999;text-align:center;line-height:1.2">LOGO<br>KKP</div>`
+
+  return `<div class="kw-page">
+  <div class="kw-kop">
+    <div class="kw-kop-logo">${logoBlock}</div>
+    <div class="kw-kop-text">
+      <div class="kw-kop-l1">${esc(cfg.KOP_BARIS_1||'KEMENTERIAN KELAUTAN DAN PERIKANAN')}</div>
+      <div class="kw-kop-l2">${esc(cfg.KOP_BARIS_2||'BADAN PENYULUHAN DAN PENGEMBANGAN')}</div>
+      <div class="kw-kop-l2">${esc(cfg.KOP_BARIS_3||'SUMBER DAYA MANUSIA KELAUTAN DAN PERIKANAN')}</div>
+      <div class="kw-kop-l1">${esc(cfg.KOP_BARIS_4||'POLITEKNIK KELAUTAN DAN PERIKANAN SORONG')}</div>
+      <div class="kw-kop-alamat">${esc(cfg.KOP_ALAMAT||'')}</div>
+      <div class="kw-kop-alamat">${esc(cfg.KOP_KOTAK_POS||'')}</div>
+      <div class="kw-kop-alamat">LAMAN <i>${esc(cfg.KOP_LAMAN||'')}</i> SUREL <i>${esc(cfg.KOP_SUREL||'')}</i></div>
+    </div>
+  </div>
+  <div class="kw-divider"></div>
+  <table class="kw-meta">
+    <tr>
+      <td class="kw-meta-label">No Kuitansi</td>
+      <td class="kw-meta-val"><b>${esc(no)}</b></td>
+      <td class="kw-meta-ta">T.A ${esc(ta)}</td>
+    </tr>
+  </table>
+  <div class="kw-title">KUITANSI BUKTI PEMBAYARAN</div>
+  <table class="kw-body">
+    <tr><td class="kw-lbl">Telah terima dari</td><td class="kw-sep">:</td><td class="kw-fill">${esc(p.terimaDari||'')}</td></tr>
+    <tr><td class="kw-lbl">Uang sejumlah</td><td class="kw-sep">:</td><td class="kw-fill"><b>${fmtRpKoma(uang)}</b></td></tr>
+    <tr><td class="kw-lbl">Terbilang</td><td class="kw-sep">:</td><td class="kw-fill kw-italic">${esc(terbilang)}</td></tr>
+    <tr><td class="kw-lbl" style="vertical-align:top;padding-top:2mm">Untuk Pembayaran</td><td class="kw-sep" style="vertical-align:top;padding-top:2mm">:</td><td class="kw-fill">${esc(p.untukPembayaran||'')}</td></tr>
+  </table>
+  <table class="kw-rincian">
+    <tr><td class="kw-r-lbl">- Besarnya pembayaran</td><td class="kw-r-val">Rp${fmtRp_(besarnya)}</td></tr>
+    <tr><td class="kw-r-lbl">PPN</td><td class="kw-r-val">Rp${fmtRp_(ppn)}</td></tr>
+    <tr><td class="kw-r-lbl">PPh</td><td class="kw-r-val">Rp${fmtRp_(pph)}</td></tr>
+    <tr class="kw-r-total"><td class="kw-r-lbl"><b>- Yang diterima</b></td><td class="kw-r-val"><b>Rp${fmtRp_(diterima)}</b></td></tr>
+  </table>
+  <div class="kw-tgl-block">
+    <div class="kw-tgl">${esc(p.tempat||cfg.KOTA||'Sorong')} , ${tglIndo}</div>
+    <div class="kw-yg-terima">Yang menerima,</div>
+    <div class="kw-spasi-ttd"></div>
+    <div class="kw-penerima"><b>${esc(p.penerimaNama||'')}</b></div>
+  </div>
+  <div class="kw-setuju">Setuju dan lunas dibayar Tgl ${tglIndo}</div>
+  <table class="kw-ttd-area">
+    <tr>
+      <td class="kw-ttd-col">
+        <div>Pejabat Pembuat Komitmen</div>
+        <div class="kw-spasi-ttd"></div>
+        <div class="kw-ttd-nama"><b>${esc(p.ppkNama||cfg.NAMA_PPK||'')}</b></div>
+        <div class="kw-ttd-nip">NIP. ${esc(p.ppkNip||cfg.NIP_PPK||'')}</div>
+      </td>
+      <td class="kw-ttd-col">
+        <div>Bendahara Pengeluaran</div>
+        <div class="kw-spasi-ttd"></div>
+        <div class="kw-ttd-nama"><b>${esc(p.bendaharaNama||cfg.NAMA_BENDAHARA||'')}</b></div>
+        <div class="kw-ttd-nip">NIP. ${esc(p.bendaharaNip||cfg.NIP_BENDAHARA||'')}</div>
+      </td>
+    </tr>
+  </table>
+  <div class="kw-mak">MAK</div>
+  <div class="kw-mak-val">${esc(p.mak||cfg.KUITANSI_MAK||'1')}</div>
+</div>`
+}
+
+// ─────────────────────────────────────────────────────────────
+// MASTER PENYEDIA
+// ─────────────────────────────────────────────────────────────
+let debouncePenyediaTimer = null
+function debounceLoadPenyedia() {
+  clearTimeout(debouncePenyediaTimer)
+  debouncePenyediaTimer = setTimeout(loadPenyedia, 400)
+}
+
+function loadPenyedia() {
+  const tbody  = document.getElementById('penyedia-tbody')
+  tbody.innerHTML = '<tr><td colspan="6" class="loading-spinner">Memuat data...</td></tr>'
+  const aktif = document.getElementById('p_status').value !== 'semua'
+  const cari  = document.getElementById('p_cari').value.toLowerCase()
+
+  api('penyedia.list', {aktif}).then(data => {
+    let list = data || []
+    if (cari) list = list.filter(p =>
+      (p['Nama']||'').toLowerCase().includes(cari) ||
+      (p['NPWP']||'').includes(cari))
+
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><div class="es-icon">🏢</div>Belum ada data penyedia</td></tr>'
+      return
+    }
+    tbody.innerHTML = list.map(p => `
+      <tr>
+        <td><div style="font-weight:600">${p['Nama']||'—'}</div><div style="font-size:10px;color:var(--text3)">${p['Email']||''}</div></td>
+        <td style="font-family:monospace">${p['NPWP']||'—'}</td>
+        <td><span class="badge ${p['Status NPWP']==='BER-NPWP'?'badge-green':'badge-red'}">${p['Status NPWP']||'—'}</span></td>
+        <td>${p['Kota']||'—'}</td>
+        <td>${p['Kualifikasi']||'—'}</td>
+        <td>
+          <button class="btn btn-outline" style="padding:4px 10px;font-size:11px"
+            onclick='openModalPenyedia(${JSON.stringify(p).replace(/'/g,"&#39;")})'>Edit</button>
+          <button class="btn btn-danger" style="padding:4px 10px;font-size:11px;margin-top:2px"
+            onclick="hapusPenyedia('${p['ID']}')">Nonaktif</button>
+        </td>
+      </tr>`).join('')
+  }).catch(err => {
+    tbody.innerHTML = `<tr><td colspan="6" class="empty-state">❌ ${err.message}</td></tr>`
+  })
+}
+
+function openModalPenyedia(p) {
+  const isEdit = p && p['ID']
+  document.getElementById('modal-penyedia-title').textContent = isEdit ? 'Edit Penyedia' : 'Tambah Penyedia Baru'
+  document.getElementById('mp_id').value         = isEdit ? p['ID'] : ''
+  document.getElementById('mp_nama').value       = isEdit ? p['Nama']||'' : ''
+  document.getElementById('mp_npwp').value       = isEdit ? p['NPWP']||'' : ''
+  document.getElementById('mp_alamat').value     = isEdit ? p['Alamat']||'' : ''
+  document.getElementById('mp_kota').value       = isEdit ? p['Kota']||'' : ''
+  document.getElementById('mp_telp').value       = isEdit ? p['No Telp']||'' : ''
+  document.getElementById('mp_bank').value       = isEdit ? p['Bank']||'' : ''
+  document.getElementById('mp_rekening').value   = isEdit ? p['No Rekening']||'' : ''
+  document.getElementById('mp_atas_nama').value  = isEdit ? p['Atas Nama']||'' : ''
+  document.getElementById('mp_kualifikasi').value= isEdit ? p['Kualifikasi']||'' : ''
+  const isNon = isEdit && String(p['Status NPWP']||'').includes('NON')
+  S.mp_npwp_status = isNon ? 'NON-NPWP' : 'BER-NPWP'
+  document.querySelector('#modal-penyedia .toggle-group')
+    .querySelectorAll('.toggle-btn').forEach((b,i) => b.classList.toggle('active', isNon ? i===1 : i===0))
+  document.getElementById('modal-penyedia').classList.add('show')
+}
+
+function simpanPenyedia() {
+  const id   = document.getElementById('mp_id').value
+  const isEdit = !!id
+  const payload = {
+    id:           isEdit ? id : undefined,
+    nama:         document.getElementById('mp_nama').value,
+    npwp:         document.getElementById('mp_npwp').value,
+    statusNpwp:   S.mp_npwp_status,
+    alamat:       document.getElementById('mp_alamat').value,
+    kota:         document.getElementById('mp_kota').value,
+    noTelp:       document.getElementById('mp_telp').value,
+    bank:         document.getElementById('mp_bank').value,
+    noRekening:   document.getElementById('mp_rekening').value,
+    atasNama:     document.getElementById('mp_atas_nama').value,
+    kualifikasi:  document.getElementById('mp_kualifikasi').value,
+  }
+  const action = isEdit ? 'penyedia.update' : 'penyedia.simpan'
+  api(action, payload)
+    .then(() => {
+      closeModal('modal-penyedia')
+      showToast('✅ Data penyedia tersimpan', 'ok')
+      loadPenyedia()
+    })
+    .catch(err => showToast('❌ ' + err.message, 'err'))
+}
+
+function hapusPenyedia(id) {
+  if (!confirm('Nonaktifkan penyedia ini?')) return
+  api('penyedia.hapus', {id})
+    .then(() => { showToast('✅ Penyedia dinonaktifkan', 'ok'); loadPenyedia() })
+    .catch(err => showToast('❌ ' + err.message, 'err'))
+}
+
+// ─────────────────────────────────────────────────────────────
+// DASHBOARD
+// ─────────────────────────────────────────────────────────────
+function loadDashboard() {
+  const tahun = document.getElementById('d_tahun').value
+
+  api('dashboard.rekap', {tahun}).then(d => {
+    document.getElementById('d_jml').textContent    = d.jmlTransaksi.toLocaleString('id-ID')
+    document.getElementById('d_pph').textContent    = fmtRpShort(d.totalPph)
+    document.getElementById('d_ppn').textContent    = fmtRpShort(d.totalPpn)
+    document.getElementById('d_total').textContent  = fmtRpShort(d.totalPajak)
+    document.getElementById('d_bln_pph').textContent   = fmtRpShort(d.pphBulan)
+    document.getElementById('d_bln_ppn').textContent   = fmtRpShort(d.ppnBulan)
+    document.getElementById('d_bln_total').textContent = fmtRpShort(d.totalBulan)
+    document.getElementById('d_bln_jml').textContent   = d.jmlBulan
+
+    // Top 5
+    const top5 = document.getElementById('d_top5_tbody')
+    if (!d.top5Penyedia || !d.top5Penyedia.length) {
+      top5.innerHTML = '<tr><td colspan="4" class="empty-state">Belum ada data</td></tr>'
+    } else {
+      top5.innerHTML = d.top5Penyedia.map((p,i) => `
+        <tr>
+          <td style="font-weight:700;color:var(--text3)">${i+1}</td>
+          <td style="font-weight:600">${p.nama}</td>
+          <td style="text-align:center">${p.jml}</td>
+          <td style="text-align:right;color:var(--accent3);font-weight:700">${fmtRpShort(p.totalPajak)}</td>
+        </tr>`).join('')
+    }
+
+    // Per jenis PPh
+    const perJenis = document.getElementById('d_per_jenis_pph')
+    const entries = Object.entries(d.perJenisPph || {})
+    if (!entries.length) {
+      perJenis.innerHTML = '<div class="empty-state">Belum ada data</div>'
+    } else {
+      const maxVal = Math.max(...entries.map(([,v])=>v))
+      perJenis.innerHTML = entries.map(([k,v]) => `
+        <div style="margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">
+            <span style="font-weight:600">${k||'—'}</span>
+            <span style="color:var(--accent)">${fmtRpShort(v)}</span>
+          </div>
+          <div style="background:var(--border);border-radius:4px;height:6px">
+            <div style="background:var(--accent);height:6px;border-radius:4px;width:${maxVal>0?Math.round(v/maxVal*100):0}%"></div>
+          </div>
+        </div>`).join('')
+    }
+
+    // Tren 6 bulan
+    renderTrenChart(d.tren6Bulan || [])
+  }).catch(err => {
+    showToast('❌ Gagal muat dashboard: ' + err.message, 'err')
+  })
+}
+
+function renderTrenChart(tren) {
+  const el  = document.getElementById('d_chart_tren')
+  if (!tren.length) { el.innerHTML = '<div class="empty-state" style="width:100%">Belum ada data</div>'; return }
+  const maxPph = Math.max(...tren.map(t=>t.pph), 1)
+  const maxPpn = Math.max(...tren.map(t=>t.ppn), 1)
+  const maxVal = Math.max(maxPph, maxPpn)
+  const H = 100
+
+  el.innerHTML = tren.map(t => `
+    <div class="bar-col">
+      <div class="bar-val">${t.jml>0?t.jml:''}</div>
+      <div style="display:flex;gap:2px;align-items:flex-end;height:${H}px">
+        <div class="bar-fill" style="height:${maxVal>0?Math.round(t.pph/maxVal*H):2}px;background:var(--accent);width:12px"></div>
+        <div class="bar-fill" style="height:${maxVal>0?Math.round(t.ppn/maxVal*H):2}px;background:var(--accent2);width:12px"></div>
+      </div>
+      <div class="bar-label">${t.label}</div>
+    </div>`).join('')
+}
+
+// ─────────────────────────────────────────────────────────────
+// PENGATURAN / CONFIG
+// ─────────────────────────────────────────────────────────────
+function loadConfig() {
+  api('config.get').then(cfg => {
+    S.cfgSatker = cfg || {}
+    document.getElementById('cfg_nama_satker').value   = cfg['NAMA_SATKER']||''
+    document.getElementById('cfg_npwp_satker').value   = cfg['NPWP_SATKER']||''
+    document.getElementById('cfg_alamat_satker').value = cfg['ALAMAT_SATKER']||''
+    document.getElementById('cfg_nama_bendahara').value= cfg['NAMA_BENDAHARA']||''
+    document.getElementById('cfg_nip_bendahara').value = cfg['NIP_BENDAHARA']||''
+    document.getElementById('cfg_nama_kpa').value      = cfg['NAMA_KPA']||''
+    document.getElementById('cfg_nip_kpa').value       = cfg['NIP_KPA']||''
+    document.getElementById('cfg_nama_ppk').value      = cfg['NAMA_PPK']||''
+    document.getElementById('cfg_nip_ppk').value       = cfg['NIP_PPK']||''
+    document.getElementById('cfg_kppn').value          = cfg['KPPN']||''
+    document.getElementById('cfg_tahun_anggaran').value= cfg['TAHUN_ANGGARAN']||''
+
+    // Kop Surat
+    document.getElementById('cfg_kop_b1').value         = cfg['KOP_BARIS_1']||''
+    document.getElementById('cfg_kop_b2').value         = cfg['KOP_BARIS_2']||''
+    document.getElementById('cfg_kop_b3').value         = cfg['KOP_BARIS_3']||''
+    document.getElementById('cfg_kop_b4').value         = cfg['KOP_BARIS_4']||''
+    document.getElementById('cfg_kop_alamat').value     = cfg['KOP_ALAMAT']||''
+    document.getElementById('cfg_kop_kotak_pos').value  = cfg['KOP_KOTAK_POS']||''
+    document.getElementById('cfg_kop_laman').value      = cfg['KOP_LAMAN']||''
+    document.getElementById('cfg_kop_surel').value      = cfg['KOP_SUREL']||''
+    document.getElementById('cfg_kop_logo').value       = cfg['KOP_LOGO_URL']||''
+    document.getElementById('cfg_kw_terima_dari').value = cfg['KUITANSI_TERIMA_DARI']||''
+    document.getElementById('cfg_kw_mak').value         = cfg['KUITANSI_MAK']||'1'
+    document.getElementById('cfg_kw_prefix').value      = cfg['KUITANSI_PREFIX']||'KWT'
+  }).catch(() => {})
+}
+
+function simpanConfigKop() {
+  const payload = {
+    KOP_BARIS_1:           document.getElementById('cfg_kop_b1').value,
+    KOP_BARIS_2:           document.getElementById('cfg_kop_b2').value,
+    KOP_BARIS_3:           document.getElementById('cfg_kop_b3').value,
+    KOP_BARIS_4:           document.getElementById('cfg_kop_b4').value,
+    KOP_ALAMAT:            document.getElementById('cfg_kop_alamat').value,
+    KOP_KOTAK_POS:         document.getElementById('cfg_kop_kotak_pos').value,
+    KOP_LAMAN:             document.getElementById('cfg_kop_laman').value,
+    KOP_SUREL:             document.getElementById('cfg_kop_surel').value,
+    KOP_LOGO_URL:          document.getElementById('cfg_kop_logo').value,
+    KUITANSI_TERIMA_DARI:  document.getElementById('cfg_kw_terima_dari').value,
+    KUITANSI_MAK:          document.getElementById('cfg_kw_mak').value,
+    KUITANSI_PREFIX:       document.getElementById('cfg_kw_prefix').value || 'KWT',
+  }
+  api('config.simpan', payload)
+    .then(cfg => { S.cfgSatker = cfg; showToast('✅ Kop surat tersimpan', 'ok') })
+    .catch(err => showToast('❌ ' + err.message, 'err'))
+}
+
+function simpanConfig() {
+  const payload = {
+    NAMA_SATKER:    document.getElementById('cfg_nama_satker').value,
+    NPWP_SATKER:    document.getElementById('cfg_npwp_satker').value,
+    ALAMAT_SATKER:  document.getElementById('cfg_alamat_satker').value,
+    NAMA_BENDAHARA: document.getElementById('cfg_nama_bendahara').value,
+    NIP_BENDAHARA:  document.getElementById('cfg_nip_bendahara').value,
+    NAMA_KPA:       document.getElementById('cfg_nama_kpa').value,
+    NIP_KPA:        document.getElementById('cfg_nip_kpa').value,
+    NAMA_PPK:       document.getElementById('cfg_nama_ppk').value,
+    NIP_PPK:        document.getElementById('cfg_nip_ppk').value,
+    KPPN:           document.getElementById('cfg_kppn').value,
+    TAHUN_ANGGARAN: document.getElementById('cfg_tahun_anggaran').value,
+  }
+  api('config.simpan', payload)
+    .then(cfg => { S.cfgSatker = cfg; showToast('✅ Konfigurasi tersimpan', 'ok') })
+    .catch(err => showToast('❌ ' + err.message, 'err'))
+}
+
+// ─────────────────────────────────────────────────────────────
+// MODAL & TOAST
+// ─────────────────────────────────────────────────────────────
+function closeModal(id) {
+  document.getElementById(id).classList.remove('show')
+}
+document.querySelectorAll('.modal-overlay').forEach(ov => {
+  ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('show') })
+})
+
+let toastTimer = null
+function showToast(msg, type = 'ok') {
+  const el = document.getElementById('toast')
+  el.textContent = msg
+  el.className   = 'toast show toast-' + type
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3500)
+}
+
+// Tambahkan action kalkulator.hitung dan kalkulator.list ke routeAction di Code.gs
+// Fungsi ini dipanggil via google.script.run.routeAction
+</script>
+</body>
+</html>

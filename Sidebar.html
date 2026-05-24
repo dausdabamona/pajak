@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<base target="_top">
+<title>Kalkulator Pajak</title>
+<style>
+:root{--accent:#1a73e8;--accent2:#188038;--accent3:#d93025;--yellow:#f9ab00;
+  --bg:#f8f9fa;--surface:#fff;--border:#dadce0;--text:#202124;--text2:#5f6368;--text3:#9aa0a6}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);font-size:13px;overflow-x:hidden}
+
+/* HEADER */
+.sb-header{background:var(--accent);color:#fff;padding:10px 12px;display:flex;align-items:center;justify-content:space-between}
+.sb-header h1{font-size:14px;font-weight:700}
+.sb-header .ver{font-size:10px;opacity:.7}
+
+/* TABS */
+.tab-bar{display:flex;background:var(--surface);border-bottom:2px solid var(--border)}
+.tab{flex:1;padding:8px 4px;text-align:center;cursor:pointer;font-size:11px;font-weight:700;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* PANEL */
+.panel{display:none;padding:10px 12px}
+.panel.active{display:block}
+
+/* FORM */
+.field{display:flex;flex-direction:column;gap:3px;margin-bottom:8px}
+.field label{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.04em}
+.field input,.field select{background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:inherit;font-size:12px;padding:7px 9px;width:100%;outline:none}
+.field input:focus,.field select:focus{border-color:var(--accent)}
+.input-rp{position:relative}
+.input-rp span{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3);pointer-events:none}
+.input-rp input{padding-left:24px;font-weight:700}
+
+/* TOGGLE */
+.tog{display:flex;gap:4px;flex-wrap:wrap}
+.tog-btn{background:#f1f3f4;border:1px solid var(--border);border-radius:5px;color:var(--text2);cursor:pointer;font-family:inherit;font-size:11px;font-weight:700;padding:5px 10px;transition:all .15s}
+.tog-btn.active{background:#e8f0fe;border-color:var(--accent);color:var(--accent)}
+
+/* BUTTONS */
+.btn{border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:700;padding:8px 14px;transition:all .15s;width:100%;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:5px}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{opacity:.9}
+.btn-success{background:var(--accent2);color:#fff}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text2)}
+.btn-sm{font-size:11px;padding:5px 10px;width:auto;margin-bottom:0}
+
+/* HASIL */
+.hasil-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
+.hasil-box{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px;position:relative;overflow:hidden}
+.hasil-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.hasil-box.h-pph::before{background:var(--accent)}
+.hasil-box.h-ppn::before{background:var(--accent2)}
+.hasil-box.h-bayar::before{background:var(--yellow)}
+.hasil-box.h-total::before{background:var(--accent3)}
+.hasil-box .hb-label{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--text3)}
+.hasil-box .hb-value{font-size:13px;font-weight:800;margin-top:2px}
+.c-blue{color:var(--accent)}.c-green{color:var(--accent2)}.c-yellow{color:var(--yellow)}.c-red{color:var(--accent3)}
+
+/* INFO ROWS */
+.info-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0f0f0;font-size:11px}
+.info-row .k{color:var(--text2)}.info-row .v{font-weight:700;text-align:right}
+
+/* RIWAYAT TABLE */
+.r-item{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px;margin-bottom:6px}
+.r-item .r-top{display:flex;justify-content:space-between;align-items:flex-start}
+.r-item .r-nama{font-weight:700;font-size:12px}
+.r-item .r-tgl{font-size:10px;color:var(--text3)}
+.r-item .r-bottom{display:flex;justify-content:space-between;margin-top:4px;font-size:11px}
+.r-item .r-kegiatan{color:var(--text2);font-size:10px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* BADGE */
+.badge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;display:inline-block}
+.badge-green{background:#e6f4ea;color:#188038}.badge-red{background:#fce8e6;color:#d93025}
+.badge-blue{background:#e8f0fe;color:#1a73e8}
+
+/* TERBILANG */
+.terbilang{font-size:10px;color:var(--text3);font-style:italic;margin-top:2px}
+
+/* TOAST */
+#sb-toast{position:fixed;bottom:12px;left:8px;right:8px;background:#323232;color:#fff;padding:8px 12px;border-radius:6px;font-size:12px;font-weight:600;z-index:999;display:none;text-align:center}
+#sb-toast.show{display:block}
+#sb-toast.ok{background:var(--accent2)}
+#sb-toast.err{background:var(--accent3)}
+
+/* EMPTY */
+.empty{text-align:center;color:var(--text3);padding:20px 0;font-size:12px}
+.loading{text-align:center;color:var(--text3);padding:16px 0;font-size:12px}
+
+/* WARN */
+.warn{background:#fef7e0;border:1px solid #fdd663;border-radius:5px;padding:6px 8px;font-size:10px;color:#b06000;margin-bottom:6px}
+.section-title{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text3);letter-spacing:.05em;margin:10px 0 6px}
+.divider{height:1px;background:var(--border);margin:8px 0}
+
+/* AUTOCOMPLETE */
+.ac-wrap{position:relative}
+.ac-list{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:5px;box-shadow:0 3px 8px rgba(0,0,0,.15);z-index:200;max-height:140px;overflow-y:auto;display:none}
+.ac-list.show{display:block}
+.ac-item{padding:6px 9px;cursor:pointer;font-size:11px;border-bottom:1px solid #f0f0f0}
+.ac-item:hover{background:#f1f3f4}
+.ac-item .ai-nama{font-weight:700}.ac-item .ai-npwp{color:var(--text3);font-size:10px}
+</style>
+</head>
+<body>
+
+<div class="sb-header">
+  <h1>🧮 Pajak Bendahara</h1>
+  <span class="ver">v1.0</span>
+</div>
+
+<div class="tab-bar">
+  <div class="tab active" onclick="showTab('kalkulator',this)">⚡ Hitung</div>
+  <div class="tab" onclick="showTab('riwayat',this)">📋 Riwayat</div>
+  <div class="tab" onclick="showTab('penyedia',this)">🏢 Penyedia</div>
+</div>
+
+<!-- ═══════════════════════════ HITUNG ═══════════════════════════ -->
+<div class="panel active" id="panel-kalkulator">
+
+  <div class="field">
+    <label>Penyedia</label>
+    <div class="ac-wrap">
+      <input type="text" id="sb_nama" placeholder="Nama / NPWP..." oninput="sbAutocomplete(this.value)" autocomplete="off">
+      <div class="ac-list" id="sb_ac_list"></div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>NPWP Penyedia</label>
+    <input type="text" id="sb_npwp" placeholder="00.000.000.0-000.000">
+  </div>
+
+  <div class="field">
+    <label>Status NPWP</label>
+    <div class="tog">
+      <button class="tog-btn active" onclick="sbSetTog('npwp','BER-NPWP',this)">✓ Ber-NPWP</button>
+      <button class="tog-btn" onclick="sbSetTog('npwp','NON-NPWP',this)">✗ Non-NPWP (2×)</button>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Jenis Kegiatan</label>
+    <select id="sb_jenis"><option value="">— Pilih... —</option></select>
+  </div>
+
+  <div class="field">
+    <label>Nilai (Rp)</label>
+    <div class="input-rp"><span>Rp</span>
+      <input type="text" id="sb_nilai" placeholder="0" oninput="sbNilaiInput(this)">
+    </div>
+    <div class="terbilang" id="sb_terbilang">—</div>
+  </div>
+
+  <div class="field">
+    <label>Nilai</label>
+    <div class="tog">
+      <button class="tog-btn active" onclick="sbSetTog('incl',true,this)">Sudah incl. PPN</button>
+      <button class="tog-btn" onclick="sbSetTog('incl',false,this)">Belum PPN</button>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Tgl Transaksi</label>
+    <input type="date" id="sb_tgl">
+  </div>
+
+  <button class="btn btn-primary" onclick="sbHitung()">⚡ Hitung Pajak</button>
+
+  <!-- HASIL -->
+  <div id="sb_hasil" style="display:none">
+    <div class="divider"></div>
+    <div id="sb_warn_nonNpwp" class="warn" style="display:none">⚠️ Non-NPWP — tarif PPh 2×</div>
+
+    <div class="hasil-grid">
+      <div class="hasil-box h-pph"><div class="hb-label">PPh</div><div class="hb-value c-blue" id="sb_r_pph">—</div></div>
+      <div class="hasil-box h-ppn"><div class="hb-label">PPN</div><div class="hb-value c-green" id="sb_r_ppn">—</div></div>
+      <div class="hasil-box h-bayar"><div class="hb-label">Dibayar</div><div class="hb-value c-yellow" id="sb_r_bayar">—</div></div>
+      <div class="hasil-box h-total"><div class="hb-label">Total Pajak</div><div class="hb-value c-red" id="sb_r_total">—</div></div>
+    </div>
+
+    <div class="section-title">Detail PPh</div>
+    <div class="info-row"><span class="k">Jenis</span><span class="v" id="sb_jenis_pph">—</span></div>
+    <div class="info-row"><span class="k">KAP / KJS</span><span class="v" id="sb_kap_kjs">—</span></div>
+    <div class="info-row"><span class="k">Tarif</span><span class="v c-blue" id="sb_tarif_pph">—</span></div>
+    <div class="info-row"><span class="k">DPP</span><span class="v" id="sb_dpp">—</span></div>
+
+    <div class="section-title">Detail PPN</div>
+    <div class="info-row"><span class="k">Jenis</span><span class="v" id="sb_jenis_ppn">—</span></div>
+    <div class="info-row"><span class="k">KAP / KJS</span><span class="v">411211 / 910</span></div>
+    <div class="info-row"><span class="k">Tarif</span><span class="v c-green" id="sb_tarif_ppn">—</span></div>
+
+    <div class="divider"></div>
+
+    <div class="field">
+      <label>Keterangan</label>
+      <input type="text" id="sb_ket" placeholder="Opsional...">
+    </div>
+
+    <button class="btn btn-success" onclick="sbSimpan()">💾 Simpan ke Riwayat</button>
+
+    <div class="section-title">🖨️ Cetak SSP</div>
+    <div style="display:flex;gap:6px;margin-bottom:6px">
+      <button class="btn btn-outline btn-sm" id="sb_cetak_pph" onclick="sbCetak('PPH')" style="flex:1">PPh</button>
+      <button class="btn btn-outline btn-sm" id="sb_cetak_ppn" onclick="sbCetak('PPN')" style="flex:1">PPN</button>
+      <button class="btn btn-outline btn-sm" onclick="sbCetak('BOTH')" style="flex:1">Keduanya</button>
+    </div>
+
+    <button class="btn btn-outline" onclick="sbReset()">↺ Hitung Ulang</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ RIWAYAT ═══════════════════════════ -->
+<div class="panel" id="panel-riwayat">
+  <div style="display:flex;gap:6px;margin-bottom:8px">
+    <select id="sbf_bulan" style="flex:1;padding:6px 8px;border:1px solid var(--border);border-radius:5px;font-size:11px" onchange="sbLoadRiwayat()">
+      <option value="">Semua Bulan</option>
+      <option value="1">Januari</option><option value="2">Februari</option>
+      <option value="3">Maret</option><option value="4">April</option>
+      <option value="5">Mei</option><option value="6">Juni</option>
+      <option value="7">Juli</option><option value="8">Agustus</option>
+      <option value="9">September</option><option value="10">Oktober</option>
+      <option value="11">November</option><option value="12">Desember</option>
+    </select>
+    <button class="btn btn-outline btn-sm" onclick="sbLoadRiwayat()">🔄</button>
+  </div>
+
+  <div id="sb_riwayat_list">
+    <div class="loading">Memuat riwayat...</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ PENYEDIA ═══════════════════════════ -->
+<div class="panel" id="panel-penyedia">
+  <div class="field" style="margin-bottom:8px">
+    <input type="text" id="sbp_cari" placeholder="Cari nama atau NPWP..." oninput="sbLoadPenyedia()">
+  </div>
+  <div id="sb_penyedia_list">
+    <div class="loading">Memuat penyedia...</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Form tambah cepat penyedia -->
+  <div class="section-title">+ Tambah Penyedia Cepat</div>
+  <div class="field"><label>Nama *</label><input type="text" id="sbp_nama" placeholder="Nama penyedia"></div>
+  <div class="field"><label>NPWP</label><input type="text" id="sbp_npwp" placeholder="00.000.000.0-000.000"></div>
+  <div class="field">
+    <label>Status NPWP</label>
+    <div class="tog">
+      <button class="tog-btn active" onclick="sbSetTog('sbp_status','BER-NPWP',this)">✓ Ber-NPWP</button>
+      <button class="tog-btn" onclick="sbSetTog('sbp_status','NON-NPWP',this)">✗ Non-NPWP</button>
+    </div>
+  </div>
+  <div class="field"><label>Kota</label><input type="text" id="sbp_kota" placeholder="Kota"></div>
+  <button class="btn btn-primary" onclick="sbTambahPenyedia()">+ Simpan Penyedia</button>
+</div>
+
+<!-- TOAST -->
+<div id="sb-toast"></div>
+
+<script>
+// ─── STATE ───
+const SB = { npwp:'BER-NPWP', incl:true, sbp_status:'BER-NPWP', lastHasil:null, cfgSatker:{} }
+
+// ─── TABS ───
+function showTab(name, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'))
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+  document.getElementById('panel-' + name).classList.add('active')
+  el.classList.add('active')
+  if (name==='riwayat') sbLoadRiwayat()
+  if (name==='penyedia') sbLoadPenyedia()
+}
+
+// ─── INIT ───
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('sb_tgl').value = new Date().toISOString().split('T')[0]
+  sbLoadDropdown()
+  sbLoadConfig()
+})
+
+function sbLoadConfig() {
+  google.script.run
+    .withSuccessHandler(cfg => { SB.cfgSatker = cfg || {} })
+    .withFailureHandler(() => {})
+    .ss_getSatkerConfig()
+}
+
+// ─── HELPERS ───
+function fmtRp(n) { return 'Rp ' + Math.round(Number(n)||0).toLocaleString('id-ID') }
+function fmtRpShort(n) {
+  n = Math.abs(Math.round(Number(n)||0))
+  if(n>=1e9) return 'Rp '+(n/1e9).toFixed(1)+'M'
+  if(n>=1e6) return 'Rp '+(n/1e6).toFixed(1)+'jt'
+  if(n>=1e3) return 'Rp '+(n/1e3).toFixed(0)+'rb'
+  return 'Rp '+n
+}
+function pctStr(n) {
+  const v = Number(n)*100
+  return (v%1===0?v.toFixed(0):v.toFixed(2)).replace('.',',')+' %'
+}
+function parseRp(str) { return parseFloat(String(str).replace(/\./g,'').replace(',','.'))||0 }
+
+const TB_S=['','satu','dua','tiga','empat','lima','enam','tujuh','delapan','sembilan',
+  'sepuluh','sebelas','dua belas','tiga belas','empat belas','lima belas',
+  'enam belas','tujuh belas','delapan belas','sembilan belas']
+function tb(n){
+  n=Math.round(n);if(n===0)return'nol';if(n<0)return'minus '+tb(-n)
+  let r=''
+  if(n>=1e12){r+=tb(Math.floor(n/1e12))+' triliun ';n%=1e12}
+  if(n>=1e9){r+=tb(Math.floor(n/1e9))+' miliar ';n%=1e9}
+  if(n>=1e6){r+=tb(Math.floor(n/1e6))+' juta ';n%=1e6}
+  if(n>=1e3){r+=(Math.floor(n/1e3)===1?'seribu':tb(Math.floor(n/1e3))+' ribu')+' ';n%=1e3}
+  if(n>=100){r+=(Math.floor(n/100)===1?'seratus':TB_S[Math.floor(n/100)]+' ratus')+' ';n%=100}
+  if(n>0){r+=n<20?TB_S[n]:TB_S[Math.floor(n/10)]+' puluh'+(n%10?' '+TB_S[n%10]:'')}
+  return r.trim()
+}
+function terbilangRp(n){const s=tb(Math.round(n));return s.charAt(0).toUpperCase()+s.slice(1)+' Rupiah'}
+
+function sbNilaiInput(el) {
+  const raw = el.value.replace(/\D/g,'')
+  if(!raw){el.value='';document.getElementById('sb_terbilang').textContent='—';return}
+  const num=parseInt(raw,10)
+  el.value=num.toLocaleString('id-ID')
+  document.getElementById('sb_terbilang').textContent=terbilangRp(num)
+}
+
+function sbSetTog(key, val, btn) {
+  SB[key]=val
+  btn.closest('.tog').querySelectorAll('.tog-btn').forEach(b=>b.classList.remove('active'))
+  btn.classList.add('active')
+}
+
+// ─── DROPDOWN JENIS KEGIATAN ───
+function sbLoadDropdown() {
+  google.script.run
+    .withSuccessHandler(list => {
+      const sel = document.getElementById('sb_jenis')
+      sel.innerHTML = '<option value="">— Pilih Jenis Kegiatan —</option>'
+      ;(list||[]).forEach(({kode,label}) => sel.add(new Option(label,kode)))
+    })
+    .withFailureHandler(() => { sbLoadDropdownLokal() })
+    .getJenisKegiatanList()
+}
+function sbLoadDropdownLokal() {
+  const items=[
+    {kode:'1',label:'Barang/Modal (ATK, Meja, dll)'},{kode:'14',label:'Jasa (servis, instalasi)'},
+    {kode:'15',label:'Jasa Katering'},{kode:'24',label:'Sewa Kendaraan Darat'},
+    {kode:'27',label:'Sewa Tanah/Bangunan'},{kode:'32',label:'Konstruksi Kecil/CV'},
+    {kode:'30',label:'Konstruksi Menengah/Besar'},{kode:'34',label:'Perencana/Pengawas'},
+  ]
+  const sel=document.getElementById('sb_jenis')
+  sel.innerHTML='<option value="">— Pilih —</option>'
+  items.forEach(({kode,label})=>sel.add(new Option(label,kode)))
+}
+
+// ─── AUTOCOMPLETE ───
+let sbAcTimer=null
+function sbAutocomplete(q) {
+  clearTimeout(sbAcTimer)
+  const list=document.getElementById('sb_ac_list')
+  if(!q||q.length<2){list.classList.remove('show');return}
+  sbAcTimer=setTimeout(()=>{
+    google.script.run
+      .withSuccessHandler(items=>{
+        if(!items||!items.length){list.classList.remove('show');return}
+        list.innerHTML=items.map(p=>`
+          <div class="ac-item" onclick='sbPilihPenyedia(${JSON.stringify(p).replace(/"/g,"&quot;")})'>
+            <div class="ai-nama">${p.nama}</div>
+            <div class="ai-npwp">${p.npwp||'—'} · ${p.statusNpwp||''}</div>
+          </div>`).join('')
+        list.classList.add('show')
+      })
+      .withFailureHandler(()=>list.classList.remove('show'))
+      .ss_cariPenyedia(q)
+  },300)
+}
+function sbPilihPenyedia(p){
+  document.getElementById('sb_nama').value=p.nama
+  document.getElementById('sb_npwp').value=p.npwp||''
+  const isNon=String(p.statusNpwp||'').includes('NON')
+  SB.npwp=isNon?'NON-NPWP':'BER-NPWP'
+  document.querySelectorAll('#panel-kalkulator .tog')[0]
+    .querySelectorAll('.tog-btn').forEach((b,i)=>b.classList.toggle('active',isNon?i===1:i===0))
+  document.getElementById('sb_ac_list').classList.remove('show')
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.ac-wrap'))
+    document.getElementById('sb_ac_list').classList.remove('show')
+})
+
+// ─── HITUNG ───
+function sbHitung() {
+  const kode  = document.getElementById('sb_jenis').value
+  const nilai = parseRp(document.getElementById('sb_nilai').value)
+  if(!kode){sbToast('Pilih jenis kegiatan','err');return}
+  if(nilai<=0){sbToast('Masukkan nilai transaksi','err');return}
+
+  google.script.run
+    .withSuccessHandler(h=>{SB.lastHasil=h;sbTampilHasil(h)})
+    .withFailureHandler(err=>{
+      const h=sbHitungLokal(kode,nilai,SB.incl,SB.npwp)
+      SB.lastHasil=h;sbTampilHasil(h)
+    })
+    .hitungPajakServer({kodeKegiatan:kode,nilaiKontrak:nilai,inclPpn:SB.incl,statusNpwp:SB.npwp})
+}
+
+function sbTampilHasil(h) {
+  document.getElementById('sb_hasil').style.display='block'
+  document.getElementById('sb_warn_nonNpwp').style.display=h.isNonNpwp&&h.nilaiPph>0?'block':'none'
+  document.getElementById('sb_r_pph').textContent=fmtRpShort(h.nilaiPph)
+  document.getElementById('sb_r_ppn').textContent=fmtRpShort(h.nilaiPpn)
+  document.getElementById('sb_r_bayar').textContent=fmtRpShort(h.nilaiDibayar)
+  document.getElementById('sb_r_total').textContent=fmtRpShort(h.totalPajak)
+  document.getElementById('sb_jenis_pph').textContent=h.jenisPph
+  document.getElementById('sb_kap_kjs').textContent=`${h.kapPph} / ${h.kjsPph}`
+  document.getElementById('sb_tarif_pph').textContent=h.isNonNpwp&&h.tarifPphNormal>0
+    ?`${pctStr(h.tarifPphNormal)} → ${pctStr(h.tarifPphEfektif)} (2×)`:pctStr(h.tarifPphNormal)
+  document.getElementById('sb_dpp').textContent=fmtRp(h.dpp)
+  document.getElementById('sb_jenis_ppn').textContent=h.tarifPpn===0?'Bebas PPN':'PPN'
+  document.getElementById('sb_tarif_ppn').textContent=pctStr(h.tarifPpn)
+  document.getElementById('sb_cetak_pph').style.opacity=h.nilaiPph>0?'1':'.4'
+  document.getElementById('sb_cetak_ppn').style.opacity=h.nilaiPpn>0?'1':'.4'
+}
+
+// Fallback hitung lokal
+const LOKAL={
+  '1':{pph:'PPh Pasal 22',kap:'411122',kjs:'910',tarif:0.015,ppn:0.11,bebas:false,ket:'Barang/Modal'},
+  '2':{pph:'PPh Pasal 22',kap:'411122',kjs:'910',tarif:0.015,ppn:0,bebas:false,ket:'Barang Galian'},
+  '3':{pph:'PPh Pasal 22',kap:'411122',kjs:'910',tarif:0,ppn:0,bebas:false,ket:'BBM/Listrik/Air'},
+  '14':{pph:'PPh Pasal 23',kap:'411124',kjs:'104',tarif:0.02,ppn:0.11,bebas:false,ket:'Jasa'},
+  '15':{pph:'PPh Pasal 23',kap:'411124',kjs:'104',tarif:0.02,ppn:0,bebas:false,ket:'Katering'},
+  '24':{pph:'PPh Pasal 23',kap:'411124',kjs:'104',tarif:0.02,ppn:0.11,bebas:false,ket:'Sewa Kendaraan'},
+  '27':{pph:'PPh Final 4(2)',kap:'411128',kjs:'403',tarif:0.10,ppn:0.11,bebas:false,ket:'Sewa Tanah/Bangunan'},
+  '32':{pph:'PPh Final 4(2)',kap:'411128',kjs:'409',tarif:0.0175,ppn:0.11,bebas:false,ket:'Konstruksi Kecil'},
+  '30':{pph:'PPh Final 4(2)',kap:'411128',kjs:'409',tarif:0.0265,ppn:0.11,bebas:false,ket:'Konstruksi Menengah/Besar'},
+  '34':{pph:'PPh Final 4(2)',kap:'411128',kjs:'409',tarif:0.04,ppn:0.11,bebas:false,ket:'Perencana/Pengawas'},
+}
+function sbHitungLokal(kode,nilai,inclPpn,statusNpwp){
+  const k=LOKAL[kode]||{pph:'—',kap:'—',kjs:'—',tarif:0,ppn:0,bebas:false,ket:'—'}
+  const isNon=String(statusNpwp).includes('NON')
+  let te=k.tarif; if(isNon&&te>0)te*=2
+  const dpp=inclPpn&&k.ppn>0?nilai/(1+k.ppn):nilai
+  const nilaiInclPpn=!inclPpn&&k.ppn>0?nilai*(1+k.ppn):nilai
+  const nilaiPph=Math.round(dpp*te), nilaiPpn=Math.round(dpp*k.ppn)
+  return{kodeKegiatan:kode,labelKegiatan:k.ket,nilaiKontrak:nilai,inclPpn,statusNpwp,isNonNpwp:isNon,
+    dpp:Math.round(dpp),nilaiInclPpn:Math.round(nilaiInclPpn),
+    jenisPph:k.pph,kapPph:k.kap,kjsPph:k.kjs,tarifPphNormal:k.tarif,tarifPphEfektif:te,nilaiPph,
+    tarifPpn:k.ppn,nilaiPpn,kapPpn:'411211',kjsPpn:'910',bebasPpn:k.bebas,ket:k.ket,
+    totalPajak:nilaiPph+nilaiPpn,nilaiDibayar:Math.round(nilaiInclPpn)-nilaiPph-nilaiPpn,
+    uraianPph:`${k.pph} atas ${k.ket}`,uraianPpn:`PPN atas ${k.ket}`}
+}
+
+// ─── SIMPAN ───
+function sbSimpan(){
+  if(!SB.lastHasil){sbToast('Hitung pajak dulu','err');return}
+  const payload={
+    hasil:SB.lastHasil,
+    namaPenyedia:document.getElementById('sb_nama').value,
+    npwpPenyedia:document.getElementById('sb_npwp').value,
+    tglTransaksi:document.getElementById('sb_tgl').value,
+    tahunPajak:new Date(document.getElementById('sb_tgl').value).getFullYear(),
+    masaPajak:new Date(document.getElementById('sb_tgl').value).getMonth()+1,
+    sumberDana:'APBN',
+    keterangan:document.getElementById('sb_ket').value,
+  }
+  google.script.run
+    .withSuccessHandler(()=>sbToast('✅ Tersimpan!','ok'))
+    .withFailureHandler(err=>sbToast('❌ '+err.message,'err'))
+    .ss_simpanTransaksi(payload)
+}
+
+// ─── CETAK SSP ───
+function sbCetak(jenis){
+  if(!SB.lastHasil){sbToast('Hitung dulu','err');return}
+  const h=SB.lastHasil
+  if(jenis==='PPH'&&h.nilaiPph===0){sbToast('PPh = 0','err');return}
+  if(jenis==='PPN'&&h.nilaiPpn===0){sbToast('PPN = 0','err');return}
+
+  const webAppUrl=google.script.getService ? google.script.getService().getUrl() : ''
+  // Buka web app dengan parameter cetak
+  google.script.run
+    .withSuccessHandler(url=>{
+      window.open(url+'?mode=cetak&jenis='+jenis,'_blank')
+    })
+    .withFailureHandler(()=>{
+      sbToast('Buka Web App untuk cetak SSP','ok')
+    })
+    .getWebAppUrl()
+}
+
+function sbReset(){
+  document.getElementById('sb_hasil').style.display='none'
+  SB.lastHasil=null
+}
+
+// ─── RIWAYAT ───
+function sbLoadRiwayat(){
+  const list=document.getElementById('sb_riwayat_list')
+  list.innerHTML='<div class="loading">Memuat...</div>'
+  const bulan=document.getElementById('sbf_bulan').value
+  const tahun=new Date().getFullYear()
+  google.script.run
+    .withSuccessHandler(res=>{
+      const data=res.data||[]
+      if(!data.length){list.innerHTML='<div class="empty">📭 Belum ada riwayat</div>';return}
+      list.innerHTML=data.slice(0,20).map(r=>`
+        <div class="r-item">
+          <div class="r-top">
+            <div>
+              <div class="r-nama">${r['Nama Penyedia']||'—'}</div>
+              <div class="r-kegiatan">${r['Jenis Kegiatan']||'—'}</div>
+            </div>
+            <div class="r-tgl">${r['Tgl Transaksi']||'—'}</div>
+          </div>
+          <div class="r-bottom">
+            <span>PPh: <b style="color:var(--accent)">${fmtRpShort(r['Nilai PPh'])}</b></span>
+            <span>PPN: <b style="color:var(--accent2)">${fmtRpShort(r['Nilai PPN'])}</b></span>
+            <span>Total: <b style="color:var(--accent3)">${fmtRpShort(r['Total Pajak'])}</b></span>
+          </div>
+        </div>`).join('')
+    })
+    .withFailureHandler(err=>list.innerHTML=`<div class="empty">❌ ${err.message}</div>`)
+    .ss_getRiwayat({tahun,bulan,limit:20})
+}
+
+// ─── PENYEDIA ───
+function sbLoadPenyedia(){
+  const list=document.getElementById('sb_penyedia_list')
+  const q=(document.getElementById('sbp_cari').value||'').toLowerCase()
+  list.innerHTML='<div class="loading">Memuat...</div>'
+  google.script.run
+    .withSuccessHandler(data=>{
+      let items=data||[]
+      if(q)items=items.filter(p=>(p['Nama']||'').toLowerCase().includes(q)||(p['NPWP']||'').includes(q))
+      if(!items.length){list.innerHTML='<div class="empty">🏢 Belum ada penyedia</div>';return}
+      list.innerHTML=items.slice(0,20).map(p=>`
+        <div style="background:#fff;border:1px solid var(--border);border-radius:6px;padding:7px 9px;margin-bottom:5px;cursor:pointer"
+          onclick='sbIsiFromPenyedia(${JSON.stringify(p).replace(/"/g,"&quot;")})'>
+          <div style="font-weight:700;font-size:12px">${p['Nama']||'—'}</div>
+          <div style="font-size:10px;color:var(--text2)">${p['NPWP']||'—'}
+            <span class="badge ${p['Status NPWP']==='BER-NPWP'?'badge-green':'badge-red'}" style="margin-left:4px">${p['Status NPWP']||''}</span>
+          </div>
+        </div>`).join('')
+    })
+    .withFailureHandler(err=>list.innerHTML=`<div class="empty">❌ ${err.message}</div>`)
+    .ss_getPenyediaList({aktif:true})
+}
+
+function sbIsiFromPenyedia(p){
+  showTab('kalkulator',document.querySelectorAll('.tab')[0])
+  document.getElementById('sb_nama').value=p['Nama']||''
+  document.getElementById('sb_npwp').value=p['NPWP']||''
+  sbToast('✅ Data penyedia diisi','ok')
+}
+
+function sbTambahPenyedia(){
+  const nama=document.getElementById('sbp_nama').value
+  if(!nama){sbToast('Nama wajib diisi','err');return}
+  google.script.run
+    .withSuccessHandler(()=>{
+      sbToast('✅ Penyedia tersimpan','ok')
+      document.getElementById('sbp_nama').value=''
+      document.getElementById('sbp_npwp').value=''
+      document.getElementById('sbp_kota').value=''
+      sbLoadPenyedia()
+    })
+    .withFailureHandler(err=>sbToast('❌ '+err.message,'err'))
+    .ss_simpanPenyedia({
+      nama, npwp:document.getElementById('sbp_npwp').value,
+      statusNpwp:SB.sbp_status,
+      kota:document.getElementById('sbp_kota').value,
+    })
+}
+
+// ─── TOAST ───
+let sbToastTimer=null
+function sbToast(msg,type='ok'){
+  const el=document.getElementById('sb-toast')
+  el.textContent=msg; el.className='show '+type
+  clearTimeout(sbToastTimer)
+  sbToastTimer=setTimeout(()=>el.className='',3000)
+}
+</script>
+</body>
+</html>
