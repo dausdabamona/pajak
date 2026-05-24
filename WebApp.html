@@ -576,7 +576,12 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
     <div class="grid-2" style="margin-bottom:12px">
       <div class="field">
         <label>Yang Menerima (Nama Penerima)</label>
-        <input type="text" id="kw_penerima" placeholder="Nama penerima uang">
+        <div class="autocomplete-wrap">
+          <input type="text" id="kw_penerima" placeholder="Ketik nama / NPWP penyedia..."
+            oninput="kwAutocompletePenerima(this.value)" autocomplete="off">
+          <div class="autocomplete-list" id="kw_ac_list"></div>
+        </div>
+        <div class="hint" id="kw_penerima_info" style="display:none;color:var(--accent2)">✓ <span id="kw_penerima_info_text"></span></div>
       </div>
       <div class="field">
         <label>Tempat (Kota)</label>
@@ -1378,9 +1383,71 @@ function pilihPenyedia(p) {
   document.getElementById('ac_list').classList.remove('show')
 }
 
+// ─────────────────────────────────────────────────────────────
+// AUTOCOMPLETE PENERIMA (di form kuitansi) — terhubung Master Penyedia
+// ─────────────────────────────────────────────────────────────
+let acKwTimer = null
+function kwAutocompletePenerima(q) {
+  clearTimeout(acKwTimer)
+  const list = document.getElementById('kw_ac_list')
+  document.getElementById('kw_penerima_info').style.display = 'none'
+  if (!q || q.length < 2) { list.classList.remove('show'); return }
+  acKwTimer = setTimeout(() => {
+    api('penyedia.cari', {q}).then(items => {
+      if (!items || !items.length) {
+        list.innerHTML = `<div class="autocomplete-item" style="color:var(--text3);font-style:italic">
+          Tidak ada di Master Penyedia. <a href="#" onclick="event.preventDefault();kwTambahPenyediaBaru('${String(q).replace(/'/g,"\\'")}')">+ Tambah baru</a>
+        </div>`
+        list.classList.add('show')
+        return
+      }
+      list.innerHTML = items.map(p => `
+        <div class="autocomplete-item" onclick='kwPilihPenerima(${JSON.stringify(p).replace(/'/g,"&#39;")})'>
+          <div class="ai-nama">${p.nama}</div>
+          <div class="ai-npwp">${p.npwp||'tanpa NPWP'} · ${p.statusNpwp||''}${p.kota?' · '+p.kota:''}</div>
+        </div>`).join('')
+      list.classList.add('show')
+    }).catch(() => list.classList.remove('show'))
+  }, 300)
+}
+
+function kwPilihPenerima(p) {
+  document.getElementById('kw_penerima').value = p.nama
+  document.getElementById('kw_ac_list').classList.remove('show')
+
+  // Tampilkan info penyedia terpilih
+  const infoEl = document.getElementById('kw_penerima_info')
+  const infoText = document.getElementById('kw_penerima_info_text')
+  infoEl.style.display = 'block'
+  infoText.textContent = `${p.statusNpwp || ''}${p.npwp ? ' · NPWP ' + p.npwp : ' · tanpa NPWP'}${p.kota ? ' · ' + p.kota : ''}`
+
+  // Auto-sync status NPWP ke toggle auto-hitung pajak (agar tarif PPh akurat)
+  const isNon = String(p.statusNpwp || '').includes('NON')
+  S.kw_npwp = isNon ? 'NON-NPWP' : 'BER-NPWP'
+  // Update tampilan toggle button di section auto-hitung
+  document.querySelectorAll('#page-kuitansi .toggle-group').forEach(grp => {
+    const btns = grp.querySelectorAll('.toggle-btn')
+    // toggle pertama di kuitansi adalah Status NPWP (Ber-NPWP / Non-NPWP)
+    if (btns.length === 2 && btns[0].textContent.includes('Ber-NPWP')) {
+      btns.forEach((btn, i) => btn.classList.toggle('active', isNon ? i === 1 : i === 0))
+    }
+  })
+}
+
+function kwTambahPenyediaBaru(nama) {
+  document.getElementById('kw_ac_list').classList.remove('show')
+  // Buka modal Tambah Penyedia dengan nama terisi
+  openModalPenyedia()
+  document.getElementById('mp_nama').value = nama
+  // Setelah user simpan, kembalikan fokus ke field penerima
+  showToast('Lengkapi data penyedia, lalu Simpan', 'ok')
+}
+
 document.addEventListener('click', e => {
   if (!e.target.closest('.autocomplete-wrap')) {
     document.getElementById('ac_list').classList.remove('show')
+    const kwList = document.getElementById('kw_ac_list')
+    if (kwList) kwList.classList.remove('show')
   }
 })
 
@@ -1599,6 +1666,10 @@ function resetFormKuitansi() {
   document.getElementById('kw_penerima').value = ''
   document.getElementById('kw_ket').value = ''
   document.getElementById('kw_info_riwayat').style.display = 'none'
+  const penInfo = document.getElementById('kw_penerima_info')
+  if (penInfo) penInfo.style.display = 'none'
+  const acList = document.getElementById('kw_ac_list')
+  if (acList) acList.classList.remove('show')
 
   // Reset auto-hitung section
   const ahJenis = document.getElementById('kw_ah_jenis')
