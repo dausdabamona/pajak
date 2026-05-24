@@ -243,6 +243,61 @@ function refreshRekap() {
 }
 
 /**
+ * Diagnostic ringan — tidak baca file, hanya cek fungsi & sheet.
+ * Jalankan ini lebih dulu untuk pastikan Apps Script project sehat.
+ */
+function quickCheck() {
+  const logs = []
+  logs.push('===== QUICK CHECK =====')
+
+  // 1. Cek fungsi-fungsi kunci ada di global scope
+  const expected = [
+    'doGet', 'doPost', 'routeAction',
+    'hitungPajakServer', 'getJenisKegiatanList',
+    'simpanKuitansi', 'getKuitansiList',
+    'simpanNominatif', 'getNominatifList', 'hitungPph21',
+    'simpanPegawai', 'cariPegawai',
+    'getSatkerConfig', 'simpanSatkerConfig',
+    'getCurrentUserEmail',
+  ]
+  let missing = 0
+  expected.forEach(function(fn) {
+    const ok = typeof globalThis[fn] === 'function' || typeof eval(fn) === 'function'
+    if (!ok) { logs.push('[MISSING] ' + fn); missing++ }
+  })
+  if (missing === 0) logs.push('[OK] Semua ' + expected.length + ' fungsi inti ada')
+
+  // 2. Cek user email
+  try {
+    const email = Session.getActiveUser().getEmail()
+    logs.push('[OK] User: ' + (email || '(empty - belum auth)'))
+  } catch (e) {
+    logs.push('[ERR] User email: ' + e.message)
+  }
+
+  // 3. Cek spreadsheet (tanpa baca isi)
+  try {
+    const ss = getSpreadsheet()
+    logs.push('[OK] Spreadsheet: ' + ss.getName())
+    logs.push('[OK] Sheets: ' + ss.getSheets().map(function(s){return s.getName()}).join(', '))
+  } catch (e) {
+    logs.push('[ERR] Spreadsheet: ' + e.message)
+  }
+
+  // 4. Cek Web App URL
+  try {
+    const url = ScriptApp.getService().getUrl()
+    logs.push('[OK] Web App URL: ' + (url || '(belum di-deploy)'))
+  } catch (e) {
+    logs.push('[ERR] Web App URL: ' + e.message)
+  }
+
+  logs.push('=========================')
+  logs.forEach(function(l) { Logger.log(l) })
+  return logs.join('\n')
+}
+
+/**
  * Verifikasi integritas file WebApp.html — jalankan manual untuk
  * memastikan file ter-update lengkap setelah copy-paste dari repo.
  *
