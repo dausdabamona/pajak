@@ -155,6 +155,25 @@ function routeAction(action, payload) {
     case 'config.get':        return getSatkerConfig()
     case 'config.simpan':     return simpanSatkerConfig(payload)
 
+    // ── Master Pegawai ──
+    case 'pegawai.list':      return getPegawaiList(payload)
+    case 'pegawai.get':       return getPegawaiById(payload.id)
+    case 'pegawai.cari':      return cariPegawai(payload.q)
+    case 'pegawai.simpan':    return simpanPegawai(payload)
+    case 'pegawai.update':    return updatePegawai(payload)
+    case 'pegawai.hapus':     return hapusPegawai(payload.id)
+
+    // ── Honor Nominatif ──
+    case 'honor.golongan':    return getGolonganList()
+    case 'honor.simpan':      return simpanNominatif(payload)
+    case 'honor.update':      return updateNominatif(payload)
+    case 'honor.list':        return getNominatifList(payload)
+    case 'honor.get':         return getNominatifById(payload.id)
+    case 'honor.hapus':       return hapusNominatif(payload.id)
+    case 'honor.cetak':       return generateNominatifHTML(payload)
+    case 'honor.draftKuitansi': return buatKuitansiDariNominatif(payload.id)
+    case 'honor.catatPph':    return catatPph21KeRiwayat(payload.id)
+
     // ── Setup ──
     case 'setup.init':        return initSheets()
 
@@ -234,7 +253,9 @@ function tentangAplikasi() {
     `• Master data penyedia\n` +
     `• Dashboard rekap bulanan/tahunan\n` +
     `• Cetak SSP PPh & PPN\n` +
-    `• Kuitansi Bukti Pembayaran (cetak & arsip)\n\n` +
+    `• Kuitansi Bukti Pembayaran (cetak & arsip)\n` +
+    `• Daftar Nominatif Honor + PPh 21 final (PP 80/2010)\n` +
+    `• Master pegawai (autocomplete penerima honor)\n\n` +
     `Dibuat: 2025 | Stack: Google Apps Script`,
     SpreadsheetApp.getUi().ButtonSet.OK
   )
@@ -266,6 +287,20 @@ function ss_getKuitansiById(id)          { return getKuitansiById(id) }
 function ss_hapusKuitansi(id)            { return hapusKuitansi(id) }
 function ss_generateKuitansiHTML(payload){ return generateKuitansiHTML(payload) }
 function ss_buatDraftKuitansi(riwayatId) { return buatDraftKuitansiDariRiwayat(riwayatId) }
+function ss_getPegawaiList(payload)      { return getPegawaiList(payload) }
+function ss_cariPegawai(q)               { return cariPegawai(q) }
+function ss_simpanPegawai(payload)       { return simpanPegawai(payload) }
+function ss_updatePegawai(payload)       { return updatePegawai(payload) }
+function ss_hapusPegawai(id)             { return hapusPegawai(id) }
+function ss_getGolonganList()            { return getGolonganList() }
+function ss_simpanNominatif(payload)     { return simpanNominatif(payload) }
+function ss_updateNominatif(payload)     { return updateNominatif(payload) }
+function ss_getNominatifList(payload)    { return getNominatifList(payload) }
+function ss_getNominatifById(id)         { return getNominatifById(id) }
+function ss_hapusNominatif(id)           { return hapusNominatif(id) }
+function ss_generateNominatifHTML(payload){ return generateNominatifHTML(payload) }
+function ss_draftKuitansiDariNominatif(id){ return buatKuitansiDariNominatif(id) }
+function ss_catatPph21KeRiwayat(id)      { return catatPph21KeRiwayat(id) }
 
 /**
  * Kembalikan URL Web App — dipakai Sidebar untuk buka browser.

@@ -22,6 +22,8 @@ function initSheets() {
     { name: CONFIG.SHEETS.MASTER_PENYEDIA, headers: SHEET_HEADERS.MASTER_PENYEDIA },
     { name: CONFIG.SHEETS.CONFIG_SATKER,   headers: SHEET_HEADERS.CONFIG_SATKER },
     { name: CONFIG.SHEETS.KUITANSI,        headers: SHEET_HEADERS.KUITANSI },
+    { name: CONFIG.SHEETS.MASTER_PEGAWAI,  headers: SHEET_HEADERS.MASTER_PEGAWAI },
+    { name: CONFIG.SHEETS.HONOR_NOMINATIF, headers: SHEET_HEADERS.HONOR_NOMINATIF },
     { name: CONFIG.SHEETS.REKAP,           headers: null },  // sheet ini dikelola program
   ]
 
@@ -103,6 +105,9 @@ function initConfigSatker(ss) {
     ['KUITANSI_TERIMA_DARI', 'Pejabat Pembuat Komitmen Politeknik Kelautan dan Perikanan Sorong'],
     ['KUITANSI_MAK',         '1'],
     ['KUITANSI_PREFIX',      'KWT'],
+    // ── Honor Nominatif default ────────────────────────────────────────────
+    ['HONOR_JUDUL_DEFAULT',  'DAFTAR NOMINATIF PENERIMA HONOR'],
+    ['HONOR_SUBJUDUL',       'PENGELOLA KEUANGAN POLITEKNIK KELAUTAN DAN PERIKANAN SORONG'],
   ]
 
   // Ambil keys existing

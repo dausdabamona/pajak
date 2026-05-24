@@ -36,7 +36,11 @@ nav{background:var(--accent);color:#fff;display:flex;align-items:center;gap:0;pa
 /* ── FORM ── */
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-@media(max-width:600px){.grid-2,.grid-3{grid-template-columns:1fr}}
+.form-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:10px}
+.form-actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.form-actions .btn{flex:1;min-width:140px}
+@media(max-width:900px){.form-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.grid-2,.grid-3,.form-grid{grid-template-columns:1fr}}
 .field{display:flex;flex-direction:column;gap:4px}
 .field label{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em}
 .field input,.field select,.field textarea{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:13px;padding:9px 11px;width:100%;outline:none;transition:border-color .15s}
@@ -58,6 +62,7 @@ nav{background:var(--accent);color:#fff;display:flex;align-items:center;gap:0;pa
 .btn-danger{background:var(--accent3);color:#fff}.btn-danger:hover{background:#b31412}
 .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text2)}.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
 .btn-full{width:100%;justify-content:center;padding:13px}
+.btn-sm{font-size:11px;padding:6px 12px;border-radius:5px}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 
 /* ── HASIL BOXES ── */
@@ -164,6 +169,7 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
     <div class="nav-tab active" onclick="showPage('kalkulator',this)">⚡ Kalkulator</div>
     <div class="nav-tab" onclick="showPage('riwayat',this)">📋 Riwayat</div>
     <div class="nav-tab" onclick="showPage('kuitansi',this)">🧾 Kuitansi</div>
+    <div class="nav-tab" onclick="showPage('honor',this)">📋 Honor</div>
     <div class="nav-tab" onclick="showPage('penyedia',this)">🏢 Penyedia</div>
     <div class="nav-tab" onclick="showPage('dashboard',this)">📊 Dashboard</div>
     <div class="nav-tab" onclick="showPage('pengaturan',this)">⚙️ Pengaturan</div>
@@ -629,6 +635,198 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
 </div>
 
 <!-- ════════════════════════════════════════════════════════════
+     HALAMAN: HONOR NOMINATIF
+═════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-honor">
+
+  <!-- LIST -->
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <div class="card-title" style="margin-bottom:0">📋 Daftar Nominatif Honor</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <select id="fhn_tahun" onchange="loadHonor()" style="padding:6px 10px;border-radius:5px;border:1px solid var(--border)"></select>
+        <select id="fhn_bulan" onchange="loadHonor()" style="padding:6px 10px;border-radius:5px;border:1px solid var(--border)">
+          <option value="">Semua Bulan</option>
+          <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
+          <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
+          <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
+          <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
+        </select>
+        <button class="btn btn-outline btn-sm" onclick="loadHonor()">🔄 Refresh</button>
+        <button class="btn btn-outline btn-sm" onclick="openModalPegawai()">👥 Kelola Pegawai</button>
+        <button class="btn btn-primary btn-sm" onclick="resetFormHonor(); document.getElementById('hn_form_card').scrollIntoView({behavior:'smooth'})">+ Nominatif Baru</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="data-tbl">
+        <thead><tr>
+          <th>Periode</th><th>Judul / No SK</th><th>Penerima</th>
+          <th>Total Bruto</th><th>Total PPh 21</th><th>Total Bersih</th><th>Aksi</th>
+        </tr></thead>
+        <tbody id="honor_table_body"><tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px">Memuat...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FORM -->
+  <div class="card" id="hn_form_card">
+    <div class="card-title" id="hn_form_title">+ Buat Nominatif Honor Baru</div>
+    <input type="hidden" id="hn_id">
+
+    <!-- Header info -->
+    <div class="form-grid">
+      <div class="field">
+        <label>No SK</label>
+        <input type="text" id="hn_no_sk" placeholder="KEP.37/KPA-POLTEK KP/KU.110/VIII/2022">
+      </div>
+      <div class="field">
+        <label>Tgl SK</label>
+        <input type="date" id="hn_tgl_sk">
+      </div>
+      <div class="field">
+        <label>Periode Bulan *</label>
+        <select id="hn_periode_bulan">
+          <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
+          <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
+          <option value="7">Juli</option><option value="8">Agustus</option><option value="9" selected>September</option>
+          <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Periode Tahun *</label>
+        <input type="number" id="hn_periode_tahun" min="2020" max="2099">
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div class="field" style="grid-column:span 2">
+        <label>Judul Nominatif *</label>
+        <input type="text" id="hn_judul" placeholder="DAFTAR NOMINATIF PENERIMA HONOR">
+      </div>
+      <div class="field" style="grid-column:span 2">
+        <label>Kegiatan / Sub-judul</label>
+        <input type="text" id="hn_kegiatan" placeholder="PENGELOLA KEUANGAN POLITEKNIK KELAUTAN DAN PERIKANAN SORONG">
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div class="field">
+        <label>MAK (Kode Anggaran)</label>
+        <input type="text" id="hn_mak" placeholder="contoh: 521211">
+      </div>
+      <div class="field">
+        <label>Tempat</label>
+        <input type="text" id="hn_tempat" placeholder="Sorong">
+      </div>
+      <div class="field">
+        <label>Tanggal Surat</label>
+        <input type="date" id="hn_tgl_surat">
+      </div>
+      <div class="field">
+        <label>Keterangan</label>
+        <input type="text" id="hn_keterangan" placeholder="Opsional">
+      </div>
+    </div>
+
+    <!-- Tabel penerima -->
+    <div style="margin-top:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-weight:700;color:var(--text2)">DAFTAR PENERIMA</div>
+        <button class="btn btn-success btn-sm" onclick="hnTambahBaris()">+ Tambah Baris</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="data-tbl" id="hn_detail_table">
+          <thead><tr>
+            <th style="width:40px">No</th>
+            <th style="min-width:200px">Nama / NIP</th>
+            <th style="min-width:160px">Jabatan</th>
+            <th style="width:140px">Golongan</th>
+            <th style="width:140px">Honor Bruto (Rp)</th>
+            <th style="width:120px">PPh 21 (Rp)</th>
+            <th style="width:130px">Bersih (Rp)</th>
+            <th style="width:40px"></th>
+          </tr></thead>
+          <tbody id="hn_detail_body"></tbody>
+          <tfoot>
+            <tr style="background:#e8f0fe;font-weight:700">
+              <td colspan="4" style="text-align:right">JUMLAH</td>
+              <td id="hn_total_bruto" style="text-align:right">Rp 0</td>
+              <td id="hn_total_pph" style="text-align:right">Rp 0</td>
+              <td id="hn_total_bersih" style="text-align:right">Rp 0</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div class="terbilang" id="hn_terbilang" style="margin-top:6px;font-style:italic;color:var(--text2)">Terbilang: —</div>
+    </div>
+
+    <!-- PPK & Bendahara -->
+    <div class="form-grid" style="margin-top:12px">
+      <div class="field"><label>PPK Nama</label><input type="text" id="hn_ppk_nama"></div>
+      <div class="field"><label>PPK NIP</label><input type="text" id="hn_ppk_nip"></div>
+      <div class="field"><label>Bendahara Nama</label><input type="text" id="hn_bend_nama"></div>
+      <div class="field"><label>Bendahara NIP</label><input type="text" id="hn_bend_nip"></div>
+    </div>
+
+    <!-- Tombol -->
+    <div class="form-actions">
+      <button class="btn btn-success" onclick="simpanNominatif()">💾 Simpan</button>
+      <button class="btn btn-primary" onclick="previewNominatif()">👁️ Preview / Cetak</button>
+      <button class="btn btn-outline" id="hn_btn_kuitansi" onclick="hnBuatKuitansi()" style="display:none">🧾 Buat Kuitansi</button>
+      <button class="btn btn-outline" id="hn_btn_riwayat" onclick="hnCatatRiwayat()" style="display:none">📒 Catat PPh 21 ke Riwayat</button>
+      <button class="btn btn-outline" onclick="resetFormHonor()">↺ Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL KELOLA PEGAWAI -->
+<div id="modal_pegawai" class="modal-overlay" style="display:none" onclick="if(event.target===this) closeModalPegawai()">
+  <div class="modal-box" style="max-width:720px">
+    <div class="modal-title">
+      <span>👥 Kelola Master Pegawai</span>
+      <button class="modal-close" onclick="closeModalPegawai()">✕</button>
+    </div>
+
+    <div>
+      <!-- Form input -->
+      <div style="background:#f8f9fa;padding:12px;border-radius:6px;margin-bottom:12px">
+        <input type="hidden" id="pgw_id">
+        <div class="form-grid">
+          <div class="field"><label>NIP</label><input type="text" id="pgw_nip" placeholder="18 digit"></div>
+          <div class="field"><label>Nama *</label><input type="text" id="pgw_nama"></div>
+          <div class="field"><label>Jabatan</label><input type="text" id="pgw_jabatan"></div>
+          <div class="field">
+            <label>Golongan</label>
+            <select id="pgw_golongan">
+              <option value="I">Gol I (0%)</option>
+              <option value="II">Gol II (0%)</option>
+              <option value="III" selected>Gol III (5%)</option>
+              <option value="IV">Gol IV (15%)</option>
+              <option value="Pejabat Negara">Pejabat Negara (15%)</option>
+            </select>
+          </div>
+          <div class="field"><label>Unit Kerja</label><input type="text" id="pgw_unit"></div>
+          <div class="field"><label>NPWP (opsional)</label><input type="text" id="pgw_npwp"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-success btn-sm" onclick="simpanPegawai()">💾 Simpan Pegawai</button>
+          <button class="btn btn-outline btn-sm" onclick="resetFormPegawai()">↺ Reset</button>
+        </div>
+      </div>
+
+      <!-- List -->
+      <div style="overflow-x:auto;max-height:300px;overflow-y:auto">
+        <table class="data-tbl">
+          <thead><tr><th>NIP</th><th>Nama</th><th>Jabatan</th><th>Gol</th><th></th></tr></thead>
+          <tbody id="pegawai_table_body"><tr><td colspan="5" style="text-align:center;color:var(--text3);padding:16px">Memuat...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
      HALAMAN 3: MASTER PENYEDIA
 ═════════════════════════════════════════════════════════════ -->
 <div class="page" id="page-penyedia">
@@ -883,6 +1081,7 @@ function showPage(name, tabEl) {
 
   if (name === 'riwayat')     loadRiwayat()
   if (name === 'kuitansi')    loadKuitansi()
+  if (name === 'honor')       loadHonor()
   if (name === 'penyedia')    loadPenyedia()
   if (name === 'dashboard')   loadDashboard()
   if (name === 'pengaturan')  loadConfig()
@@ -912,6 +1111,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Init filter tahun
   initTahunFilter()
+
+  // Auto-switch tab dari URL ?tab=...
+  try {
+    const params = new URLSearchParams(window.location.search)
+    const tab = params.get('tab')
+    if (tab && document.getElementById('page-' + tab)) {
+      const tabEl = document.querySelector(`.nav-tab[onclick*="'${tab}'"]`)
+      showPage(tab, tabEl)
+    }
+  } catch(_) {}
 })
 
 function initTahunFilter() {
@@ -919,18 +1128,25 @@ function initTahunFilter() {
   const selTahun  = document.getElementById('f_tahun')
   const selDTahun = document.getElementById('d_tahun')
   const selKwTahun = document.getElementById('fkw_tahun')
+  const selHnTahun = document.getElementById('fhn_tahun')
+  const selHnPeriodeThn = document.getElementById('hn_periode_tahun')
   for (let y = now; y >= now - 5; y--) {
     selTahun.add(new Option(y, y))
     selDTahun.add(new Option(y, y))
     if (selKwTahun) selKwTahun.add(new Option(y, y))
+    if (selHnTahun) selHnTahun.add(new Option(y, y))
   }
   selTahun.value  = now
   selDTahun.value = now
   if (selKwTahun) {
-    // tambahkan opsi "Semua" di atas
     selKwTahun.insertBefore(new Option('Semua', ''), selKwTahun.firstChild)
     selKwTahun.value = now
   }
+  if (selHnTahun) {
+    selHnTahun.insertBefore(new Option('Semua', ''), selHnTahun.firstChild)
+    selHnTahun.value = now
+  }
+  if (selHnPeriodeThn) selHnPeriodeThn.value = now
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -2415,8 +2631,490 @@ function showToast(msg, type = 'ok') {
   toastTimer = setTimeout(() => el.classList.remove('show'), 3500)
 }
 
-// Tambahkan action kalkulator.hitung dan kalkulator.list ke routeAction di Code.gs
-// Fungsi ini dipanggil via google.script.run.routeAction
+// ─────────────────────────────────────────────────────────────
+// HONOR NOMINATIF
+// ─────────────────────────────────────────────────────────────
+
+// Tarif PPh 21 (mirror dari Honor.gs untuk fallback offline)
+const TARIF_PPH21_LOKAL = {
+  'I': 0, 'II': 0, 'III': 0.05, 'IV': 0.15,
+  'PEJABAT NEGARA': 0.15,
+  'NON-PNS SETARA III': 0.05,
+  'NON-PNS SETARA IV':  0.15,
+}
+const GOLONGAN_OPTIONS = [
+  { kode:'I',                  label:'Gol I (0%)' },
+  { kode:'II',                 label:'Gol II (0%)' },
+  { kode:'III',                label:'Gol III (5%)' },
+  { kode:'IV',                 label:'Gol IV (15%)' },
+  { kode:'Pejabat Negara',     label:'Pejabat Negara (15%)' },
+  { kode:'Non-PNS Setara III', label:'Non-PNS (5%)' },
+  { kode:'Non-PNS Setara IV',  label:'Non-PNS (15%)' },
+]
+
+function hitungPph21Lokal(bruto, golongan) {
+  const key = String(golongan || '').toUpperCase()
+  const tarif = TARIF_PPH21_LOKAL[key] !== undefined ? TARIF_PPH21_LOKAL[key] : 0
+  const pph    = Math.round((Number(bruto) || 0) * tarif)
+  const bersih = Math.round((Number(bruto) || 0)) - pph
+  return { tarif, pph, bersih }
+}
+
+// ── Load list nominatif ────────────────────────────────────────
+function loadHonor() {
+  const tbody = document.getElementById('honor_table_body')
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px">Memuat...</td></tr>'
+  const tahun = document.getElementById('fhn_tahun').value
+  const bulan = document.getElementById('fhn_bulan').value
+  api('honor.list', { tahun, bulan }).then(data => {
+    if (!data || !data.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px">📋 Belum ada nominatif</td></tr>'
+      return
+    }
+    const BLN = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des']
+    tbody.innerHTML = data.map(r => {
+      let detail = []
+      try { detail = JSON.parse(r['Detail JSON'] || '[]') } catch(_) {}
+      const nPenerima = detail.length
+      return `<tr>
+        <td><b>${BLN[Number(r['Periode Bulan']) - 1] || '?'}</b> ${r['Periode Tahun'] || ''}</td>
+        <td><b>${escapeAttr(r['Judul'] || '—')}</b>${r['No SK'] ? `<br><small style="color:var(--text3)">SK: ${escapeAttr(r['No SK'])}</small>` : ''}</td>
+        <td>${nPenerima} orang</td>
+        <td>${fmtRp(r['Total Bruto'])}</td>
+        <td style="color:var(--accent)">${fmtRp(r['Total PPh'])}</td>
+        <td style="color:var(--accent2);font-weight:700">${fmtRp(r['Total Bersih'])}</td>
+        <td>
+          <button class="btn btn-outline btn-sm" onclick="editNominatif('${r['ID']}')" title="Edit">✏️</button>
+          <button class="btn btn-outline btn-sm" onclick="cetakNominatif('${r['ID']}')" title="Cetak">🖨️</button>
+          <button class="btn btn-outline btn-sm" onclick="hapusNominatif('${r['ID']}')" title="Hapus" style="color:var(--accent3)">🗑️</button>
+        </td>
+      </tr>`
+    }).join('')
+  }).catch(err => {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--accent3);padding:20px">❌ ${err.message}</td></tr>`
+  })
+}
+
+// ── Reset form nominatif ───────────────────────────────────────
+function resetFormHonor() {
+  document.getElementById('hn_form_title').textContent = '+ Buat Nominatif Honor Baru'
+  document.getElementById('hn_id').value           = ''
+  document.getElementById('hn_no_sk').value        = ''
+  document.getElementById('hn_tgl_sk').value       = ''
+  const now = new Date()
+  document.getElementById('hn_periode_bulan').value = (now.getMonth() + 1)
+  document.getElementById('hn_periode_tahun').value = now.getFullYear()
+  document.getElementById('hn_judul').value     = (S.cfgSatker && S.cfgSatker['HONOR_JUDUL_DEFAULT']) || 'DAFTAR NOMINATIF PENERIMA HONOR'
+  document.getElementById('hn_kegiatan').value  = (S.cfgSatker && S.cfgSatker['HONOR_SUBJUDUL']) || ''
+  document.getElementById('hn_mak').value       = ''
+  document.getElementById('hn_tempat').value    = (S.cfgSatker && S.cfgSatker['KOTA']) || 'Sorong'
+  document.getElementById('hn_tgl_surat').value = now.toISOString().split('T')[0]
+  document.getElementById('hn_keterangan').value = ''
+  document.getElementById('hn_ppk_nama').value  = (S.cfgSatker && S.cfgSatker['NAMA_PPK']) || ''
+  document.getElementById('hn_ppk_nip').value   = (S.cfgSatker && S.cfgSatker['NIP_PPK']) || ''
+  document.getElementById('hn_bend_nama').value = (S.cfgSatker && S.cfgSatker['NAMA_BENDAHARA']) || ''
+  document.getElementById('hn_bend_nip').value  = (S.cfgSatker && S.cfgSatker['NIP_BENDAHARA']) || ''
+  document.getElementById('hn_btn_kuitansi').style.display = 'none'
+  document.getElementById('hn_btn_riwayat').style.display = 'none'
+  document.getElementById('hn_detail_body').innerHTML = ''
+  hnTambahBaris()
+  hnHitungTotal()
+}
+
+// ── Tambah baris penerima ──────────────────────────────────────
+function hnTambahBaris(prefill) {
+  const tbody = document.getElementById('hn_detail_body')
+  const idx = tbody.children.length
+  const tr = document.createElement('tr')
+  tr.className = 'hn-row'
+  const golOpts = GOLONGAN_OPTIONS.map(g => `<option value="${g.kode}">${g.label}</option>`).join('')
+  tr.innerHTML = `
+    <td style="text-align:center">${idx + 1}</td>
+    <td>
+      <div class="ac-wrap">
+        <input type="text" class="hn-nama" placeholder="Nama..." oninput="hnAutocompletePegawai(this)" autocomplete="off">
+        <div class="ac-list hn-ac-list"></div>
+      </div>
+      <input type="text" class="hn-nip" placeholder="NIP" style="margin-top:4px;font-size:11px">
+    </td>
+    <td><input type="text" class="hn-jabatan" placeholder="Jabatan"></td>
+    <td>
+      <select class="hn-golongan" onchange="hnHitungBaris(this)">${golOpts}</select>
+    </td>
+    <td><input type="text" class="hn-bruto" placeholder="0" oninput="hnFormatBruto(this)" style="text-align:right"></td>
+    <td class="hn-pph" style="text-align:right;color:var(--accent);font-weight:600">Rp 0</td>
+    <td class="hn-bersih" style="text-align:right;color:var(--accent2);font-weight:700">Rp 0</td>
+    <td><button class="btn btn-outline btn-sm" onclick="hnHapusBaris(this)" style="color:var(--accent3);padding:4px 8px">🗑️</button></td>
+  `
+  tbody.appendChild(tr)
+
+  if (prefill) {
+    tr.querySelector('.hn-nama').value     = prefill.nama || ''
+    tr.querySelector('.hn-nip').value      = prefill.nip || ''
+    tr.querySelector('.hn-jabatan').value  = prefill.jabatan || ''
+    tr.querySelector('.hn-golongan').value = prefill.golongan || 'III'
+    tr.querySelector('.hn-bruto').value    = Number(prefill.bruto || 0).toLocaleString('id-ID')
+    hnHitungBaris(tr.querySelector('.hn-golongan'))
+  }
+  // Default golongan III
+  if (!prefill) tr.querySelector('.hn-golongan').value = 'III'
+  hnRenumber()
+}
+
+function hnHapusBaris(btn) {
+  btn.closest('tr').remove()
+  hnRenumber()
+  hnHitungTotal()
+}
+
+function hnRenumber() {
+  document.querySelectorAll('#hn_detail_body tr').forEach((tr, i) => {
+    tr.children[0].textContent = i + 1
+  })
+}
+
+function hnFormatBruto(el) {
+  const raw = el.value.replace(/\D/g,'')
+  el.value = raw ? parseInt(raw, 10).toLocaleString('id-ID') : ''
+  hnHitungBaris(el)
+}
+
+function hnHitungBaris(el) {
+  const tr = el.closest('tr')
+  const bruto = parseRp(tr.querySelector('.hn-bruto').value)
+  const gol   = tr.querySelector('.hn-golongan').value
+  const h = hitungPph21Lokal(bruto, gol)
+  tr.querySelector('.hn-pph').textContent    = fmtRp(h.pph)
+  tr.querySelector('.hn-bersih').textContent = fmtRp(h.bersih)
+  hnHitungTotal()
+}
+
+function hnHitungTotal() {
+  let totBruto = 0, totPph = 0, totBersih = 0
+  document.querySelectorAll('#hn_detail_body tr').forEach(tr => {
+    const bruto = parseRp(tr.querySelector('.hn-bruto').value)
+    const gol   = tr.querySelector('.hn-golongan').value
+    const h = hitungPph21Lokal(bruto, gol)
+    totBruto  += bruto
+    totPph    += h.pph
+    totBersih += h.bersih
+  })
+  document.getElementById('hn_total_bruto').textContent  = fmtRp(totBruto)
+  document.getElementById('hn_total_pph').textContent    = fmtRp(totPph)
+  document.getElementById('hn_total_bersih').textContent = fmtRp(totBersih)
+  document.getElementById('hn_terbilang').textContent    = 'Terbilang: ' + (totBersih > 0 ? terbilangRp(totBersih) : '—')
+}
+
+// ── Autocomplete pegawai di baris penerima ─────────────────────
+let hnAcTimer = null
+function hnAutocompletePegawai(input) {
+  clearTimeout(hnAcTimer)
+  const q = input.value
+  const list = input.parentElement.querySelector('.hn-ac-list')
+  if (!q || q.length < 2) { list.classList.remove('show'); return }
+  hnAcTimer = setTimeout(() => {
+    api('pegawai.cari', { q }).then(items => {
+      if (!items || !items.length) {
+        list.innerHTML = `<div class="ac-item" style="color:var(--text3);font-style:italic">Tidak ada. Ketik manual / <a href="#" onclick="event.preventDefault();openModalPegawai();return false">+ tambah pegawai</a></div>`
+        list.classList.add('show')
+        return
+      }
+      list.innerHTML = items.map(p => `
+        <div class="ac-item" onclick='hnPilihPegawai(this, ${JSON.stringify(p).replace(/"/g,"&quot;")})'>
+          <div><b>${escapeAttr(p.nama)}</b> ${p.golongan ? `<span class="badge badge-blue" style="margin-left:4px">Gol ${escapeAttr(p.golongan)}</span>` : ''}</div>
+          <div style="font-size:11px;color:var(--text3)">NIP: ${escapeAttr(p.nip || '—')} · ${escapeAttr(p.jabatan || '')}</div>
+        </div>
+      `).join('')
+      list.classList.add('show')
+    }).catch(() => list.classList.remove('show'))
+  }, 250)
+}
+
+function hnPilihPegawai(div, p) {
+  const tr = div.closest('tr')
+  tr.querySelector('.hn-nama').value     = p.nama || ''
+  tr.querySelector('.hn-nip').value      = p.nip || ''
+  tr.querySelector('.hn-jabatan').value  = p.jabatan || ''
+  if (p.golongan) {
+    // Map golongan ke kode dropdown — toleransi 'III' atau 'Gol III' atau lainnya
+    const golKey = String(p.golongan).trim().toUpperCase().replace(/^GOL\s+/, '')
+    const opts = ['I','II','III','IV','PEJABAT NEGARA']
+    const found = opts.find(o => o === golKey)
+    if (found) tr.querySelector('.hn-golongan').value = found.charAt(0) + found.slice(1).toLowerCase().split(' ').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ').replace('Iii','III').replace('Iv','IV').replace('Ii','II')
+    // sederhanakan: kalau 'III'/'IV'/'I'/'II' langsung set
+    if (['I','II','III','IV'].includes(golKey)) tr.querySelector('.hn-golongan').value = golKey
+    if (golKey === 'PEJABAT NEGARA') tr.querySelector('.hn-golongan').value = 'Pejabat Negara'
+  }
+  hnHitungBaris(tr.querySelector('.hn-golongan'))
+  div.parentElement.classList.remove('show')
+}
+
+// Close autocomplete on click outside
+document.addEventListener('click', e => {
+  if (!e.target.closest('.ac-wrap')) {
+    document.querySelectorAll('.hn-ac-list').forEach(l => l.classList.remove('show'))
+  }
+})
+
+// ── Kumpulkan data form ────────────────────────────────────────
+function hnKumpulkanData() {
+  const detail = []
+  document.querySelectorAll('#hn_detail_body tr').forEach((tr, idx) => {
+    const nama = tr.querySelector('.hn-nama').value.trim()
+    if (!nama) return  // skip baris kosong
+    detail.push({
+      no:       idx + 1,
+      nama,
+      nip:      tr.querySelector('.hn-nip').value.trim(),
+      jabatan:  tr.querySelector('.hn-jabatan').value.trim(),
+      golongan: tr.querySelector('.hn-golongan').value,
+      bruto:    parseRp(tr.querySelector('.hn-bruto').value),
+    })
+  })
+  return {
+    id:            document.getElementById('hn_id').value || undefined,
+    noSk:          document.getElementById('hn_no_sk').value.trim(),
+    tglSk:         document.getElementById('hn_tgl_sk').value,
+    periodeBulan:  Number(document.getElementById('hn_periode_bulan').value),
+    periodeTahun:  Number(document.getElementById('hn_periode_tahun').value),
+    judul:         document.getElementById('hn_judul').value.trim(),
+    kegiatan:      document.getElementById('hn_kegiatan').value.trim(),
+    mak:           document.getElementById('hn_mak').value.trim(),
+    tempat:        document.getElementById('hn_tempat').value.trim(),
+    tglSurat:      document.getElementById('hn_tgl_surat').value,
+    ppkNama:       document.getElementById('hn_ppk_nama').value.trim(),
+    ppkNip:        document.getElementById('hn_ppk_nip').value.trim(),
+    bendaharaNama: document.getElementById('hn_bend_nama').value.trim(),
+    bendaharaNip:  document.getElementById('hn_bend_nip').value.trim(),
+    keterangan:    document.getElementById('hn_keterangan').value.trim(),
+    detail,
+  }
+}
+
+// ── Simpan ─────────────────────────────────────────────────────
+function simpanNominatif() {
+  const p = hnKumpulkanData()
+  if (!p.judul)        { showToast('Judul nominatif wajib diisi', 'err'); return }
+  if (!p.detail.length){ showToast('Tambahkan minimal 1 penerima', 'err'); return }
+  const action = p.id ? 'honor.update' : 'honor.simpan'
+  api(action, p).then(saved => {
+    showToast('✅ Nominatif tersimpan: ' + (saved.ID || ''), 'ok')
+    document.getElementById('hn_id').value = saved.ID || p.id
+    document.getElementById('hn_btn_kuitansi').style.display = ''
+    document.getElementById('hn_btn_riwayat').style.display = ''
+    loadHonor()
+  }).catch(err => showToast('❌ ' + err.message, 'err'))
+}
+
+// ── Edit ───────────────────────────────────────────────────────
+function editNominatif(id) {
+  api('honor.get', { id }).then(n => {
+    document.getElementById('hn_form_title').textContent = '✏️ Edit Nominatif: ' + (n['Judul'] || '')
+    document.getElementById('hn_id').value = n['ID']
+    document.getElementById('hn_no_sk').value = n['No SK'] || ''
+    document.getElementById('hn_tgl_sk').value = toIsoDate(n['Tgl SK']) || ''
+    document.getElementById('hn_periode_bulan').value = n['Periode Bulan'] || 1
+    document.getElementById('hn_periode_tahun').value = n['Periode Tahun'] || new Date().getFullYear()
+    document.getElementById('hn_judul').value = n['Judul'] || ''
+    document.getElementById('hn_kegiatan').value = n['Kegiatan'] || ''
+    document.getElementById('hn_mak').value = n['MAK'] || ''
+    document.getElementById('hn_tempat').value = n['Tempat'] || ''
+    document.getElementById('hn_tgl_surat').value = toIsoDate(n['Tgl Surat']) || ''
+    document.getElementById('hn_keterangan').value = n['Keterangan'] || ''
+    document.getElementById('hn_ppk_nama').value = n['PPK Nama'] || ''
+    document.getElementById('hn_ppk_nip').value = n['PPK NIP'] || ''
+    document.getElementById('hn_bend_nama').value = n['Bendahara Nama'] || ''
+    document.getElementById('hn_bend_nip').value = n['Bendahara NIP'] || ''
+    document.getElementById('hn_detail_body').innerHTML = ''
+    ;(n.detail || []).forEach(d => hnTambahBaris(d))
+    if (!n.detail || !n.detail.length) hnTambahBaris()
+    hnHitungTotal()
+    document.getElementById('hn_btn_kuitansi').style.display = ''
+    document.getElementById('hn_btn_riwayat').style.display = ''
+    document.getElementById('hn_form_card').scrollIntoView({behavior:'smooth'})
+  }).catch(err => showToast('❌ ' + err.message, 'err'))
+}
+
+// ── Hapus ──────────────────────────────────────────────────────
+function hapusNominatif(id) {
+  if (!confirm('Hapus nominatif ini? Tidak bisa dibatalkan.')) return
+  api('honor.hapus', { id }).then(() => {
+    showToast('✅ Nominatif dihapus', 'ok')
+    loadHonor()
+    if (document.getElementById('hn_id').value === id) resetFormHonor()
+  }).catch(err => showToast('❌ ' + err.message, 'err'))
+}
+
+// ── Cetak ──────────────────────────────────────────────────────
+function cetakNominatif(id) {
+  api('honor.cetak', { id }).then(res => {
+    const w = window.open('', '_blank')
+    w.document.write(res.html)
+    w.document.close()
+  }).catch(err => showToast('❌ ' + err.message, 'err'))
+}
+
+function previewNominatif() {
+  const p = hnKumpulkanData()
+  if (!p.detail.length) { showToast('Tambahkan minimal 1 penerima', 'err'); return }
+  api('honor.cetak', p).then(res => {
+    const w = window.open('', '_blank')
+    w.document.write(res.html)
+    w.document.close()
+  }).catch(err => showToast('❌ ' + err.message, 'err'))
+}
+
+// ── Buat kuitansi dari nominatif ───────────────────────────────
+function hnBuatKuitansi() {
+  const id = document.getElementById('hn_id').value
+  if (!id) { showToast('Simpan nominatif dulu', 'err'); return }
+  api('honor.draftKuitansi', { id }).then(draft => {
+    // Pindah ke tab kuitansi & isi form
+    showPage('kuitansi', null)
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'))
+    document.querySelector('.nav-tab[onclick*="kuitansi"]').classList.add('active')
+
+    document.getElementById('kw_id').value          = ''
+    document.getElementById('kw_no_kuitansi').value = ''
+    document.getElementById('kw_no_kuitansi').dataset.auto = '1'
+    document.getElementById('kw_ta').value          = draft.tahunAnggaran
+    document.getElementById('kw_tgl').value         = toIsoDate(draft.tglKuitansi) || new Date().toISOString().split('T')[0]
+    document.getElementById('kw_terima_dari').value = draft.terimaDari
+    document.getElementById('kw_uang').value        = Number(draft.uangSejumlah).toLocaleString('id-ID')
+    document.getElementById('kw_terbilang').value   = terbilangRp(draft.uangSejumlah)
+    document.getElementById('kw_untuk').value       = draft.untukPembayaran
+    document.getElementById('kw_besarnya').value    = Number(draft.besarnyaBayar).toLocaleString('id-ID')
+    document.getElementById('kw_ppn').value         = Number(draft.nilaiPpn).toLocaleString('id-ID')
+    document.getElementById('kw_pph').value         = Number(draft.nilaiPph).toLocaleString('id-ID')
+    document.getElementById('kw_diterima').value    = Number(draft.yangDiterima).toLocaleString('id-ID')
+    document.getElementById('kw_tempat').value      = draft.tempat
+    document.getElementById('kw_penerima').value    = draft.penerimaNama
+    document.getElementById('kw_ppk_nama').value    = draft.ppkNama
+    document.getElementById('kw_ppk_nip').value     = draft.ppkNip
+    document.getElementById('kw_bend_nama').value   = draft.bendaharaNama
+    document.getElementById('kw_bend_nip').value    = draft.bendaharaNip
+    document.getElementById('kw_mak').value         = draft.mak
+    document.getElementById('kw_ket').value         = draft.keterangan
+    if (typeof refreshNomorKuitansi === 'function') refreshNomorKuitansi()
+    showToast('✅ Draft kuitansi dibuat dari nominatif', 'ok')
+  }).catch(err => showToast('❌ ' + err.message, 'err'))
+}
+
+// ── Catat PPh 21 ke Riwayat ────────────────────────────────────
+function hnCatatRiwayat() {
+  const id = document.getElementById('hn_id').value
+  if (!id) { showToast('Simpan nominatif dulu', 'err'); return }
+  if (!confirm('Catat total PPh 21 nominatif ini ke sheet RIWAYAT?')) return
+  api('honor.catatPph', { id }).then(r => {
+    showToast('✅ Tercatat di Riwayat: ' + (r.ID || ''), 'ok')
+    loadHonor()
+  }).catch(err => showToast('❌ ' + err.message, 'err'))
+}
+
+// ─────────────────────────────────────────────────────────────
+// MASTER PEGAWAI (modal)
+// ─────────────────────────────────────────────────────────────
+function openModalPegawai() {
+  document.getElementById('modal_pegawai').style.display = 'flex'
+  resetFormPegawai()
+  loadPegawaiTable()
+}
+function closeModalPegawai() {
+  document.getElementById('modal_pegawai').style.display = 'none'
+}
+
+function loadPegawaiTable() {
+  const tbody = document.getElementById('pegawai_table_body')
+  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:16px">Memuat...</td></tr>'
+  api('pegawai.list', { aktif: true }).then(data => {
+    if (!data || !data.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:16px">Belum ada pegawai</td></tr>'
+      return
+    }
+    tbody.innerHTML = data.map(p => `
+      <tr>
+        <td style="font-size:12px">${escapeAttr(p['NIP'] || '—')}</td>
+        <td><b>${escapeAttr(p['Nama'] || '')}</b></td>
+        <td style="font-size:12px">${escapeAttr(p['Jabatan'] || '')}</td>
+        <td><span class="badge badge-blue">${escapeAttr(p['Golongan'] || '')}</span></td>
+        <td>
+          <button class="btn btn-outline btn-sm" onclick='editPegawai(${JSON.stringify(p).replace(/"/g,"&quot;")})'>✏️</button>
+          <button class="btn btn-outline btn-sm" onclick="hapusPegawai('${p['ID']}')" style="color:var(--accent3)">🗑️</button>
+        </td>
+      </tr>
+    `).join('')
+  }).catch(err => {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--accent3);padding:16px">❌ ${err.message}</td></tr>`
+  })
+}
+
+function resetFormPegawai() {
+  document.getElementById('pgw_id').value = ''
+  document.getElementById('pgw_nip').value = ''
+  document.getElementById('pgw_nama').value = ''
+  document.getElementById('pgw_jabatan').value = ''
+  document.getElementById('pgw_golongan').value = 'III'
+  document.getElementById('pgw_unit').value = ''
+  document.getElementById('pgw_npwp').value = ''
+}
+
+function editPegawai(p) {
+  document.getElementById('pgw_id').value       = p['ID'] || ''
+  document.getElementById('pgw_nip').value      = p['NIP'] || ''
+  document.getElementById('pgw_nama').value     = p['Nama'] || ''
+  document.getElementById('pgw_jabatan').value  = p['Jabatan'] || ''
+  document.getElementById('pgw_golongan').value = p['Golongan'] || 'III'
+  document.getElementById('pgw_unit').value     = p['Unit Kerja'] || ''
+  document.getElementById('pgw_npwp').value     = p['NPWP'] || ''
+}
+
+function simpanPegawai() {
+  const payload = {
+    id:        document.getElementById('pgw_id').value || undefined,
+    nip:       document.getElementById('pgw_nip').value.trim(),
+    nama:      document.getElementById('pgw_nama').value.trim(),
+    jabatan:   document.getElementById('pgw_jabatan').value.trim(),
+    golongan:  document.getElementById('pgw_golongan').value,
+    unitKerja: document.getElementById('pgw_unit').value.trim(),
+    npwp:      document.getElementById('pgw_npwp').value.trim(),
+  }
+  if (!payload.nama) { showToast('Nama pegawai wajib diisi', 'err'); return }
+  const action = payload.id ? 'pegawai.update' : 'pegawai.simpan'
+  api(action, payload).then(() => {
+    showToast('✅ Pegawai tersimpan', 'ok')
+    resetFormPegawai()
+    loadPegawaiTable()
+  }).catch(err => showToast('❌ ' + err.message, 'err'))
+}
+
+function hapusPegawai(id) {
+  if (!confirm('Non-aktifkan pegawai ini?')) return
+  api('pegawai.hapus', { id }).then(() => {
+    showToast('✅ Pegawai dinonaktifkan', 'ok')
+    loadPegawaiTable()
+  }).catch(err => showToast('❌ ' + err.message, 'err'))
+}
+
+// Helper escape untuk template literal (jika belum ada)
+function escapeAttr(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+}
+
+// Konversi tanggal dd/MM/yyyy atau Date → yyyy-MM-dd untuk input[type=date]
+function toIsoDate(s) {
+  if (!s) return ''
+  if (s instanceof Date) return s.toISOString().split('T')[0]
+  const str = String(s).trim()
+  // sudah yyyy-MM-dd?
+  if (/^\d{4}-\d{2}-\d{2}/.test(str)) return str.slice(0, 10)
+  // dd/MM/yyyy
+  const parts = str.split('/')
+  if (parts.length === 3) {
+    return `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`
+  }
+  return ''
+}
+
 </script>
 </body>
 </html>

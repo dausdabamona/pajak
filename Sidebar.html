@@ -106,13 +106,14 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--te
 
 <div class="sb-header">
   <h1>🧮 Pajak Bendahara</h1>
-  <span class="ver">v1.0</span>
+  <span class="ver">v1.2</span>
 </div>
 
 <div class="tab-bar">
   <div class="tab active" onclick="showTab('kalkulator',this)">⚡ Hitung</div>
   <div class="tab" onclick="showTab('riwayat',this)">📋 Riwayat</div>
   <div class="tab" onclick="showTab('penyedia',this)">🏢 Penyedia</div>
+  <div class="tab" onclick="showTab('lainnya',this)">⋯</div>
 </div>
 
 <!-- ═══════════════════════════ HITUNG ═══════════════════════════ -->
@@ -171,6 +172,9 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--te
   <div id="sb_hasil" style="display:none">
     <div class="divider"></div>
     <div id="sb_warn_nonNpwp" class="warn" style="display:none">⚠️ Non-NPWP — tarif PPh 2×</div>
+    <div id="sb_warn_ppn_threshold" class="warn" style="display:none;background:#e8f5e9;border-color:#a5d6a7;color:#2e7d32">
+      ℹ️ DPP ≤ Rp2jt — PPN tidak dipungut (PMK 231/2019)
+    </div>
 
     <div class="hasil-grid">
       <div class="hasil-box h-pph"><div class="hb-label">PPh</div><div class="hb-value c-blue" id="sb_r_pph">—</div></div>
@@ -254,6 +258,36 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--te
   </div>
   <div class="field"><label>Kota</label><input type="text" id="sbp_kota" placeholder="Kota"></div>
   <button class="btn btn-primary" onclick="sbTambahPenyedia()">+ Simpan Penyedia</button>
+</div>
+
+<!-- ═══════════════════════════ LAINNYA ═══════════════════════════ -->
+<div class="panel" id="panel-lainnya">
+  <div class="section-title">Buka di Web App (browser)</div>
+  <p style="font-size:11px;color:var(--text2);margin-bottom:10px">
+    Sidebar terlalu sempit untuk fitur berikut. Klik untuk buka di tab baru.
+  </p>
+
+  <button class="btn btn-outline" onclick="sbBukaWebApp()" style="margin-bottom:10px">
+    🌐 Buka Web App Penuh
+  </button>
+
+  <div class="divider"></div>
+  <div class="section-title">Fitur Lengkap (Web App)</div>
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <button class="btn btn-outline btn-sm" onclick="sbBukaWebApp('kuitansi')">🧾 Kuitansi Bukti Pembayaran</button>
+    <button class="btn btn-outline btn-sm" onclick="sbBukaWebApp('honor')">📋 Daftar Nominatif Honor (PPh 21)</button>
+    <button class="btn btn-outline btn-sm" onclick="sbBukaWebApp('dashboard')">📊 Dashboard / Rekap Tahunan</button>
+    <button class="btn btn-outline btn-sm" onclick="sbBukaWebApp('pengaturan')">⚙️ Pengaturan Kop & Satker</button>
+  </div>
+
+  <div class="divider"></div>
+  <div class="section-title">Tentang</div>
+  <p style="font-size:11px;color:var(--text2);line-height:1.5">
+    <b>Pajak Bendahara v1.2.0</b><br>
+    Politeknik KP Sorong<br><br>
+    Aturan PPN ≤ Rp2jt mengikuti PMK 231/PMK.03/2019 Pasal 32 ayat (1).<br>
+    Tarif PPh 21 final atas honor PNS mengikuti PP 80/2010.
+  </p>
 </div>
 
 <!-- TOAST -->
@@ -409,6 +443,7 @@ function sbHitung() {
 function sbTampilHasil(h) {
   document.getElementById('sb_hasil').style.display='block'
   document.getElementById('sb_warn_nonNpwp').style.display=h.isNonNpwp&&h.nilaiPph>0?'block':'none'
+  document.getElementById('sb_warn_ppn_threshold').style.display=h.ppnDibawahThreshold?'block':'none'
   document.getElementById('sb_r_pph').textContent=fmtRpShort(h.nilaiPph)
   document.getElementById('sb_r_ppn').textContent=fmtRpShort(h.nilaiPpn)
   document.getElementById('sb_r_bayar').textContent=fmtRpShort(h.nilaiDibayar)
@@ -418,7 +453,7 @@ function sbTampilHasil(h) {
   document.getElementById('sb_tarif_pph').textContent=h.isNonNpwp&&h.tarifPphNormal>0
     ?`${pctStr(h.tarifPphNormal)} → ${pctStr(h.tarifPphEfektif)} (2×)`:pctStr(h.tarifPphNormal)
   document.getElementById('sb_dpp').textContent=fmtRp(h.dpp)
-  document.getElementById('sb_jenis_ppn').textContent=h.tarifPpn===0?'Bebas PPN':'PPN'
+  document.getElementById('sb_jenis_ppn').textContent=h.ppnDibawahThreshold?'Bebas PPN (≤Rp2jt)':(h.tarifPpn===0?'Bebas PPN':'PPN')
   document.getElementById('sb_tarif_ppn').textContent=pctStr(h.tarifPpn)
   document.getElementById('sb_cetak_pph').style.opacity=h.nilaiPph>0?'1':'.4'
   document.getElementById('sb_cetak_ppn').style.opacity=h.nilaiPpn>0?'1':'.4'
@@ -441,13 +476,18 @@ function sbHitungLokal(kode,nilai,inclPpn,statusNpwp){
   const k=LOKAL[kode]||{pph:'—',kap:'—',kjs:'—',tarif:0,ppn:0,bebas:false,ket:'—'}
   const isNon=String(statusNpwp).includes('NON')
   let te=k.tarif; if(isNon&&te>0)te*=2
-  const dpp=inclPpn&&k.ppn>0?nilai/(1+k.ppn):nilai
-  const nilaiInclPpn=!inclPpn&&k.ppn>0?nilai*(1+k.ppn):nilai
-  const nilaiPph=Math.round(dpp*te), nilaiPpn=Math.round(dpp*k.ppn)
+  const ppnNom=k.ppn
+  const dpp=inclPpn&&ppnNom>0?nilai/(1+ppnNom):nilai
+  // PMK 231/PMK.03/2019 Pasal 32 ayat (1): DPP ≤ Rp2.000.000 tidak dipungut PPN
+  const ppnDibawahThreshold = ppnNom>0 && Math.round(dpp)<=2000000
+  const ppnRate = ppnDibawahThreshold ? 0 : ppnNom
+  let nilaiInclPpn=!inclPpn&&ppnNom>0&&!ppnDibawahThreshold?nilai*(1+ppnNom):nilai
+  const nilaiPph=Math.round(dpp*te), nilaiPpn=Math.round(dpp*ppnRate)
   return{kodeKegiatan:kode,labelKegiatan:k.ket,nilaiKontrak:nilai,inclPpn,statusNpwp,isNonNpwp:isNon,
     dpp:Math.round(dpp),nilaiInclPpn:Math.round(nilaiInclPpn),
     jenisPph:k.pph,kapPph:k.kap,kjsPph:k.kjs,tarifPphNormal:k.tarif,tarifPphEfektif:te,nilaiPph,
-    tarifPpn:k.ppn,nilaiPpn,kapPpn:'411211',kjsPpn:'910',bebasPpn:k.bebas,ket:k.ket,
+    tarifPpn:ppnRate,tarifPpnNominal:ppnNom,nilaiPpn,kapPpn:'411211',kjsPpn:'910',
+    bebasPpn:k.bebas,ppnDibawahThreshold,ket:k.ket,
     totalPajak:nilaiPph+nilaiPpn,nilaiDibayar:Math.round(nilaiInclPpn)-nilaiPph-nilaiPpn,
     uraianPph:`${k.pph} atas ${k.ket}`,uraianPpn:`PPN atas ${k.ket}`}
 }
@@ -493,6 +533,19 @@ function sbCetak(jenis){
 function sbReset(){
   document.getElementById('sb_hasil').style.display='none'
   SB.lastHasil=null
+}
+
+// ─── BUKA WEB APP (browser) ───
+function sbBukaWebApp(tab){
+  google.script.run
+    .withSuccessHandler(url=>{
+      if(!url){sbToast('Web App belum di-deploy','err');return}
+      // Tab webapp = ?tab=kuitansi (read di webapp init untuk auto-switch)
+      const finalUrl = tab ? `${url}?tab=${tab}` : url
+      window.open(finalUrl, '_blank')
+    })
+    .withFailureHandler(()=>sbToast('Gagal ambil URL Web App','err'))
+    .getWebAppUrl()
 }
 
 // ─── RIWAYAT ───

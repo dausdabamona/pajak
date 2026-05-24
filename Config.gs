@@ -18,6 +18,8 @@ const CONFIG = {
     CONFIG_SATKER:   'CONFIG',           // Data satker & bendahara
     REKAP:           'REKAP',            // Sheet rekap otomatis (formula)
     KUITANSI:        'KUITANSI',         // Log kuitansi bukti pembayaran
+    MASTER_PEGAWAI:  'MASTER_PEGAWAI',   // Data pegawai (penerima honor)
+    HONOR_NOMINATIF: 'HONOR_NOMINATIF',  // Daftar nominatif penerima honor
   },
 
   // ── Kolom RIWAYAT (0-indexed) ──────────────────────────────────────────────
@@ -95,12 +97,54 @@ const CONFIG = {
     UPDATE_AT:    14,
   },
 
+  // ── Kolom MASTER_PEGAWAI (0-indexed) ──────────────────────────────────────
+  COL_PEGAWAI: {
+    ID:           0,
+    NIP:          1,
+    NAMA:         2,
+    JABATAN:      3,
+    GOLONGAN:     4,   // I / II / III / IV / Non-PNS
+    UNIT_KERJA:   5,
+    NPWP:         6,
+    STATUS_NPWP:  7,   // BER-NPWP / NON-NPWP
+    AKTIF:        8,   // TRUE/FALSE
+    TIMESTAMP:    9,
+    UPDATE_AT:    10,
+  },
+
+  // ── Kolom HONOR_NOMINATIF (0-indexed) ─────────────────────────────────────
+  COL_NOMINATIF: {
+    ID:                0,
+    TIMESTAMP:         1,
+    NO_SK:             2,
+    TGL_SK:            3,
+    PERIODE_BULAN:     4,   // 1..12
+    PERIODE_TAHUN:     5,
+    JUDUL:             6,
+    KEGIATAN:          7,
+    MAK:               8,
+    DETAIL_JSON:       9,   // array penerima dalam JSON
+    TOTAL_BRUTO:       10,
+    TOTAL_PPH:         11,
+    TOTAL_BERSIH:      12,
+    TEMPAT:            13,
+    TGL_SURAT:         14,
+    PPK_NAMA:          15,
+    PPK_NIP:           16,
+    BENDAHARA_NAMA:    17,
+    BENDAHARA_NIP:     18,
+    RIWAYAT_ID:        19,
+    KUITANSI_ID:       20,
+    OPERATOR:          21,
+    KETERANGAN:        22,
+  },
+
   // ── Timezone ───────────────────────────────────────────────────────────────
   TIMEZONE: 'Asia/Jayapura',  // WIT (UTC+9) — Sorong
 
   // ── Versi Aplikasi ─────────────────────────────────────────────────────────
   APP_NAME:    'Pajak Bendahara',
-  APP_VERSION: '1.1.0',
+  APP_VERSION: '1.2.0',
   SATKER:      'Politeknik Kelautan dan Perikanan Sorong',
 }
 
@@ -136,5 +180,19 @@ const SHEET_HEADERS = {
 
   CONFIG_SATKER: [
     'Key', 'Value',
+  ],
+
+  MASTER_PEGAWAI: [
+    'ID', 'NIP', 'Nama', 'Jabatan', 'Golongan', 'Unit Kerja',
+    'NPWP', 'Status NPWP', 'Aktif', 'Timestamp', 'Update At',
+  ],
+
+  HONOR_NOMINATIF: [
+    'ID', 'Timestamp', 'No SK', 'Tgl SK', 'Periode Bulan', 'Periode Tahun',
+    'Judul', 'Kegiatan', 'MAK', 'Detail JSON',
+    'Total Bruto', 'Total PPh', 'Total Bersih',
+    'Tempat', 'Tgl Surat',
+    'PPK Nama', 'PPK NIP', 'Bendahara Nama', 'Bendahara NIP',
+    'Riwayat ID', 'Kuitansi ID', 'Operator', 'Keterangan',
   ],
 }
