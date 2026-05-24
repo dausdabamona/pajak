@@ -1479,7 +1479,7 @@ function bukaWindowCetak(htmlPages, payload) {
 }
 
 function buildSSPWindow(pages, d) {
-  return `<!DOCTYPE html><html><head>
+  return `\x3C!DOCTYPE html>\x3Chtml>\x3Chead>
 <meta charset="UTF-8"><title>SSP Pajak</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -2274,7 +2274,7 @@ function bukaWindowCetakKuitansi(html) {
 }
 
 function buildKuitansiWindow(content) {
-  return `<!DOCTYPE html><html><head>
+  return `\x3C!DOCTYPE html>\x3Chtml>\x3Chead>
 <meta charset="UTF-8"><title>Kuitansi Bukti Pembayaran</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
