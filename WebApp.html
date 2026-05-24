@@ -3332,49 +3332,70 @@ function escapeAttr(s) {
 
 // ─── Pejabat penandatangan auto-from-config (Kuitansi & Honor) ───
 function kwUpdatePejabatDisplay() {
-  const ppkN  = (document.getElementById('kw_ppk_nama').value || '').trim() || (S.cfgSatker && S.cfgSatker.NAMA_PPK)      || '—'
-  const ppkNip= (document.getElementById('kw_ppk_nip').value  || '').trim() || (S.cfgSatker && S.cfgSatker.NIP_PPK)       || ''
-  const bn    = (document.getElementById('kw_bend_nama').value|| '').trim() || (S.cfgSatker && S.cfgSatker.NAMA_BENDAHARA)|| '—'
-  const bnip  = (document.getElementById('kw_bend_nip').value || '').trim() || (S.cfgSatker && S.cfgSatker.NIP_BENDAHARA) || ''
-  document.getElementById('kw_ppk_display').textContent      = ppkN
-  document.getElementById('kw_ppk_nip_display').textContent  = ppkNip ? `NIP. ${ppkNip}` : ''
-  document.getElementById('kw_bend_display').textContent     = bn
-  document.getElementById('kw_bend_nip_display').textContent = bnip ? `NIP. ${bnip}` : ''
+  const ppkN_el  = document.getElementById('kw_ppk_nama')
+  const ppkNip_el= document.getElementById('kw_ppk_nip')
+  const bn_el    = document.getElementById('kw_bend_nama')
+  const bnip_el  = document.getElementById('kw_bend_nip')
+  const disp_ppk = document.getElementById('kw_ppk_display')
+  const disp_pnip= document.getElementById('kw_ppk_nip_display')
+  const disp_bn  = document.getElementById('kw_bend_display')
+  const disp_bnip= document.getElementById('kw_bend_nip_display')
+  if (!disp_ppk || !disp_bn) return  // markup belum ter-update
+  const ppkN  = (ppkN_el  && ppkN_el.value  || '').trim() || (S.cfgSatker && S.cfgSatker.NAMA_PPK)      || '—'
+  const ppkNip= (ppkNip_el&& ppkNip_el.value|| '').trim() || (S.cfgSatker && S.cfgSatker.NIP_PPK)       || ''
+  const bn    = (bn_el    && bn_el.value    || '').trim() || (S.cfgSatker && S.cfgSatker.NAMA_BENDAHARA)|| '—'
+  const bnip  = (bnip_el  && bnip_el.value  || '').trim() || (S.cfgSatker && S.cfgSatker.NIP_BENDAHARA) || ''
+  disp_ppk.textContent       = ppkN
+  if (disp_pnip) disp_pnip.textContent = ppkNip ? `NIP. ${ppkNip}` : ''
+  disp_bn.textContent        = bn
+  if (disp_bnip) disp_bnip.textContent = bnip ? `NIP. ${bnip}` : ''
 }
 function kwTogglePejabat() {
   const box = document.getElementById('kw_pejabat_inputs')
   const btn = document.getElementById('kw_btn_override_pejabat')
+  if (!box) return
   const open = box.style.display === 'none'
   box.style.display = open ? 'block' : 'none'
-  btn.textContent = open ? '✕ Tutup Override' : '✏️ Override untuk kuitansi ini'
+  if (btn) btn.textContent = open ? '✕ Tutup Override' : '✏️ Override untuk kuitansi ini'
 }
 function hnUpdatePejabatDisplay() {
-  const ppkN  = (document.getElementById('hn_ppk_nama').value || '').trim() || (S.cfgSatker && S.cfgSatker.NAMA_PPK)      || '—'
-  const ppkNip= (document.getElementById('hn_ppk_nip').value  || '').trim() || (S.cfgSatker && S.cfgSatker.NIP_PPK)       || ''
-  const bn    = (document.getElementById('hn_bend_nama').value|| '').trim() || (S.cfgSatker && S.cfgSatker.NAMA_BENDAHARA)|| '—'
-  const bnip  = (document.getElementById('hn_bend_nip').value || '').trim() || (S.cfgSatker && S.cfgSatker.NIP_BENDAHARA) || ''
-  document.getElementById('hn_ppk_display').textContent      = ppkN
-  document.getElementById('hn_ppk_nip_display').textContent  = ppkNip ? `NIP. ${ppkNip}` : ''
-  document.getElementById('hn_bend_display').textContent     = bn
-  document.getElementById('hn_bend_nip_display').textContent = bnip ? `NIP. ${bnip}` : ''
+  const ppkN_el  = document.getElementById('hn_ppk_nama')
+  const ppkNip_el= document.getElementById('hn_ppk_nip')
+  const bn_el    = document.getElementById('hn_bend_nama')
+  const bnip_el  = document.getElementById('hn_bend_nip')
+  const disp_ppk = document.getElementById('hn_ppk_display')
+  const disp_pnip= document.getElementById('hn_ppk_nip_display')
+  const disp_bn  = document.getElementById('hn_bend_display')
+  const disp_bnip= document.getElementById('hn_bend_nip_display')
+  if (!disp_ppk || !disp_bn) return
+  const ppkN  = (ppkN_el  && ppkN_el.value  || '').trim() || (S.cfgSatker && S.cfgSatker.NAMA_PPK)      || '—'
+  const ppkNip= (ppkNip_el&& ppkNip_el.value|| '').trim() || (S.cfgSatker && S.cfgSatker.NIP_PPK)       || ''
+  const bn    = (bn_el    && bn_el.value    || '').trim() || (S.cfgSatker && S.cfgSatker.NAMA_BENDAHARA)|| '—'
+  const bnip  = (bnip_el  && bnip_el.value  || '').trim() || (S.cfgSatker && S.cfgSatker.NIP_BENDAHARA) || ''
+  disp_ppk.textContent       = ppkN
+  if (disp_pnip) disp_pnip.textContent = ppkNip ? `NIP. ${ppkNip}` : ''
+  disp_bn.textContent        = bn
+  if (disp_bnip) disp_bnip.textContent = bnip ? `NIP. ${bnip}` : ''
 }
 function hnTogglePejabat() {
   const box = document.getElementById('hn_pejabat_inputs')
   const btn = document.getElementById('hn_btn_override_pejabat')
+  if (!box) return
   const open = box.style.display === 'none'
   box.style.display = open ? 'block' : 'none'
-  btn.textContent = open ? '✕ Tutup Override' : '✏️ Override untuk nominatif ini'
+  if (btn) btn.textContent = open ? '✕ Tutup Override' : '✏️ Override untuk nominatif ini'
 }
 
 // Preview logo di Pengaturan (otomatis normalisasi Drive URL)
 function updateLogoPreview() {
-  const rawUrl = document.getElementById('cfg_kop_logo').value.trim()
+  const input = document.getElementById('cfg_kop_logo')
   const box = document.getElementById('cfg_kop_logo_box')
   const img = document.getElementById('cfg_kop_logo_preview')
   const err = document.getElementById('cfg_kop_logo_err')
+  if (!input || !box || !img) return
+  const rawUrl = (input.value || '').trim()
   if (!rawUrl) { box.style.display = 'none'; return }
   const normalized = normalizeLogoUrl(rawUrl)
-  // Beri tahu user jika URL diubah
   const note = document.getElementById('cfg_kop_logo_note')
   if (note) {
     if (normalized !== rawUrl) {
@@ -3386,7 +3407,7 @@ function updateLogoPreview() {
   }
   box.style.display = 'block'
   img.style.display = 'inline-block'
-  err.style.display = 'none'
+  if (err) err.style.display = 'none'
   img.src = normalized
 }
 
