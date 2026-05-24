@@ -242,6 +242,60 @@ function refreshRekap() {
   SpreadsheetApp.getUi().alert('✅ Rekap berhasil diperbarui!')
 }
 
+/**
+ * Verifikasi integritas file WebApp.html — jalankan manual untuk
+ * memastikan file ter-update lengkap setelah copy-paste dari repo.
+ *
+ * Cara pakai:
+ *   1. Apps Script editor → file Code.gs
+ *   2. Pilih function "verifyWebApp" di dropdown atas → klik ▶ Run
+ *   3. Lihat output di "Execution log"
+ */
+function verifyWebApp() {
+  const checks = []
+  try {
+    const content = HtmlService.createHtmlOutputFromFile('WebApp').getContent()
+    const len = content.length
+    checks.push('Total karakter: ' + len + ' (target: kurang lebih 178000)')
+
+    const mustHave = [
+      ['function showPage',             'function showPage('],
+      ['function api',                  'function api('],
+      ['tab Honor',                     "showPage('honor'"],
+      ['tab Kuitansi',                  "showPage('kuitansi'"],
+      ['closing /html',                 '</html>'],
+      ['function kwUpdatePejabatDisplay','function kwUpdatePejabatDisplay'],
+      ['function normalizeLogoUrl',     'function normalizeLogoUrl'],
+    ]
+    mustHave.forEach(function(c) {
+      const found = content.indexOf(c[1]) !== -1
+      checks.push((found ? '[OK] ' : '[MISSING] ') + c[0])
+    })
+
+    // Cek karakter mencurigakan
+    const nbsp  = (content.match(/ /g) || []).length
+    const zwsp  = (content.match(/[​‌‍﻿]/g) || []).length
+    const smart = (content.match(/[‘’“”]/g) || []).length
+    checks.push((nbsp  === 0 ? '[OK] ' : '[WARN] ') + 'Non-breaking spaces: ' + nbsp)
+    checks.push((zwsp  === 0 ? '[OK] ' : '[WARN] ') + 'Zero-width chars: '   + zwsp)
+    checks.push((smart === 0 ? '[OK] ' : '[WARN] ') + 'Smart quotes: '       + smart)
+
+    const openDiv  = (content.match(/<div\b/g) || []).length
+    const closeDiv = (content.match(/<\/div>/g) || []).length
+    checks.push((openDiv === closeDiv ? '[OK] ' : '[WARN] ') +
+                '<div>: ' + openDiv + ' buka / ' + closeDiv + ' tutup')
+
+    Logger.log('===== VERIFIKASI WEBAPP.HTML =====')
+    checks.forEach(function(c) { Logger.log(c) })
+    Logger.log('==================================')
+
+    return { ok: true, checks: checks }
+  } catch (err) {
+    Logger.log('ERROR membaca WebApp.html: ' + err.message)
+    return { ok: false, error: err.message }
+  }
+}
+
 function tentangAplikasi() {
   SpreadsheetApp.getUi().alert(
     'Tentang Aplikasi',
