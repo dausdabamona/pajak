@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Tab Test</title>
+<style>
+body { font-family: Arial; padding: 20px; }
+.nav { display: flex; gap: 8px; border-bottom: 2px solid #1a73e8; margin-bottom: 20px; }
+.tab { padding: 10px 20px; cursor: pointer; background: #f1f3f4; border-radius: 4px 4px 0 0; }
+.tab.active { background: #1a73e8; color: white; }
+.page { display: none; padding: 20px; background: #fff; border: 1px solid #ddd; }
+.page.active { display: block; }
+</style>
+</head>
+<body>
+
+<h2>🧪 Tab Navigation Test</h2>
+<p>Kalau klik tab di bawah ini bisa pindah, berarti Apps Script render JS normal.</p>
+
+<div class="nav">
+  <div class="tab active" onclick="showPage('a', this)">Tab A</div>
+  <div class="tab" onclick="showPage('b', this)">Tab B</div>
+  <div class="tab" onclick="showPage('c', this)">Tab C</div>
+</div>
+
+<div id="page-a" class="page active">
+  <h3>Halaman A</h3>
+  <p>Ini halaman A. Tab bekerja normal.</p>
+</div>
+<div id="page-b" class="page">
+  <h3>Halaman B</h3>
+  <p>Ini halaman B.</p>
+</div>
+<div id="page-c" class="page">
+  <h3>Halaman C</h3>
+  <p>Ini halaman C.</p>
+</div>
+
+<p id="status" style="margin-top:30px;color:green;font-weight:bold">✅ Script ter-load dengan baik. Klik tab di atas untuk test.</p>
+
+<script>
+function showPage(name, tabEl) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+  document.getElementById('page-' + name).classList.add('active')
+  tabEl.classList.add('active')
+  document.getElementById('status').textContent = '✅ Berpindah ke tab ' + name.toUpperCase() + ' — JS BEKERJA!'
+}
+console.log('✅ Tab test script loaded successfully')
+</script>
+
+</body>
+</html>
