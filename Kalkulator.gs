@@ -211,21 +211,32 @@ function hitungPajak(input) {
 
   const k       = getJenisKegiatan(kodeKegiatan)
   const nilai   = Number(nilaiKontrak)
-  const ppnRate = k.ppn
 
   // ── Hitung DPP ─────────────────────────────────────────────────────────
   let dpp
   let nilaiInclPpn
 
+  // Gunakan ppnRate sementara untuk ekstrak DPP (sebelum threshold dicek)
+  const ppnRateNominal = k.ppn
+
   if (inclPpn) {
-    // Nilai sudah termasuk PPN → ekstrak balik
-    dpp         = ppnRate > 0 ? nilai / (1 + ppnRate) : nilai
+    dpp          = ppnRateNominal > 0 ? nilai / (1 + ppnRateNominal) : nilai
     nilaiInclPpn = nilai
   } else {
-    // Nilai belum termasuk PPN
     dpp          = nilai
-    nilaiInclPpn = ppnRate > 0 ? nilai * (1 + ppnRate) : nilai
+    nilaiInclPpn = ppnRateNominal > 0 ? nilai * (1 + ppnRateNominal) : nilai
   }
+
+  // ── Ambang batas PPN: DPP ≤ Rp2.000.000 tidak dipungut PPN ────────────
+  // Dasar hukum: PMK No. 231/PMK.03/2019 Pasal 32 ayat (1) — Instansi
+  // Pemerintah sebagai Pemungut PPN tidak memungut PPN atas penyerahan BKP
+  // dan/atau JKP dengan nilai penyerahan (DPP) tidak melebihi Rp2.000.000.
+  const PPN_THRESHOLD = 2000000
+  const ppnDibawahThreshold = ppnRateNominal > 0 && Math.round(dpp) <= PPN_THRESHOLD
+  const ppnRate = ppnDibawahThreshold ? 0 : ppnRateNominal
+
+  // Jika PPN tidak dipungut karena threshold, nilai incl PPN = DPP saja
+  if (ppnDibawahThreshold && !inclPpn) nilaiInclPpn = nilai
 
   // ── Tarif PPh (non-NPWP = 2x) ──────────────────────────────────────────
   const isNonNpwp   = String(statusNpwp).toUpperCase().includes('NON')
@@ -278,10 +289,12 @@ function hitungPajak(input) {
 
     // PPN
     tarifPpn:        ppnRate,
+    tarifPpnNominal: ppnRateNominal,
     nilaiPpn,
     kapPpn:          '411211',
     kjsPpn:          '910',
     bebasPpn:        k.bebasPpn,
+    ppnDibawahThreshold,
     uraianPpn,
 
     // Total

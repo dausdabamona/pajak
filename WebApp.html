@@ -262,6 +262,10 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
       <div id="warn_nonNpwp" class="warn-box" style="display:none">
         ⚠️ Rekanan <b>NON-NPWP</b> — tarif PPh dikenakan <b>2×</b> lipat dari tarif normal.
       </div>
+      <div id="warn_ppn_threshold" class="warn-box" style="display:none;background:#e8f5e9;border-left-color:#43a047;color:#2e7d32">
+        ℹ️ DPP ≤ Rp2.000.000 — <b>PPN tidak dipungut</b> oleh Bendahara Pemerintah.<br>
+        <small>Dasar: PMK No. 231/PMK.03/2019 Pasal 32 ayat (1)</small>
+      </div>
 
       <div class="hasil-grid">
         <div class="hasil-box h-pph">
@@ -535,6 +539,9 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
           <tr><td>PPN dipungut</td><td id="kw_ah_ppn" style="color:var(--accent2);font-weight:700">—</td></tr>
           <tr><td>Diterima Penyedia</td><td id="kw_ah_bayar" style="color:var(--yellow);font-weight:700">—</td></tr>
         </table>
+        <div id="kw_ah_threshold_note" style="display:none;margin-top:8px;font-size:11px;color:#2e7d32;background:#e8f5e9;padding:6px 8px;border-radius:4px;border-left:3px solid #43a047">
+          ℹ️ DPP ≤ Rp2.000.000 — PPN tidak dipungut (PMK 231/PMK.03/2019 Psl. 32)
+        </div>
       </div>
     </div>
 
@@ -1079,15 +1086,18 @@ function hitungPajak() {
 function tampilkanHasil(h) {
   document.getElementById('hasil-section').style.display = 'block'
   document.getElementById('warn_nonNpwp').style.display = h.isNonNpwp && h.nilaiPph > 0 ? 'flex' : 'none'
+  document.getElementById('warn_ppn_threshold').style.display = h.ppnDibawahThreshold ? 'block' : 'none'
 
   document.getElementById('r_pph').textContent = fmtRp(h.nilaiPph)
   document.getElementById('r_pph_sub').textContent = h.nilaiPph === 0
     ? 'Tidak ada pemotongan PPh'
     : `${pctStr(h.tarifPphEfektif)} × DPP ${fmtRp(h.dpp)}`
   document.getElementById('r_ppn').textContent = fmtRp(h.nilaiPpn)
-  document.getElementById('r_ppn_sub').textContent = h.nilaiPpn === 0
-    ? 'Tidak ada pemungutan PPN'
-    : `${pctStr(h.tarifPpn)} × DPP ${fmtRp(h.dpp)}`
+  document.getElementById('r_ppn_sub').textContent = h.ppnDibawahThreshold
+    ? `DPP ${fmtRp(h.dpp)} ≤ Rp2.000.000 — tidak dipungut (PMK 231/2019)`
+    : (h.nilaiPpn === 0
+        ? 'Tidak ada pemungutan PPN'
+        : `${pctStr(h.tarifPpn)} × DPP ${fmtRp(h.dpp)}`)
   document.getElementById('r_bayar').textContent  = fmtRp(h.nilaiDibayar)
   document.getElementById('r_total').textContent  = fmtRp(h.totalPajak)
 
@@ -1131,18 +1141,23 @@ function hitungLokal(kode, nilai, inclPpn, statusNpwp) {
   const isNon = String(statusNpwp).includes('NON')
   let tEfektif = k.tarif
   if (isNon && tEfektif > 0) tEfektif *= 2
-  const dpp = inclPpn && k.ppn > 0 ? nilai/(1+k.ppn) : nilai
-  const nilaiInclPpn = !inclPpn && k.ppn > 0 ? nilai*(1+k.ppn) : (inclPpn ? nilai : nilai)
+  const ppnNominal = k.ppn
+  const dpp = inclPpn && ppnNominal > 0 ? nilai/(1+ppnNominal) : nilai
+  // PMK 231/PMK.03/2019 Pasal 32 ayat (1): DPP ≤ Rp2.000.000 tidak dipungut PPN
+  const ppnDibawahThreshold = ppnNominal > 0 && Math.round(dpp) <= 2000000
+  const ppnRate = ppnDibawahThreshold ? 0 : ppnNominal
+  let nilaiInclPpn = !inclPpn && ppnNominal > 0 && !ppnDibawahThreshold ? nilai*(1+ppnNominal) : (inclPpn ? nilai : nilai)
   const nilaiPph  = Math.round(dpp * tEfektif)
-  const nilaiPpn  = Math.round(dpp * k.ppn)
+  const nilaiPpn  = Math.round(dpp * ppnRate)
   return {
     kodeKegiatan:kode, labelKegiatan:k.ket, nilaiKontrak:nilai,
     inclPpn, statusNpwp, isNonNpwp:isNon,
     dpp:Math.round(dpp), nilaiInclPpn:Math.round(nilaiInclPpn),
     jenisPph:k.pph, kapPph:k.kap, kjsPph:k.kjs,
     tarifPphNormal:k.tarif, tarifPphEfektif:tEfektif, nilaiPph,
-    tarifPpn:k.ppn, nilaiPpn, kapPpn:'411211', kjsPpn:'910',
-    bebasPpn:k.bebas, ket:k.ket,
+    tarifPpn:ppnRate, tarifPpnNominal:ppnNominal, nilaiPpn,
+    kapPpn:'411211', kjsPpn:'910',
+    bebasPpn:k.bebas, ppnDibawahThreshold, ket:k.ket,
     totalPajak:nilaiPph+nilaiPpn,
     nilaiDibayar:Math.round(nilaiInclPpn)-nilaiPph-nilaiPpn,
     uraianPph:`${k.pph} atas ${k.ket}`,
@@ -1932,6 +1947,7 @@ function kwTerapkanHasil(h) {
   document.getElementById('kw_ah_ppn').textContent = fmtRp(h.nilaiPpn)
   document.getElementById('kw_ah_bayar').textContent = fmtRp(h.nilaiDibayar)
   document.getElementById('kw_ah_dpp').textContent = fmtRp(h.dpp) + ` (${h.labelKegiatan || ''})`
+  document.getElementById('kw_ah_threshold_note').style.display = h.ppnDibawahThreshold ? 'block' : 'none'
 
   // Auto-isi field kuitansi (gunakan nilai total termasuk PPN sebagai "Uang Sejumlah")
   const total = h.nilaiInclPpn || (h.dpp + h.nilaiPpn)
