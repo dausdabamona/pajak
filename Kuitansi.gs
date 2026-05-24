@@ -323,12 +323,13 @@ function buildKuitansiPage(d, cfg) {
   const kopSurel = cfg['KOP_SUREL'] || ''
   const kopLogoUrl = cfg['KOP_LOGO_URL'] || ''
 
-  const logoBlock = kopLogoUrl
-    ? `<img src="${escapeHtml(kopLogoUrl)}" style="width:22mm;height:22mm;object-fit:contain">`
-    : `<div style="width:22mm;height:22mm;border:1px solid #999;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7pt;color:#999;text-align:center;line-height:1.2">LOGO<br>KKP</div>`
+  const logoNormalized = normalizeLogoUrlServer(kopLogoUrl)
+  const logoBlock = logoNormalized
+    ? `<img src="${escapeHtml(logoNormalized)}" alt="logo">`
+    : `<div style="width:24mm;height:24mm;border:1.5pt solid #1f3a5f;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7pt;color:#1f3a5f;text-align:center;line-height:1.2;font-family:'Cormorant Garamond',serif">LOGO<br>SATKER</div>`
 
   return `<div class="kw-page">
-  <!-- ── KOP SURAT ── -->
+  <!-- KOP SURAT -->
   <div class="kw-kop">
     <div class="kw-kop-logo">${logoBlock}</div>
     <div class="kw-kop-text">
@@ -338,24 +339,27 @@ function buildKuitansiPage(d, cfg) {
       <div class="kw-kop-l1">${escapeHtml(kopBaris4)}</div>
       <div class="kw-kop-alamat">${escapeHtml(kopAlamat)}</div>
       <div class="kw-kop-alamat">${escapeHtml(kopKotakPos)}</div>
-      <div class="kw-kop-alamat">LAMAN <i>${escapeHtml(kopLaman)}</i> SUREL <i>${escapeHtml(kopSurel)}</i></div>
+      <div class="kw-kop-alamat">Laman: <i>${escapeHtml(kopLaman)}</i> &nbsp;&middot;&nbsp; Surel: <i>${escapeHtml(kopSurel)}</i></div>
     </div>
   </div>
   <div class="kw-divider"></div>
 
-  <!-- ── NO KUITANSI & TA ── -->
+  <!-- NO KUITANSI & TA -->
   <table class="kw-meta">
     <tr>
       <td class="kw-meta-label">No Kuitansi</td>
-      <td class="kw-meta-val"><b>${escapeHtml(d['No Kuitansi'])}</b></td>
-      <td class="kw-meta-ta">T.A ${escapeHtml(String(d['Tahun Anggaran']))}</td>
+      <td class="kw-meta-val">${escapeHtml(d['No Kuitansi'])}</td>
+      <td class="kw-meta-ta">T.A. ${escapeHtml(String(d['Tahun Anggaran']))}</td>
     </tr>
   </table>
 
-  <!-- ── JUDUL ── -->
-  <div class="kw-title">KUITANSI BUKTI PEMBAYARAN</div>
+  <!-- JUDUL -->
+  <div class="kw-title-wrap">
+    <div class="kw-title">Kuitansi Bukti Pembayaran</div>
+    <div class="kw-title-sub">— Surat Bukti Tanda Terima Uang —</div>
+  </div>
 
-  <!-- ── FIELDS ── -->
+  <!-- FIELDS UTAMA -->
   <table class="kw-body">
     <tr>
       <td class="kw-lbl">Telah terima dari</td>
@@ -365,7 +369,7 @@ function buildKuitansiPage(d, cfg) {
     <tr>
       <td class="kw-lbl">Uang sejumlah</td>
       <td class="kw-sep">:</td>
-      <td class="kw-fill"><b>${fmtRpKoma(d['Uang Sejumlah'])}</b></td>
+      <td class="kw-fill"><span class="kw-amount-box">Rp ${fmtRpKoma(d['Uang Sejumlah'])}</span></td>
     </tr>
     <tr>
       <td class="kw-lbl">Terbilang</td>
@@ -379,57 +383,79 @@ function buildKuitansiPage(d, cfg) {
     </tr>
   </table>
 
-  <!-- ── RINCIAN ── -->
-  <table class="kw-rincian">
-    <tr>
-      <td class="kw-r-lbl">- Besarnya pembayaran</td>
-      <td class="kw-r-val">Rp${fmtRp(d['Besarnya Pembayaran'])}</td>
-    </tr>
-    <tr>
-      <td class="kw-r-lbl">PPN</td>
-      <td class="kw-r-val">Rp${fmtRp(d['Nilai PPN'])}</td>
-    </tr>
-    <tr>
-      <td class="kw-r-lbl">PPh</td>
-      <td class="kw-r-val">Rp${fmtRp(d['Nilai PPh'])}</td>
-    </tr>
-    <tr class="kw-r-total">
-      <td class="kw-r-lbl"><b>- Yang diterima</b></td>
-      <td class="kw-r-val"><b>Rp${fmtRp(d['Yang Diterima'])}</b></td>
-    </tr>
-  </table>
-
-  <!-- ── TANGGAL & PENERIMA ── -->
-  <div class="kw-tgl-block">
-    <div class="kw-tgl">${escapeHtml(d['Tempat'])} , ${tglIndo}</div>
-    <div class="kw-yg-terima">Yang menerima,</div>
-    <div class="kw-spasi-ttd"></div>
-    <div class="kw-penerima"><b>${escapeHtml(d['Penerima Nama'])}</b></div>
+  <!-- RINCIAN -->
+  <div class="kw-rincian-wrap">
+    <table class="kw-rincian">
+      <tr>
+        <td class="kw-r-lbl">Besarnya pembayaran</td>
+        <td class="kw-r-val">Rp ${fmtRp(d['Besarnya Pembayaran'])}</td>
+      </tr>
+      <tr>
+        <td class="kw-r-lbl">PPN dipungut</td>
+        <td class="kw-r-val">Rp ${fmtRp(d['Nilai PPN'])}</td>
+      </tr>
+      <tr>
+        <td class="kw-r-lbl">PPh dipotong</td>
+        <td class="kw-r-val">Rp ${fmtRp(d['Nilai PPh'])}</td>
+      </tr>
+      <tr class="kw-r-total">
+        <td class="kw-r-lbl">Yang diterima</td>
+        <td class="kw-r-val">Rp ${fmtRp(d['Yang Diterima'])}</td>
+      </tr>
+    </table>
   </div>
 
-  <!-- ── SETUJU + TTD PPK & BENDAHARA ── -->
-  <div class="kw-setuju">Setuju dan lunas dibayar Tgl ${tglIndo}</div>
+  <!-- TANGGAL & PENERIMA -->
+  <div class="kw-tgl-block">
+    <div class="kw-tgl">${escapeHtml(d['Tempat'])}, ${tglIndo}</div>
+    <div class="kw-yg-terima">Yang menerima,</div>
+    <div class="kw-penerima">${escapeHtml(d['Penerima Nama'])}</div>
+  </div>
+
+  <!-- SETUJU + TTD -->
+  <div class="kw-setuju">Setuju dan lunas dibayar pada tanggal ${tglIndo}</div>
   <table class="kw-ttd-area">
     <tr>
       <td class="kw-ttd-col">
-        <div>Pejabat Pembuat Komitmen</div>
-        <div class="kw-spasi-ttd"></div>
-        <div class="kw-ttd-nama"><b>${escapeHtml(d['PPK Nama'])}</b></div>
+        <div class="kw-ttd-jab">Pejabat Pembuat Komitmen,</div>
+        <div class="kw-ttd-nama">${escapeHtml(d['PPK Nama'])}</div>
         <div class="kw-ttd-nip">NIP. ${escapeHtml(d['PPK NIP'])}</div>
       </td>
       <td class="kw-ttd-col">
-        <div>Bendahara Pengeluaran</div>
-        <div class="kw-spasi-ttd"></div>
-        <div class="kw-ttd-nama"><b>${escapeHtml(d['Bendahara Nama'])}</b></div>
+        <div class="kw-ttd-jab">Bendahara Pengeluaran,</div>
+        <div class="kw-ttd-nama">${escapeHtml(d['Bendahara Nama'])}</div>
         <div class="kw-ttd-nip">NIP. ${escapeHtml(d['Bendahara NIP'])}</div>
       </td>
     </tr>
   </table>
 
-  <!-- ── MAK ── -->
-  <div class="kw-mak">MAK</div>
-  <div class="kw-mak-val">${escapeHtml(d['MAK'])}</div>
+  <!-- MAK -->
+  <div class="kw-mak-wrap">
+    <span class="kw-mak">MAK</span>
+    <span class="kw-mak-val">${escapeHtml(d['MAK'])}</span>
+  </div>
 </div>`
+}
+
+/**
+ * Normalisasi URL logo (Drive sharing URL → format yang bisa dimuat sebagai gambar).
+ * Dipakai server-side saat build HTML kuitansi/nominatif.
+ */
+function normalizeLogoUrlServer(url) {
+  if (!url) return ''
+  const s = String(url).trim()
+  const patterns = [
+    /drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/,
+    /drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/,
+    /drive\.google\.com\/uc\?[^"']*id=([a-zA-Z0-9_-]+)/,
+    /drive\.google\.com\/thumbnail\?[^"']*id=([a-zA-Z0-9_-]+)/,
+    /lh3\.googleusercontent\.com\/d\/([a-zA-Z0-9_-]+)/,
+  ]
+  for (let i = 0; i < patterns.length; i++) {
+    const m = s.match(patterns[i])
+    if (m && m[1]) return `https://lh3.googleusercontent.com/d/${m[1]}=w400`
+  }
+  return s
 }
 
 /**

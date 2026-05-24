@@ -602,16 +602,29 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
       </div>
     </div>
 
-    <!-- Pejabat -->
+    <!-- Pejabat (auto dari Pengaturan, bisa override) -->
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px">
-      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;margin-bottom:10px">Pejabat Penandatangan</div>
-      <div class="grid-2" style="margin-bottom:10px">
-        <div class="field"><label>Nama PPK</label><input type="text" id="kw_ppk_nama"></div>
-        <div class="field"><label>NIP PPK</label><input type="text" id="kw_ppk_nip"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+        <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase">
+          Pejabat Penandatangan
+          <span style="color:var(--text3);font-weight:400;text-transform:none;margin-left:4px">— otomatis dari Pengaturan</span>
+        </div>
+        <button type="button" class="btn btn-outline btn-sm" onclick="kwTogglePejabat()" id="kw_btn_override_pejabat">✏️ Override untuk kuitansi ini</button>
       </div>
-      <div class="grid-2">
-        <div class="field"><label>Nama Bendahara Pengeluaran</label><input type="text" id="kw_bend_nama"></div>
-        <div class="field"><label>NIP Bendahara</label><input type="text" id="kw_bend_nip"></div>
+      <div id="kw_pejabat_summary" style="font-size:13px;line-height:1.7;color:var(--text)">
+        <div>👤 <b>PPK:</b> <span id="kw_ppk_display" style="color:var(--accent)">—</span> <span style="color:var(--text3);font-size:11px" id="kw_ppk_nip_display">—</span></div>
+        <div>💼 <b>Bendahara:</b> <span id="kw_bend_display" style="color:var(--accent2)">—</span> <span style="color:var(--text3);font-size:11px" id="kw_bend_nip_display">—</span></div>
+      </div>
+      <div id="kw_pejabat_inputs" style="display:none;margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)">
+        <div class="grid-2" style="margin-bottom:10px">
+          <div class="field"><label>Nama PPK</label><input type="text" id="kw_ppk_nama" oninput="kwUpdatePejabatDisplay()"></div>
+          <div class="field"><label>NIP PPK</label><input type="text" id="kw_ppk_nip" oninput="kwUpdatePejabatDisplay()"></div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><label>Nama Bendahara Pengeluaran</label><input type="text" id="kw_bend_nama" oninput="kwUpdatePejabatDisplay()"></div>
+          <div class="field"><label>NIP Bendahara</label><input type="text" id="kw_bend_nip" oninput="kwUpdatePejabatDisplay()"></div>
+        </div>
+        <div class="hint" style="margin-top:6px">💡 Jika tidak diisi, akan dipakai dari Pengaturan. Override hanya berlaku untuk kuitansi ini.</div>
       </div>
     </div>
 
@@ -761,12 +774,30 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
       <div class="terbilang" id="hn_terbilang" style="margin-top:6px;font-style:italic;color:var(--text2)">Terbilang: —</div>
     </div>
 
-    <!-- PPK & Bendahara -->
-    <div class="form-grid" style="margin-top:12px">
-      <div class="field"><label>PPK Nama</label><input type="text" id="hn_ppk_nama"></div>
-      <div class="field"><label>PPK NIP</label><input type="text" id="hn_ppk_nip"></div>
-      <div class="field"><label>Bendahara Nama</label><input type="text" id="hn_bend_nama"></div>
-      <div class="field"><label>Bendahara NIP</label><input type="text" id="hn_bend_nip"></div>
+    <!-- PPK & Bendahara (auto dari Pengaturan, bisa override) -->
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+        <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase">
+          Pejabat Penandatangan
+          <span style="color:var(--text3);font-weight:400;text-transform:none;margin-left:4px">— otomatis dari Pengaturan</span>
+        </div>
+        <button type="button" class="btn btn-outline btn-sm" onclick="hnTogglePejabat()" id="hn_btn_override_pejabat">✏️ Override untuk nominatif ini</button>
+      </div>
+      <div id="hn_pejabat_summary" style="font-size:13px;line-height:1.7;color:var(--text)">
+        <div>👤 <b>PPK:</b> <span id="hn_ppk_display" style="color:var(--accent)">—</span> <span style="color:var(--text3);font-size:11px" id="hn_ppk_nip_display">—</span></div>
+        <div>💼 <b>Bendahara:</b> <span id="hn_bend_display" style="color:var(--accent2)">—</span> <span style="color:var(--text3);font-size:11px" id="hn_bend_nip_display">—</span></div>
+      </div>
+      <div id="hn_pejabat_inputs" style="display:none;margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)">
+        <div class="grid-2" style="margin-bottom:10px">
+          <div class="field"><label>Nama PPK</label><input type="text" id="hn_ppk_nama" oninput="hnUpdatePejabatDisplay()"></div>
+          <div class="field"><label>NIP PPK</label><input type="text" id="hn_ppk_nip" oninput="hnUpdatePejabatDisplay()"></div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><label>Nama Bendahara</label><input type="text" id="hn_bend_nama" oninput="hnUpdatePejabatDisplay()"></div>
+          <div class="field"><label>NIP Bendahara</label><input type="text" id="hn_bend_nip" oninput="hnUpdatePejabatDisplay()"></div>
+        </div>
+        <div class="hint" style="margin-top:6px">💡 Jika tidak diisi, akan dipakai dari Pengaturan.</div>
+      </div>
     </div>
 
     <!-- Tombol -->
@@ -976,8 +1007,16 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
     </div>
     <div class="field" style="margin-bottom:10px">
       <label>URL Logo (opsional)</label>
-      <input type="text" id="cfg_kop_logo" placeholder="https://...">
-      <div class="hint">URL gambar logo (PNG/SVG). Kosongkan jika tidak ada.</div>
+      <input type="text" id="cfg_kop_logo" placeholder="https://drive.google.com/file/d/.../view  atau  URL gambar publik" oninput="updateLogoPreview()">
+      <div class="hint">
+        💡 <b>Bisa langsung paste URL share Drive</b> (format <code>https://drive.google.com/file/d/.../view</code>) — otomatis dikonversi.<br>
+        Penting: file di Drive harus di-share <b>"Anyone with the link → Viewer"</b> agar bisa diakses.
+      </div>
+      <div id="cfg_kop_logo_note" style="display:none;margin-top:6px;font-size:11px;color:var(--accent);background:#e8f0fe;padding:6px 8px;border-radius:4px"></div>
+      <div id="cfg_kop_logo_box" style="margin-top:8px;padding:10px;background:#fff;border:1px dashed var(--border);border-radius:6px;display:none;text-align:center">
+        <img id="cfg_kop_logo_preview" alt="logo" style="max-width:120px;max-height:120px;object-fit:contain" onerror="this.style.display='none';document.getElementById('cfg_kop_logo_err').style.display='block'">
+        <div id="cfg_kop_logo_err" style="display:none;color:var(--accent3);font-size:11px">⚠️ Gambar tidak bisa dimuat. Pastikan file di Drive di-share "Anyone with the link".</div>
+      </div>
     </div>
     <div class="field" style="margin-bottom:10px">
       <label>Default "Telah terima dari"</label>
@@ -1923,6 +1962,13 @@ function resetFormKuitansi() {
   document.getElementById('kw_bend_nip').value  = S.cfgSatker.NIP_BENDAHARA  || ''
   document.getElementById('kw_mak').value       = S.cfgSatker.KUITANSI_MAK || '1'
 
+  // Update display ringkas & sembunyikan panel override
+  kwUpdatePejabatDisplay()
+  const ovBox = document.getElementById('kw_pejabat_inputs')
+  if (ovBox) ovBox.style.display = 'none'
+  const ovBtn = document.getElementById('kw_btn_override_pejabat')
+  if (ovBtn) ovBtn.textContent = '✏️ Override untuk kuitansi ini'
+
   // Minta nomor auto
   refreshNomorKuitansi()
 }
@@ -2083,6 +2129,19 @@ function editKuitansi(id) {
     document.getElementById('kw_bend_nip').value     = r['Bendahara NIP'] || ''
     document.getElementById('kw_mak').value          = r['MAK'] || '1'
     document.getElementById('kw_ket').value          = r['Keterangan'] || ''
+
+    // Update display pejabat & auto-buka override jika nilai berbeda dari config
+    kwUpdatePejabatDisplay()
+    const cfg = S.cfgSatker || {}
+    const beda = (r['PPK Nama']||'')   !== (cfg.NAMA_PPK||'')      ||
+                 (r['PPK NIP']||'')    !== (cfg.NIP_PPK||'')       ||
+                 (r['Bendahara Nama']||'') !== (cfg.NAMA_BENDAHARA||'') ||
+                 (r['Bendahara NIP']||'')  !== (cfg.NIP_BENDAHARA||'')
+    const ovBox = document.getElementById('kw_pejabat_inputs')
+    const ovBtn = document.getElementById('kw_btn_override_pejabat')
+    if (ovBox) ovBox.style.display = beda ? 'block' : 'none'
+    if (ovBtn) ovBtn.textContent = beda ? '✕ Tutup Override' : '✏️ Override untuk kuitansi ini'
+
     if (r['Riwayat ID']) {
       document.getElementById('kw_info_riwayat').style.display = 'block'
       document.getElementById('kw_info_riwayat_text').textContent = r['Riwayat ID']
@@ -2217,67 +2276,198 @@ function bukaWindowCetakKuitansi(html) {
 function buildKuitansiWindow(content) {
   return `<!DOCTYPE html><html><head>
 <meta charset="UTF-8"><title>Kuitansi Bukti Pembayaran</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,'Helvetica Neue',sans-serif;background:#eee;padding:10mm;color:#000}
-.kw-page{width:210mm;min-height:297mm;margin:0 auto 8mm;padding:14mm 16mm;background:#fff;font-size:10pt;line-height:1.4;page-break-after:always;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+body{font-family:'Crimson Text','Times New Roman',Georgia,serif;background:#dcdcd4;padding:14mm 10mm;color:#1a1a1a}
+
+/* ─── HALAMAN ─── */
+.kw-page{
+  width:210mm;min-height:297mm;
+  margin:0 auto 10mm;padding:18mm 20mm 16mm;
+  background:#fdfdf8;
+  font-size:11pt;line-height:1.5;
+  page-break-after:always;
+  box-shadow:0 6px 24px rgba(0,0,0,.18);
+  border:1.5pt solid #1f3a5f;
+  position:relative;
+  background-image:repeating-linear-gradient(0deg,transparent,transparent 23px,rgba(31,58,95,.018) 24px);
+}
 .kw-page:last-child{page-break-after:auto}
+/* Decorative inner border */
+.kw-page::before{
+  content:'';position:absolute;
+  top:5mm;left:5mm;right:5mm;bottom:5mm;
+  border:0.5pt solid #1f3a5f;
+  pointer-events:none;
+}
+/* Watermark */
+.kw-page::after{
+  content:'KUITANSI';
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%) rotate(-28deg);
+  font-family:'Cormorant Garamond',serif;
+  font-size:140pt;font-weight:bold;
+  color:rgba(31,58,95,.04);
+  letter-spacing:.15em;
+  white-space:nowrap;pointer-events:none;
+  z-index:0;
+}
+.kw-page > *{position:relative;z-index:1}
 
-/* KOP */
-.kw-kop{display:flex;gap:8mm;align-items:center;margin-bottom:2mm}
-.kw-kop-logo{flex-shrink:0}
-.kw-kop-text{flex:1;text-align:center}
-.kw-kop-l1{font-size:13pt;font-weight:bold;line-height:1.25}
-.kw-kop-l2{font-size:12pt;font-weight:bold;line-height:1.25}
-.kw-kop-alamat{font-size:9pt;line-height:1.3}
-.kw-divider{border-bottom:2.5pt solid #000;margin:1mm 0 3mm;position:relative}
-.kw-divider::after{content:'';display:block;border-bottom:0.8pt solid #000;margin-top:1.2pt}
+/* ─── KOP SURAT ─── */
+.kw-kop{display:flex;gap:8mm;align-items:center;margin-bottom:3mm}
+.kw-kop-logo{flex-shrink:0;width:24mm;height:24mm;display:flex;align-items:center;justify-content:center}
+.kw-kop-logo img{max-width:24mm;max-height:24mm;object-fit:contain}
+.kw-kop-text{flex:1;text-align:center;font-family:'Cormorant Garamond','Times New Roman',serif}
+.kw-kop-l1{font-size:14pt;font-weight:700;letter-spacing:.04em;line-height:1.3}
+.kw-kop-l2{font-size:13pt;font-weight:700;letter-spacing:.04em;line-height:1.3}
+.kw-kop-alamat{font-size:9pt;line-height:1.4;color:#333;font-family:'Crimson Text',serif;font-style:italic;margin-top:0.5mm}
 
-/* META */
-.kw-meta{width:100%;border-collapse:collapse;margin-bottom:1mm}
-.kw-meta-label{width:32mm;font-size:10pt}
-.kw-meta-val{padding:1mm 4mm;font-size:11pt}
-.kw-meta-ta{text-align:right;font-size:10pt;width:30mm}
+/* Decorative divider */
+.kw-divider{
+  margin:2mm 0 4mm;position:relative;
+  border-top:2.5pt solid #1f3a5f;
+}
+.kw-divider::after{
+  content:'';display:block;
+  border-top:0.6pt solid #1f3a5f;
+  margin-top:1.8pt;
+}
 
-/* TITLE */
-.kw-title{text-align:center;font-size:13pt;font-weight:bold;text-decoration:underline;margin:4mm 0 6mm}
+/* ─── META ROW ─── */
+.kw-meta{width:100%;border-collapse:collapse;margin-bottom:2mm;font-size:10.5pt}
+.kw-meta-label{width:32mm;color:#444;font-style:italic;font-family:'Crimson Text',serif}
+.kw-meta-val{padding:1mm 4mm;font-size:11.5pt;font-weight:600;letter-spacing:.04em}
+.kw-meta-ta{text-align:right;font-size:10.5pt;width:30mm;color:#444;font-style:italic;font-weight:600}
 
-/* BODY */
-.kw-body{width:100%;border-collapse:collapse;margin-bottom:3mm}
-.kw-body td{padding:1.5mm 0;vertical-align:top}
-.kw-lbl{width:38mm;font-size:10pt}
-.kw-sep{width:4mm;font-size:10pt}
-.kw-fill{border-bottom:1px solid #999;padding-bottom:0.5mm;font-size:10pt}
-.kw-italic{font-style:italic}
+/* ─── TITLE ─── */
+.kw-title-wrap{text-align:center;margin:5mm 0 7mm}
+.kw-title{
+  display:inline-block;
+  font-family:'Cormorant Garamond',serif;
+  font-size:18pt;font-weight:700;
+  letter-spacing:.18em;
+  padding:1.5mm 12mm 2.5mm;
+  border-top:0.6pt double #1f3a5f;
+  border-bottom:0.6pt double #1f3a5f;
+  text-transform:uppercase;
+}
+.kw-title-sub{font-size:9pt;color:#666;font-style:italic;margin-top:1.5mm;letter-spacing:.05em}
 
-/* RINCIAN */
-.kw-rincian{margin-left:42mm;border-collapse:collapse;margin-bottom:4mm;width:calc(100% - 42mm)}
-.kw-rincian td{padding:0.8mm 2mm;font-size:10pt;border-bottom:1px dotted #ccc}
-.kw-r-lbl{width:60%}
-.kw-r-val{text-align:right;font-family:'Courier New',monospace}
-.kw-r-total td{border-top:1.5pt solid #000;border-bottom:1.5pt solid #000;padding-top:1.5mm;padding-bottom:1.5mm;font-size:11pt}
+/* ─── BODY (Field-field utama) ─── */
+.kw-body{width:100%;border-collapse:collapse;margin-bottom:4mm}
+.kw-body td{padding:2mm 0;vertical-align:top}
+.kw-lbl{width:42mm;font-size:11pt;color:#222;letter-spacing:.02em;font-family:'Crimson Text',serif}
+.kw-sep{width:4mm;font-size:11pt;color:#222}
+.kw-fill{
+  border-bottom:0.5pt dotted #555;
+  padding-bottom:1mm;font-size:11pt;letter-spacing:.01em;
+}
+.kw-italic{font-style:italic;font-family:'Crimson Text',Georgia,serif}
 
-/* TGL BLOCK */
-.kw-tgl-block{margin-left:50%;margin-bottom:3mm}
-.kw-tgl{font-size:10pt;margin-bottom:1mm;border-bottom:1px solid #999;padding-bottom:0.5mm}
-.kw-yg-terima{font-size:10pt}
-.kw-spasi-ttd{height:14mm}
-.kw-penerima{font-size:10pt;border-bottom:1px solid #999;padding-bottom:0.5mm}
+/* Amount box — highlight */
+.kw-amount-box{
+  display:inline-block;
+  background:linear-gradient(180deg,#fff 0%,#f8f4e8 100%);
+  border:0.8pt solid #1f3a5f;
+  border-radius:1pt;
+  padding:1mm 7mm;
+  font-weight:700;font-size:12pt;
+  font-family:'Cormorant Garamond',serif;
+  letter-spacing:.06em;
+  color:#1f3a5f;
+  box-shadow:1pt 1pt 0 rgba(31,58,95,.12);
+}
 
-/* SETUJU */
-.kw-setuju{font-size:9.5pt;margin-bottom:1mm;border-top:1px solid #000;padding-top:1.5mm}
-.kw-ttd-area{width:100%;border-collapse:collapse;margin-bottom:6mm}
-.kw-ttd-col{width:50%;font-size:10pt;padding-right:6mm;vertical-align:top}
-.kw-ttd-nama{border-top:1px solid #999;padding-top:0.5mm;font-size:10pt}
-.kw-ttd-nip{font-size:9pt;color:#222}
+/* ─── RINCIAN BOX ─── */
+.kw-rincian-wrap{
+  margin:5mm 0 5mm 42mm;
+  padding:3mm 5mm 2.5mm;
+  background:linear-gradient(180deg,#faf8f1 0%,#f5f0e0 100%);
+  border:0.4pt solid #b8a878;
+  border-radius:1.5pt;
+  width:calc(100% - 50mm);
+  box-shadow:inset 0 0 0 0.2pt rgba(184,168,120,.4);
+}
+.kw-rincian{width:100%;border-collapse:collapse;font-size:10.5pt}
+.kw-rincian td{padding:1.2mm 2mm;border-bottom:0.4pt dotted #c4b58f}
+.kw-rincian tr:last-child td{border-bottom:none}
+.kw-r-lbl{width:55%;color:#2c2c2c;font-family:'Crimson Text',serif}
+.kw-r-val{text-align:right;font-family:'Cormorant Garamond','Courier New',monospace;font-weight:600;color:#1f3a5f;letter-spacing:.04em}
+.kw-r-total td{
+  border-top:1.2pt double #1f3a5f;
+  border-bottom:0!important;
+  padding-top:2mm;padding-bottom:1.5mm;
+  font-size:11.5pt;
+  background:rgba(184,168,120,.18);
+}
+.kw-r-total .kw-r-lbl{color:#1f3a5f;font-weight:700}
+.kw-r-total .kw-r-val{color:#0d4a2a;font-size:12.5pt;font-weight:700}
 
-/* MAK */
-.kw-mak{font-size:9.5pt;margin-top:8mm}
-.kw-mak-val{font-size:10pt;font-weight:bold;border:1px solid #000;display:inline-block;padding:0.5mm 5mm;min-width:14mm;text-align:center}
+/* ─── TANGGAL + PENERIMA ─── */
+.kw-tgl-block{margin-left:50%;margin-bottom:5mm}
+.kw-tgl{font-size:11pt;margin-bottom:1.5mm;font-style:italic;font-family:'Crimson Text',serif}
+.kw-yg-terima{font-size:11pt;margin-bottom:15mm}
+.kw-penerima{
+  font-size:11pt;font-weight:600;
+  border-bottom:0.8pt solid #1f3a5f;
+  padding-bottom:1mm;text-align:center;
+  font-family:'Crimson Text',serif;
+}
 
-/* BUTTON CETAK */
-.btn-print{position:fixed;top:10px;right:10px;background:#1a73e8;color:#fff;border:none;border-radius:6px;padding:10px 22px;font-size:14px;font-weight:bold;cursor:pointer;z-index:999;box-shadow:0 2px 6px rgba(0,0,0,.3)}
-@media print{body{background:#fff;padding:0}.btn-print{display:none}.kw-page{box-shadow:none;margin:0}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+/* ─── SETUJU + TTD ─── */
+.kw-setuju{
+  font-size:10pt;margin:5mm 0 3mm;
+  padding:1.5mm 4mm;
+  background:linear-gradient(90deg,#faf8f1,transparent);
+  border-left:2.5pt solid #b8a878;
+  font-style:italic;
+  font-family:'Crimson Text',serif;
+}
+.kw-ttd-area{width:100%;border-collapse:collapse;margin-bottom:4mm}
+.kw-ttd-col{width:50%;font-size:11pt;padding-right:6mm;vertical-align:top;text-align:center;font-family:'Crimson Text',serif}
+.kw-ttd-jab{font-size:11pt;margin-bottom:16mm;color:#222}
+.kw-ttd-nama{font-size:11pt;font-weight:700;border-bottom:0.7pt solid #1f3a5f;padding-bottom:0.5mm;display:inline-block;min-width:65mm;letter-spacing:.02em}
+.kw-ttd-nip{font-size:9.5pt;color:#333;margin-top:1mm;letter-spacing:.05em}
+
+/* ─── MAK ─── */
+.kw-mak-wrap{margin-top:6mm;display:flex;align-items:center;gap:3mm}
+.kw-mak{font-size:10pt;font-weight:700;letter-spacing:.08em;color:#1f3a5f;font-family:'Crimson Text',serif}
+.kw-mak-val{
+  font-size:11pt;font-weight:700;
+  border:1pt solid #1f3a5f;
+  background:linear-gradient(180deg,#fff,#faf8f1);
+  display:inline-block;
+  padding:1.2mm 9mm;
+  min-width:18mm;
+  text-align:center;
+  font-family:'Cormorant Garamond',monospace;
+  letter-spacing:.05em;
+  color:#1f3a5f;
+}
+
+/* ─── BUTTON CETAK ─── */
+.btn-print{
+  position:fixed;top:14px;right:14px;
+  background:linear-gradient(180deg,#1a73e8,#1557b0);
+  color:#fff;border:none;border-radius:6px;
+  padding:11px 24px;font-size:14px;font-weight:700;
+  font-family:'Segoe UI','Helvetica Neue',sans-serif;
+  cursor:pointer;z-index:999;
+  box-shadow:0 4px 14px rgba(0,0,0,.28);
+  transition:transform .12s;
+}
+.btn-print:hover{transform:translateY(-1px);background:linear-gradient(180deg,#1557b0,#0d3d80)}
+
+@media print{
+  body{background:#fff;padding:0}
+  .btn-print{display:none}
+  .kw-page{box-shadow:none;margin:0;border-width:1pt}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact}
+}
 </style></head><body>
 <button class="btn-print" onclick="window.print()">🖨️ Print / Simpan PDF</button>
 ${content}
@@ -2301,9 +2491,10 @@ function generateKuitansiClient(p, cfg) {
   const ta = p.tahunAnggaran || new Date().getFullYear()
   const terbilang = p.terbilang || terbilangRp(uang)
 
-  const logoBlock = cfg.KOP_LOGO_URL
-    ? `<img src="${esc(cfg.KOP_LOGO_URL)}" style="width:22mm;height:22mm;object-fit:contain">`
-    : `<div style="width:22mm;height:22mm;border:1px solid #999;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7pt;color:#999;text-align:center;line-height:1.2">LOGO<br>KKP</div>`
+  const logoUrl = normalizeLogoUrl(cfg.KOP_LOGO_URL || '')
+  const logoBlock = logoUrl
+    ? `<img src="${esc(logoUrl)}" alt="logo">`
+    : `<div style="width:24mm;height:24mm;border:1.5pt solid #1f3a5f;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7pt;color:#1f3a5f;text-align:center;line-height:1.2;font-family:'Cormorant Garamond',serif">LOGO<br>SATKER</div>`
 
   return `<div class="kw-page">
   <div class="kw-kop">
@@ -2315,55 +2506,59 @@ function generateKuitansiClient(p, cfg) {
       <div class="kw-kop-l1">${esc(cfg.KOP_BARIS_4||'POLITEKNIK KELAUTAN DAN PERIKANAN SORONG')}</div>
       <div class="kw-kop-alamat">${esc(cfg.KOP_ALAMAT||'')}</div>
       <div class="kw-kop-alamat">${esc(cfg.KOP_KOTAK_POS||'')}</div>
-      <div class="kw-kop-alamat">LAMAN <i>${esc(cfg.KOP_LAMAN||'')}</i> SUREL <i>${esc(cfg.KOP_SUREL||'')}</i></div>
+      <div class="kw-kop-alamat">Laman: <i>${esc(cfg.KOP_LAMAN||'')}</i> &nbsp;&middot;&nbsp; Surel: <i>${esc(cfg.KOP_SUREL||'')}</i></div>
     </div>
   </div>
   <div class="kw-divider"></div>
   <table class="kw-meta">
     <tr>
       <td class="kw-meta-label">No Kuitansi</td>
-      <td class="kw-meta-val"><b>${esc(no)}</b></td>
-      <td class="kw-meta-ta">T.A ${esc(ta)}</td>
+      <td class="kw-meta-val">${esc(no)}</td>
+      <td class="kw-meta-ta">T.A. ${esc(ta)}</td>
     </tr>
   </table>
-  <div class="kw-title">KUITANSI BUKTI PEMBAYARAN</div>
+  <div class="kw-title-wrap">
+    <div class="kw-title">Kuitansi Bukti Pembayaran</div>
+    <div class="kw-title-sub">— Surat Bukti Tanda Terima Uang —</div>
+  </div>
   <table class="kw-body">
     <tr><td class="kw-lbl">Telah terima dari</td><td class="kw-sep">:</td><td class="kw-fill">${esc(p.terimaDari||'')}</td></tr>
-    <tr><td class="kw-lbl">Uang sejumlah</td><td class="kw-sep">:</td><td class="kw-fill"><b>${fmtRpKoma(uang)}</b></td></tr>
+    <tr><td class="kw-lbl">Uang sejumlah</td><td class="kw-sep">:</td><td class="kw-fill"><span class="kw-amount-box">Rp ${fmtRpKoma(uang)}</span></td></tr>
     <tr><td class="kw-lbl">Terbilang</td><td class="kw-sep">:</td><td class="kw-fill kw-italic">${esc(terbilang)}</td></tr>
     <tr><td class="kw-lbl" style="vertical-align:top;padding-top:2mm">Untuk Pembayaran</td><td class="kw-sep" style="vertical-align:top;padding-top:2mm">:</td><td class="kw-fill">${esc(p.untukPembayaran||'')}</td></tr>
   </table>
-  <table class="kw-rincian">
-    <tr><td class="kw-r-lbl">- Besarnya pembayaran</td><td class="kw-r-val">Rp${fmtRp_(besarnya)}</td></tr>
-    <tr><td class="kw-r-lbl">PPN</td><td class="kw-r-val">Rp${fmtRp_(ppn)}</td></tr>
-    <tr><td class="kw-r-lbl">PPh</td><td class="kw-r-val">Rp${fmtRp_(pph)}</td></tr>
-    <tr class="kw-r-total"><td class="kw-r-lbl"><b>- Yang diterima</b></td><td class="kw-r-val"><b>Rp${fmtRp_(diterima)}</b></td></tr>
-  </table>
-  <div class="kw-tgl-block">
-    <div class="kw-tgl">${esc(p.tempat||cfg.KOTA||'Sorong')} , ${tglIndo}</div>
-    <div class="kw-yg-terima">Yang menerima,</div>
-    <div class="kw-spasi-ttd"></div>
-    <div class="kw-penerima"><b>${esc(p.penerimaNama||'')}</b></div>
+  <div class="kw-rincian-wrap">
+    <table class="kw-rincian">
+      <tr><td class="kw-r-lbl">Besarnya pembayaran</td><td class="kw-r-val">Rp ${fmtRp_(besarnya)}</td></tr>
+      <tr><td class="kw-r-lbl">PPN dipungut</td><td class="kw-r-val">Rp ${fmtRp_(ppn)}</td></tr>
+      <tr><td class="kw-r-lbl">PPh dipotong</td><td class="kw-r-val">Rp ${fmtRp_(pph)}</td></tr>
+      <tr class="kw-r-total"><td class="kw-r-lbl">Yang diterima</td><td class="kw-r-val">Rp ${fmtRp_(diterima)}</td></tr>
+    </table>
   </div>
-  <div class="kw-setuju">Setuju dan lunas dibayar Tgl ${tglIndo}</div>
+  <div class="kw-tgl-block">
+    <div class="kw-tgl">${esc(p.tempat||cfg.KOTA||'Sorong')}, ${tglIndo}</div>
+    <div class="kw-yg-terima">Yang menerima,</div>
+    <div class="kw-penerima">${esc(p.penerimaNama||'')}</div>
+  </div>
+  <div class="kw-setuju">Setuju dan lunas dibayar pada tanggal ${tglIndo}</div>
   <table class="kw-ttd-area">
     <tr>
       <td class="kw-ttd-col">
-        <div>Pejabat Pembuat Komitmen</div>
-        <div class="kw-spasi-ttd"></div>
-        <div class="kw-ttd-nama"><b>${esc(p.ppkNama||cfg.NAMA_PPK||'')}</b></div>
+        <div class="kw-ttd-jab">Pejabat Pembuat Komitmen,</div>
+        <div class="kw-ttd-nama">${esc(p.ppkNama||cfg.NAMA_PPK||'')}</div>
         <div class="kw-ttd-nip">NIP. ${esc(p.ppkNip||cfg.NIP_PPK||'')}</div>
       </td>
       <td class="kw-ttd-col">
-        <div>Bendahara Pengeluaran</div>
-        <div class="kw-spasi-ttd"></div>
-        <div class="kw-ttd-nama"><b>${esc(p.bendaharaNama||cfg.NAMA_BENDAHARA||'')}</b></div>
+        <div class="kw-ttd-jab">Bendahara Pengeluaran,</div>
+        <div class="kw-ttd-nama">${esc(p.bendaharaNama||cfg.NAMA_BENDAHARA||'')}</div>
         <div class="kw-ttd-nip">NIP. ${esc(p.bendaharaNip||cfg.NIP_BENDAHARA||'')}</div>
       </td>
     </tr>
   </table>
-  <div class="kw-mak">MAK</div>
-  <div class="kw-mak-val">${esc(p.mak||cfg.KUITANSI_MAK||'1')}</div>
+  <div class="kw-mak-wrap">
+    <span class="kw-mak">MAK</span>
+    <span class="kw-mak-val">${esc(p.mak||cfg.KUITANSI_MAK||'1')}</span>
+  </div>
 </div>`
 }
 
@@ -2570,7 +2765,24 @@ function loadConfig() {
     document.getElementById('cfg_kw_terima_dari').value = cfg['KUITANSI_TERIMA_DARI']||''
     document.getElementById('cfg_kw_mak').value         = cfg['KUITANSI_MAK']||'1'
     document.getElementById('cfg_kw_prefix').value      = cfg['KUITANSI_PREFIX']||'KWT'
+    if (typeof updateLogoPreview === 'function') updateLogoPreview()
   }).catch(() => {})
+}
+
+// Normalisasi URL logo (Drive sharing URL → format yang bisa dimuat sebagai gambar)
+function normalizeLogoUrl(url) {
+  if (!url) return ''
+  const s = String(url).trim()
+  // Ekstrak FILE_ID dari berbagai format Drive
+  let m = s.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/) ||  // /file/d/{id}/view
+          s.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/)  ||  // /open?id={id}
+          s.match(/drive\.google\.com\/uc\?[^"']*id=([a-zA-Z0-9_-]+)/)|| // /uc?id={id}
+          s.match(/drive\.google\.com\/thumbnail\?[^"']*id=([a-zA-Z0-9_-]+)/) ||
+          s.match(/lh3\.googleusercontent\.com\/d\/([a-zA-Z0-9_-]+)/)
+  if (m && m[1]) {
+    return `https://lh3.googleusercontent.com/d/${m[1]}=w400`
+  }
+  return s
 }
 
 function simpanConfigKop() {
@@ -2583,7 +2795,7 @@ function simpanConfigKop() {
     KOP_KOTAK_POS:         document.getElementById('cfg_kop_kotak_pos').value,
     KOP_LAMAN:             document.getElementById('cfg_kop_laman').value,
     KOP_SUREL:             document.getElementById('cfg_kop_surel').value,
-    KOP_LOGO_URL:          document.getElementById('cfg_kop_logo').value,
+    KOP_LOGO_URL:          normalizeLogoUrl(document.getElementById('cfg_kop_logo').value),
     KUITANSI_TERIMA_DARI:  document.getElementById('cfg_kw_terima_dari').value,
     KUITANSI_MAK:          document.getElementById('cfg_kw_mak').value,
     KUITANSI_PREFIX:       document.getElementById('cfg_kw_prefix').value || 'KWT',
@@ -2714,6 +2926,12 @@ function resetFormHonor() {
   document.getElementById('hn_ppk_nip').value   = (S.cfgSatker && S.cfgSatker['NIP_PPK']) || ''
   document.getElementById('hn_bend_nama').value = (S.cfgSatker && S.cfgSatker['NAMA_BENDAHARA']) || ''
   document.getElementById('hn_bend_nip').value  = (S.cfgSatker && S.cfgSatker['NIP_BENDAHARA']) || ''
+  // Update display pejabat & sembunyikan override
+  hnUpdatePejabatDisplay()
+  const hnOvBox = document.getElementById('hn_pejabat_inputs')
+  if (hnOvBox) hnOvBox.style.display = 'none'
+  const hnOvBtn = document.getElementById('hn_btn_override_pejabat')
+  if (hnOvBtn) hnOvBtn.textContent = '✏️ Override untuk nominatif ini'
   document.getElementById('hn_btn_kuitansi').style.display = 'none'
   document.getElementById('hn_btn_riwayat').style.display = 'none'
   document.getElementById('hn_detail_body').innerHTML = ''
@@ -2925,6 +3143,18 @@ function editNominatif(id) {
     document.getElementById('hn_ppk_nip').value = n['PPK NIP'] || ''
     document.getElementById('hn_bend_nama').value = n['Bendahara Nama'] || ''
     document.getElementById('hn_bend_nip').value = n['Bendahara NIP'] || ''
+    // Update display pejabat & auto-buka override jika berbeda dari config
+    hnUpdatePejabatDisplay()
+    const hnCfg = S.cfgSatker || {}
+    const hnBeda = (n['PPK Nama']||'')      !== (hnCfg.NAMA_PPK||'')       ||
+                   (n['PPK NIP']||'')       !== (hnCfg.NIP_PPK||'')        ||
+                   (n['Bendahara Nama']||'')!== (hnCfg.NAMA_BENDAHARA||'') ||
+                   (n['Bendahara NIP']||'') !== (hnCfg.NIP_BENDAHARA||'')
+    const hnOvBox2 = document.getElementById('hn_pejabat_inputs')
+    const hnOvBtn2 = document.getElementById('hn_btn_override_pejabat')
+    if (hnOvBox2) hnOvBox2.style.display = hnBeda ? 'block' : 'none'
+    if (hnOvBtn2) hnOvBtn2.textContent = hnBeda ? '✕ Tutup Override' : '✏️ Override untuk nominatif ini'
+
     document.getElementById('hn_detail_body').innerHTML = ''
     ;(n.detail || []).forEach(d => hnTambahBaris(d))
     if (!n.detail || !n.detail.length) hnTambahBaris()
@@ -3098,6 +3328,66 @@ function hapusPegawai(id) {
 // Helper escape untuk template literal (jika belum ada)
 function escapeAttr(s) {
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+}
+
+// ─── Pejabat penandatangan auto-from-config (Kuitansi & Honor) ───
+function kwUpdatePejabatDisplay() {
+  const ppkN  = (document.getElementById('kw_ppk_nama').value || '').trim() || (S.cfgSatker && S.cfgSatker.NAMA_PPK)      || '—'
+  const ppkNip= (document.getElementById('kw_ppk_nip').value  || '').trim() || (S.cfgSatker && S.cfgSatker.NIP_PPK)       || ''
+  const bn    = (document.getElementById('kw_bend_nama').value|| '').trim() || (S.cfgSatker && S.cfgSatker.NAMA_BENDAHARA)|| '—'
+  const bnip  = (document.getElementById('kw_bend_nip').value || '').trim() || (S.cfgSatker && S.cfgSatker.NIP_BENDAHARA) || ''
+  document.getElementById('kw_ppk_display').textContent      = ppkN
+  document.getElementById('kw_ppk_nip_display').textContent  = ppkNip ? `NIP. ${ppkNip}` : ''
+  document.getElementById('kw_bend_display').textContent     = bn
+  document.getElementById('kw_bend_nip_display').textContent = bnip ? `NIP. ${bnip}` : ''
+}
+function kwTogglePejabat() {
+  const box = document.getElementById('kw_pejabat_inputs')
+  const btn = document.getElementById('kw_btn_override_pejabat')
+  const open = box.style.display === 'none'
+  box.style.display = open ? 'block' : 'none'
+  btn.textContent = open ? '✕ Tutup Override' : '✏️ Override untuk kuitansi ini'
+}
+function hnUpdatePejabatDisplay() {
+  const ppkN  = (document.getElementById('hn_ppk_nama').value || '').trim() || (S.cfgSatker && S.cfgSatker.NAMA_PPK)      || '—'
+  const ppkNip= (document.getElementById('hn_ppk_nip').value  || '').trim() || (S.cfgSatker && S.cfgSatker.NIP_PPK)       || ''
+  const bn    = (document.getElementById('hn_bend_nama').value|| '').trim() || (S.cfgSatker && S.cfgSatker.NAMA_BENDAHARA)|| '—'
+  const bnip  = (document.getElementById('hn_bend_nip').value || '').trim() || (S.cfgSatker && S.cfgSatker.NIP_BENDAHARA) || ''
+  document.getElementById('hn_ppk_display').textContent      = ppkN
+  document.getElementById('hn_ppk_nip_display').textContent  = ppkNip ? `NIP. ${ppkNip}` : ''
+  document.getElementById('hn_bend_display').textContent     = bn
+  document.getElementById('hn_bend_nip_display').textContent = bnip ? `NIP. ${bnip}` : ''
+}
+function hnTogglePejabat() {
+  const box = document.getElementById('hn_pejabat_inputs')
+  const btn = document.getElementById('hn_btn_override_pejabat')
+  const open = box.style.display === 'none'
+  box.style.display = open ? 'block' : 'none'
+  btn.textContent = open ? '✕ Tutup Override' : '✏️ Override untuk nominatif ini'
+}
+
+// Preview logo di Pengaturan (otomatis normalisasi Drive URL)
+function updateLogoPreview() {
+  const rawUrl = document.getElementById('cfg_kop_logo').value.trim()
+  const box = document.getElementById('cfg_kop_logo_box')
+  const img = document.getElementById('cfg_kop_logo_preview')
+  const err = document.getElementById('cfg_kop_logo_err')
+  if (!rawUrl) { box.style.display = 'none'; return }
+  const normalized = normalizeLogoUrl(rawUrl)
+  // Beri tahu user jika URL diubah
+  const note = document.getElementById('cfg_kop_logo_note')
+  if (note) {
+    if (normalized !== rawUrl) {
+      note.style.display = 'block'
+      note.innerHTML = `🔄 URL akan disimpan sebagai: <code style="font-size:10px">${normalized}</code>`
+    } else {
+      note.style.display = 'none'
+    }
+  }
+  box.style.display = 'block'
+  img.style.display = 'inline-block'
+  err.style.display = 'none'
+  img.src = normalized
 }
 
 // Konversi tanggal dd/MM/yyyy atau Date → yyyy-MM-dd untuk input[type=date]

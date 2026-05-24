@@ -393,8 +393,11 @@ function buildNominatifPage(n, detail, cfg) {
     </tr>`
   }).join('')
 
-  const kopLogo = cfg['KOP_LOGO_URL']
-    ? `<img src="${cfg['KOP_LOGO_URL']}" class="kop-logo" alt="logo">`
+  const logoUrl = (typeof normalizeLogoUrlServer === 'function')
+    ? normalizeLogoUrlServer(cfg['KOP_LOGO_URL'])
+    : (cfg['KOP_LOGO_URL'] || '')
+  const kopLogo = logoUrl
+    ? `<img src="${escapeHtml(logoUrl)}" class="kop-logo" alt="logo">`
     : `<div class="kop-logo-placeholder"></div>`
 
   return `<!DOCTYPE html>
