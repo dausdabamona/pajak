@@ -363,3 +363,15 @@ function getWebAppUrl() {
   return ScriptApp.getService().getUrl()
 }
 
+/**
+ * Kembalikan email user aktif — dipakai frontend untuk display di nav.
+ * Aman dipanggil meski user belum auth (return '').
+ */
+function getCurrentUserEmail() {
+  try {
+    return Session.getActiveUser().getEmail() || ''
+  } catch (_) {
+    return ''
+  }
+}
+

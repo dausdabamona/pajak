@@ -1135,9 +1135,15 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('k_tgl_transaksi').value = now.toISOString().split('T')[0]
   document.getElementById('k_tahun_pajak').value   = now.getFullYear()
 
-  // Isi nav user
+  // Isi nav user dari server (via API)
   try {
-    document.getElementById('nav-user').textContent = '<?= userEmail ?>'
+    google.script.run
+      .withSuccessHandler(email => {
+        const el = document.getElementById('nav-user')
+        if (el) el.textContent = email || ''
+      })
+      .withFailureHandler(() => {})
+      .getCurrentUserEmail()
   } catch(_) {}
 
   // Load config satker
