@@ -1650,10 +1650,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function onUangKuitansi(el) {
   const raw = el.value.replace(/\D/g,'')
-  if (!raw) { el.value=''; document.getElementById('kw_terbilang').value=''; return }
-  const num = parseInt(raw,10)
+  if (!raw) {
+    el.value = ''
+    document.getElementById('kw_terbilang').value = ''
+    document.getElementById('kw_ah_nilai').value = ''
+    return
+  }
+  const num = parseInt(raw, 10)
   el.value = num.toLocaleString('id-ID')
   document.getElementById('kw_terbilang').value = terbilangRp(num)
+
+  // Sync → Nilai Kontrak di auto-hitung selalu sama
+  document.getElementById('kw_ah_nilai').value = num.toLocaleString('id-ID')
 
   // Auto-isi besarnya pembayaran jika kosong
   const besarnyaEl = document.getElementById('kw_besarnya')
@@ -1857,6 +1865,7 @@ function kwTerapkanHasil(h) {
   // Auto-isi field kuitansi (gunakan nilai total termasuk PPN sebagai "Uang Sejumlah")
   const total = h.nilaiInclPpn || (h.dpp + h.nilaiPpn)
   document.getElementById('kw_uang').value      = total.toLocaleString('id-ID')
+  document.getElementById('kw_ah_nilai').value  = total.toLocaleString('id-ID')  // sync balik
   document.getElementById('kw_terbilang').value = terbilangRp(total)
   document.getElementById('kw_besarnya').value  = total.toLocaleString('id-ID')
   document.getElementById('kw_ppn').value       = h.nilaiPpn.toLocaleString('id-ID')
@@ -1872,8 +1881,25 @@ function kwTerapkanHasil(h) {
 
 function kwOnNilaiInput(el) {
   const raw = el.value.replace(/\D/g,'')
-  if (!raw) { el.value=''; return }
-  el.value = parseInt(raw,10).toLocaleString('id-ID')
+  if (!raw) {
+    el.value = ''
+    document.getElementById('kw_uang').value = ''
+    document.getElementById('kw_terbilang').value = ''
+    return
+  }
+  const num = parseInt(raw, 10)
+  el.value = num.toLocaleString('id-ID')
+
+  // Sync → Uang Sejumlah selalu sama dengan Nilai Kontrak
+  document.getElementById('kw_uang').value = num.toLocaleString('id-ID')
+  document.getElementById('kw_terbilang').value = terbilangRp(num)
+
+  // Auto-isi besarnya pembayaran jika kosong
+  const besarnyaEl = document.getElementById('kw_besarnya')
+  if (!besarnyaEl.value) {
+    besarnyaEl.value = num.toLocaleString('id-ID')
+    onRincianInput()
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
