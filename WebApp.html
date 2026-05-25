@@ -116,6 +116,11 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
 .btn-cetak-ppn:hover{background:#ceead6}
 .btn-cetak-all{width:100%;background:#fef7e0;border:1px solid #fdd663;border-radius:8px;color:#b06000;cursor:pointer;font-family:inherit;font-size:12px;font-weight:700;padding:11px;margin-top:6px;transition:all .15s}
 .btn-cetak-all:hover{background:#feefc3}
+.btn-cetak-inactive{opacity:.4;pointer-events:none}
+#overlay-cetak{position:fixed;inset:0;z-index:9999;background:#fff;display:flex;flex-direction:column}
+.overlay-cetak-bar{background:#1a73e8;color:#fff;padding:10px 16px;display:flex;align-items:center;gap:8px;flex-shrink:0;font-family:inherit}
+.overlay-cetak-frame{flex:1;border:none;width:100%}
+.btn-pag{padding:6px 12px}
 
 /* ── AUTOCOMPLETE ── */
 .autocomplete-wrap{position:relative}
@@ -1106,6 +1111,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script>
+console.log('[PajBend v20260525] Block 2 mulai load')
 // ─────────────────────────────────────────────────────────────
 // STATE
 // ─────────────────────────────────────────────────────────────
@@ -1407,8 +1413,8 @@ function tampilkanHasil(h) {
   document.getElementById('r_tarif_ppn').textContent  = pctStr(h.tarifPpn)
   document.getElementById('r_ket_ppn').textContent    = h.bebasPpn ? '⚠️ Faktur dicap BEBAS PPN' : h.ket
 
-  document.getElementById('btn_cetak_pph').style.opacity = h.nilaiPph > 0 ? '1' : '.4'
-  document.getElementById('btn_cetak_ppn').style.opacity = h.nilaiPpn > 0 ? '1' : '.4'
+  document.getElementById('btn_cetak_pph').classList.toggle('btn-cetak-inactive', !(h.nilaiPph > 0))
+  document.getElementById('btn_cetak_ppn').classList.toggle('btn-cetak-inactive', !(h.nilaiPpn > 0))
 
   document.getElementById('hasil-section').scrollIntoView({behavior:'smooth', block:'start'})
 }
@@ -1526,14 +1532,13 @@ function bukaTabCetak(html, title) {
   if (old) old.remove()
   const ov = document.createElement('div')
   ov.id = 'overlay-cetak'
-  ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#fff;display:flex;flex-direction:column'
   const bar = document.createElement('div')
-  bar.style.cssText = 'background:#1a73e8;color:#fff;padding:10px 16px;display:flex;align-items:center;gap:8px;flex-shrink:0;font-family:inherit'
+  bar.className = 'overlay-cetak-bar'
   bar.innerHTML = `<span style="flex:1;font-weight:700;font-size:14px">${title || 'Cetak'}</span>
     <button id="btn-overlay-print" style="background:#fff;color:#1a73e8;border:none;border-radius:5px;padding:7px 16px;font-weight:700;cursor:pointer;font-size:13px">🖨️ Cetak / Simpan PDF</button>
     <button onclick="document.getElementById('overlay-cetak').remove()" style="background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:5px;padding:7px 14px;font-weight:700;cursor:pointer;font-size:13px">✕ Tutup</button>`
   const frame = document.createElement('iframe')
-  frame.style.cssText = 'flex:1;border:none;width:100%'
+  frame.className = 'overlay-cetak-frame'
   frame.srcdoc = html
   frame.onload = () => {
     document.getElementById('btn-overlay-print').onclick = () => {
@@ -1860,8 +1865,7 @@ function renderPagination(total, offset, limit) {
   const cur   = Math.floor(offset / limit)
   for (let i = 0; i < pages; i++) {
     const btn = document.createElement('button')
-    btn.className = 'btn ' + (i === cur ? 'btn-primary' : 'btn-outline')
-    btn.style.padding = '6px 12px'
+    btn.className = 'btn btn-pag ' + (i === cur ? 'btn-primary' : 'btn-outline')
     btn.textContent = i + 1
     btn.onclick = () => loadRiwayat(i * limit)
     pag.appendChild(btn)
@@ -3552,7 +3556,7 @@ function toIsoDate(s) {
   }
   return ''
 }
-
+console.log('[PajBend v20260525] Block 2 selesai — semua fungsi siap')
 </script>
 </body>
 </html>
