@@ -1111,7 +1111,79 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script>
-console.log('[PajBend v20260525] Block 2 mulai load')
+// ─────────────────────────────────────────────────────────────
+// DEBUG RUNTIME — observability only, no business logic change
+// ─────────────────────────────────────────────────────────────
+;(function() {
+  var _t0 = Date.now()
+  function _ms() { return ((Date.now()-_t0)/1000).toFixed(3)+'s' }
+  var _C = {
+    lifecycle: 'background:#1a73e8;color:#fff;padding:1px 7px;border-radius:3px;font-weight:700',
+    error:     'background:#d93025;color:#fff;padding:1px 7px;border-radius:3px;font-weight:700',
+    warn:      'background:#f9ab00;color:#202124;padding:1px 7px;border-radius:3px;font-weight:700',
+    ok:        'background:#188038;color:#fff;padding:1px 7px;border-radius:3px;font-weight:700',
+    dim:       'color:#9aa0a6;font-size:11px',
+  }
+
+  window._PBDebug = {
+    lifecycle: function(phase, detail) {
+      console.groupCollapsed(
+        '%c PajBend %c ' + phase + ' %c +' + _ms(),
+        _C.lifecycle, _C.ok, _C.dim
+      )
+      if (detail) console.log(detail)
+      console.trace('call stack')
+      console.groupEnd()
+    },
+    error: function(label, err, extra) {
+      console.group('%c PajBend ERROR %c ' + label, _C.error, 'color:#d93025;font-weight:700')
+      if (err instanceof Error) {
+        console.error('Message :', err.message)
+        console.error('Stack   :', err.stack || '(no stack)')
+      } else {
+        console.error('Value   :', err)
+      }
+      if (extra !== undefined) console.error('Context :', extra)
+      console.groupEnd()
+    },
+    warn: function(label, detail) {
+      console.group('%c PajBend WARN %c ' + label, _C.warn, 'color:#b06000;font-weight:700')
+      if (detail !== undefined) console.warn(detail)
+      console.groupEnd()
+    },
+  }
+
+  // ── Global uncaught synchronous error ──
+  window.onerror = function(message, source, lineno, colno, error) {
+    console.group('%c PajBend UNCAUGHT ERROR', _C.error)
+    console.error('Message  :', message)
+    console.error('Source   :', source   || '(inline script)')
+    console.error('Location : line', lineno, '  col', colno)
+    if (error && error.stack) console.error('Stack    :', error.stack)
+    console.groupEnd()
+    return false  // biarkan browser tetap log error defaultnya
+  }
+
+  // ── Unhandled Promise rejection (api() calls, google.script.run, dll) ──
+  window.onunhandledrejection = function(ev) {
+    var r = ev.reason
+    console.group('%c PajBend UNHANDLED REJECTION', _C.error)
+    if (r instanceof Error) {
+      console.error('Message :', r.message)
+      console.error('Stack   :', r.stack || '(no stack)')
+    } else {
+      console.error('Reason  :', r)
+    }
+    console.groupEnd()
+  }
+
+  window._PBDebug.lifecycle('SCRIPT START', {
+    ts:        new Date().toISOString(),
+    userAgent: navigator.userAgent.slice(0, 100),
+    pageUrl:   location.href.slice(0, 120),
+  })
+})()
+// ─────────────────────────────────────────────────────────────
 // ─────────────────────────────────────────────────────────────
 // STATE
 // ─────────────────────────────────────────────────────────────
@@ -1162,11 +1234,16 @@ function showPage(name, tabEl) {
     if (name === 'pengaturan')  loadConfig()
   } catch(e) { console.error('[showPage]', name, e) }
 }
+if (window._PBDebug) window._PBDebug.lifecycle('NAVIGATION LOADED', {
+  navTabs:  document.querySelectorAll('.nav-tab').length,
+  pages:    document.querySelectorAll('.page').length,
+})
 
 // ─────────────────────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  if (window._PBDebug) window._PBDebug.lifecycle('DOM LOADED')
   // ── Operasi DOM murni — langsung, tidak memicu OAuth ──
   const now = new Date()
   document.getElementById('k_tgl_transaksi').value = now.toISOString().split('T')[0]
@@ -1186,6 +1263,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── API calls di-defer agar page interactive dulu sebelum OAuth dialog muncul ──
   // Jika user belum authorize, dialog OAuth akan muncul SETELAH page bisa diklik
   setTimeout(() => {
+    if (window._PBDebug) window._PBDebug.lifecycle('API LOADED', {
+      googleScriptRunAvailable: typeof google !== 'undefined' && typeof google.script !== 'undefined',
+    })
     // Tampilkan email user di nav
     try {
       google.script.run
@@ -2068,6 +2148,9 @@ function refreshNomorKuitansi() {
 
 // Event listener form kuitansi
 document.addEventListener('DOMContentLoaded', () => {
+  if (window._PBDebug) window._PBDebug.lifecycle('FORM LOADED', {
+    fields: ['kw_no_kuitansi','kw_tgl','kw_ta'].filter(id => !!document.getElementById(id)),
+  })
   const elNo = document.getElementById('kw_no_kuitansi')
   if (elNo) elNo.addEventListener('input', () => { elNo.dataset.auto = '0' })
   const elTgl = document.getElementById('kw_tgl')
@@ -3556,7 +3639,12 @@ function toIsoDate(s) {
   }
   return ''
 }
-console.log('[PajBend v20260525] Block 2 selesai — semua fungsi siap')
+if (window._PBDebug) window._PBDebug.lifecycle('SCRIPT COMPLETE', {
+  functions: typeof api === 'function' && typeof showPage === 'function'
+    ? '✅ api, showPage, openFormKuitansi, openModalPenyedia, hnTambahBaris — semua siap'
+    : '❌ ada fungsi yang hilang',
+  modalOverlays: document.querySelectorAll('.modal-overlay').length,
+})
 </script>
 </body>
 </html>
