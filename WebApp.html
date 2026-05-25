@@ -1078,6 +1078,34 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
 <!-- TOAST -->
 <div id="toast"></div>
 
+<!-- Tab navigation — script TERPISAH, tidak terpengaruh error di script utama -->
+<script>
+(function() {
+  function switchTab(name, tab) {
+    document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+    document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
+    var el = document.getElementById('page-' + name);
+    if (el) el.classList.add('active');
+    if (tab) tab.classList.add('active');
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.nav-tab').forEach(function(tab) {
+      var m = (tab.getAttribute('onclick') || '').match(/showPage\('([^']+)'/);
+      if (!m) return;
+      var pageName = m[1];
+      tab.addEventListener('click', function() {
+        if (typeof showPage === 'function') {
+          showPage(pageName, tab);
+        } else {
+          switchTab(pageName, tab);
+        }
+      });
+    });
+    console.log('[TabNav] listener registered, showPage available:', typeof showPage === 'function');
+  });
+})();
+</script>
+
 <script>
 // ─────────────────────────────────────────────────────────────
 // STATE
@@ -1134,31 +1162,10 @@ function showPage(name, tabEl) {
 // INIT
 // ─────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  // Tanggal & tahun default
+  // ── Operasi DOM murni — langsung, tidak memicu OAuth ──
   const now = new Date()
   document.getElementById('k_tgl_transaksi').value = now.toISOString().split('T')[0]
   document.getElementById('k_tahun_pajak').value   = now.getFullYear()
-
-  // Isi nav user dari server (via API)
-  try {
-    google.script.run
-      .withSuccessHandler(email => {
-        const el = document.getElementById('nav-user')
-        if (el) el.textContent = email || ''
-      })
-      .withFailureHandler(() => {})
-      .getCurrentUserEmail()
-  } catch(_) {}
-
-  // Load config satker
-  api('config.get').then(cfg => {
-    S.cfgSatker = cfg || {}
-  }).catch(() => {})
-
-  // Load dropdown jenis kegiatan
-  loadJenisKegiatan()
-
-  // Init filter tahun
   initTahunFilter()
 
   // Auto-switch tab dari URL ?tab=...
@@ -1170,6 +1177,29 @@ document.addEventListener('DOMContentLoaded', () => {
       showPage(tab, tabEl)
     }
   } catch(_) {}
+
+  // ── API calls di-defer agar page interactive dulu sebelum OAuth dialog muncul ──
+  // Jika user belum authorize, dialog OAuth akan muncul SETELAH page bisa diklik
+  setTimeout(() => {
+    // Tampilkan email user di nav
+    try {
+      google.script.run
+        .withSuccessHandler(email => {
+          const el = document.getElementById('nav-user')
+          if (el) el.textContent = email || ''
+        })
+        .withFailureHandler(() => {})
+        .getCurrentUserEmail()
+    } catch(_) {}
+
+    // Load config satker
+    api('config.get').then(cfg => {
+      S.cfgSatker = cfg || {}
+    }).catch(() => {})
+
+    // Load dropdown jenis kegiatan
+    loadJenisKegiatan()
+  }, 300)
 })
 
 function initTahunFilter() {
@@ -1562,10 +1592,10 @@ body{font-family:Arial,sans-serif;background:#eee;padding:10mm}
 .ssp-kode{font-size:7pt;text-align:right;color:#aaa;margin-top:1mm}
 .btn-print{position:fixed;top:10px;right:10px;background:#1a73e8;color:#fff;border:none;border-radius:6px;padding:10px 22px;font-size:14px;font-weight:bold;cursor:pointer;z-index:999}
 @media print{body{background:#fff;padding:0}.btn-print{display:none}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
-</style></head><body>
+\x3C/style>\x3C/head>\x3Cbody>
 <button class="btn-print" onclick="window.print()">🖨️ Print / Simpan PDF</button>
 ${pages}
-</body></html>`
+\x3C/body>\x3C/html>`
 }
 
 // Generate SSP di sisi client (fallback)
@@ -2508,10 +2538,10 @@ body{font-family:'Crimson Text','Times New Roman',Georgia,serif;background:#dcdc
   .kw-page{box-shadow:none;margin:0;border-width:1pt}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact}
 }
-</style></head><body>
+\x3C/style>\x3C/head>\x3Cbody>
 <button class="btn-print" onclick="window.print()">🖨️ Print / Simpan PDF</button>
 ${content}
-</body></html>`
+\x3C/body>\x3C/html>`
 }
 
 // Generate kuitansi HTML di sisi client (fallback)
