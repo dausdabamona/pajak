@@ -1115,15 +1115,19 @@ function api(action, payload) {
 function showPage(name, tabEl) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'))
-  document.getElementById('page-' + name).classList.add('active')
+  const page = document.getElementById('page-' + name)
+  if (!page) return
+  page.classList.add('active')
   if (tabEl) tabEl.classList.add('active')
 
-  if (name === 'riwayat')     loadRiwayat()
-  if (name === 'kuitansi')    loadKuitansi()
-  if (name === 'honor')       loadHonor()
-  if (name === 'penyedia')    loadPenyedia()
-  if (name === 'dashboard')   loadDashboard()
-  if (name === 'pengaturan')  loadConfig()
+  try {
+    if (name === 'riwayat')     loadRiwayat()
+    if (name === 'kuitansi')    loadKuitansi()
+    if (name === 'honor')       loadHonor()
+    if (name === 'penyedia')    loadPenyedia()
+    if (name === 'dashboard')   loadDashboard()
+    if (name === 'pengaturan')  loadConfig()
+  } catch(e) { console.error('[showPage]', name, e) }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -1478,10 +1482,42 @@ function cetakSSP(jenis) {
   })
 }
 
+// ─── Helper cetak — fallback ke overlay bila popup diblokir ───
+function bukaTabCetak(html, title) {
+  let win = null
+  try { win = window.open('', '_blank') } catch(_) {}
+  if (win) {
+    win.document.write(html)
+    win.document.close()
+    setTimeout(() => { try { win.focus() } catch(_) {} }, 100)
+    return
+  }
+  // Fallback: tampilkan di overlay penuh dalam halaman yang sama
+  const old = document.getElementById('overlay-cetak')
+  if (old) old.remove()
+  const ov = document.createElement('div')
+  ov.id = 'overlay-cetak'
+  ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#fff;display:flex;flex-direction:column'
+  const bar = document.createElement('div')
+  bar.style.cssText = 'background:#1a73e8;color:#fff;padding:10px 16px;display:flex;align-items:center;gap:8px;flex-shrink:0;font-family:inherit'
+  bar.innerHTML = `<span style="flex:1;font-weight:700;font-size:14px">${title || 'Cetak'}</span>
+    <button id="btn-overlay-print" style="background:#fff;color:#1a73e8;border:none;border-radius:5px;padding:7px 16px;font-weight:700;cursor:pointer;font-size:13px">🖨️ Cetak / Simpan PDF</button>
+    <button onclick="document.getElementById('overlay-cetak').remove()" style="background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:5px;padding:7px 14px;font-weight:700;cursor:pointer;font-size:13px">✕ Tutup</button>`
+  const frame = document.createElement('iframe')
+  frame.style.cssText = 'flex:1;border:none;width:100%'
+  frame.srcdoc = html
+  frame.onload = () => {
+    document.getElementById('btn-overlay-print').onclick = () => {
+      try { frame.contentWindow.print() } catch(_) { window.print() }
+    }
+  }
+  ov.appendChild(bar)
+  ov.appendChild(frame)
+  document.body.appendChild(ov)
+}
+
 function bukaWindowCetak(htmlPages, payload) {
-  const win = window.open('', '_blank', 'width=900,height=720')
-  win.document.write(buildSSPWindow(htmlPages, payload))
-  win.document.close()
+  bukaTabCetak(buildSSPWindow(htmlPages, payload), 'Cetak SSP Pajak')
 }
 
 function buildSSPWindow(pages, d) {
@@ -2274,9 +2310,7 @@ function kwOnNilaiInput(el) {
 // KUITANSI — Window cetak
 // ─────────────────────────────────────────────────────────────
 function bukaWindowCetakKuitansi(html) {
-  const win = window.open('', '_blank', 'width=900,height=900')
-  win.document.write(buildKuitansiWindow(html))
-  win.document.close()
+  bukaTabCetak(buildKuitansiWindow(html), 'Cetak Kuitansi')
 }
 
 function buildKuitansiWindow(content) {
@@ -3184,9 +3218,7 @@ function hapusNominatif(id) {
 // ── Cetak ──────────────────────────────────────────────────────
 function cetakNominatif(id) {
   api('honor.cetak', { id }).then(res => {
-    const w = window.open('', '_blank')
-    w.document.write(res.html)
-    w.document.close()
+    bukaTabCetak(res.html, 'Nominatif Honor')
   }).catch(err => showToast('❌ ' + err.message, 'err'))
 }
 
@@ -3194,9 +3226,7 @@ function previewNominatif() {
   const p = hnKumpulkanData()
   if (!p.detail.length) { showToast('Tambahkan minimal 1 penerima', 'err'); return }
   api('honor.cetak', p).then(res => {
-    const w = window.open('', '_blank')
-    w.document.write(res.html)
-    w.document.close()
+    bukaTabCetak(res.html, 'Preview Nominatif')
   }).catch(err => showToast('❌ ' + err.message, 'err'))
 }
 

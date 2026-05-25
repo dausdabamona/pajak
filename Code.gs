@@ -15,23 +15,10 @@ function doGet(e) {
   const page = (e && e.parameter && e.parameter.page) ? e.parameter.page : 'WebApp'
 
   try {
+    // Tidak memanggil Session/Spreadsheet di sini agar tidak memicu OAuth
+    // saat halaman pertama dimuat. Auth dilakukan lazy via google.script.run
+    // oleh frontend setelah halaman selesai render.
     const template = HtmlService.createTemplateFromFile(page)
-    template.appName    = CONFIG.APP_NAME
-    template.appVersion = CONFIG.APP_VERSION
-    template.satker     = CONFIG.SATKER
-    template.userEmail  = Session.getActiveUser().getEmail()
-
-    // getSatkerConfig aman meski sheet CONFIG belum ada
-    try {
-      template.configSatker = getSatkerConfig()
-    } catch (_) {
-      template.configSatker = {
-        NAMA_SATKER:   CONFIG.SATKER,
-        NPWP_SATKER:   '',
-        ALAMAT_SATKER: '',
-        NAMA_BENDAHARA:'',
-      }
-    }
 
     return template.evaluate()
       .setTitle(`${CONFIG.APP_NAME} — ${CONFIG.SATKER}`)
