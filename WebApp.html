@@ -3639,6 +3639,70 @@ function toIsoDate(s) {
   }
   return ''
 }
+
+// ─────────────────────────────────────────────────────────────
+// WINDOW REGISTRATION — eksplisit daftarkan semua fungsi UI ke
+// window object agar bisa dipanggil dari onclick="" di HTML.
+//
+// Mengapa perlu: GAS HTMLService menjalankan lockdown() dari SES
+// (Secure ECMAScript). SES membuat "compartment" terisolasi —
+// function yang terdefinisi dengan `function foo()` masuk ke
+// scope compartment, BUKAN ke window/globalThis yang diakses
+// onclick="foo()". Tanpa registrasi eksplisit: ReferenceError.
+// ─────────────────────────────────────────────────────────────
+window.showPage                = showPage
+window.hitungPajak             = hitungPajak
+window.resetKalkulator         = resetKalkulator
+window.simpanTransaksi         = simpanTransaksi
+window.cetakSSP                = cetakSSP
+window.pilihPenyedia           = pilihPenyedia
+window.kwPilihPenerima         = kwPilihPenerima
+window.kwTambahPenyediaBaru    = kwTambahPenyediaBaru
+window.kwHitungPajak           = kwHitungPajak
+window.kwTogglePejabat         = kwTogglePejabat
+window.exportCSV               = exportCSV
+window.loadRiwayat             = loadRiwayat
+window.hapusRiwayat            = hapusRiwayat
+window.lihatDetailRiwayat      = lihatDetailRiwayat
+window.buatKuitansiDariRiwayat = buatKuitansiDariRiwayat
+window.openFormKuitansi        = openFormKuitansi
+window.closeFormKuitansi       = closeFormKuitansi
+window.resetFormKuitansi       = resetFormKuitansi
+window.loadKuitansi            = loadKuitansi
+window.previewKuitansi         = previewKuitansi
+window.cetakKuitansiTersimpan  = cetakKuitansiTersimpan
+window.editKuitansi            = editKuitansi
+window.hapusKuitansi           = hapusKuitansi
+window.simpanKuitansi          = simpanKuitansi
+window.loadHonor               = loadHonor
+window.resetFormHonor          = resetFormHonor
+window.hnTambahBaris           = hnTambahBaris
+window.hnHapusBaris            = hnHapusBaris
+window.hnPilihPegawai          = hnPilihPegawai
+window.hnTogglePejabat         = hnTogglePejabat
+window.hnBuatKuitansi          = hnBuatKuitansi
+window.hnCatatRiwayat          = hnCatatRiwayat
+window.simpanNominatif         = simpanNominatif
+window.editNominatif           = editNominatif
+window.hapusNominatif          = hapusNominatif
+window.cetakNominatif          = cetakNominatif
+window.previewNominatif        = previewNominatif
+window.openModalPenyedia       = openModalPenyedia
+window.hapusPenyedia           = hapusPenyedia
+window.simpanPenyedia          = simpanPenyedia
+window.loadDashboard           = loadDashboard
+window.openModalPegawai        = openModalPegawai
+window.closeModalPegawai       = closeModalPegawai
+window.resetFormPegawai        = resetFormPegawai
+window.editPegawai             = editPegawai
+window.hapusPegawai            = hapusPegawai
+window.simpanPegawai           = simpanPegawai
+window.closeModal              = closeModal
+window.setToggle               = setToggle
+window.simpanConfig            = simpanConfig
+window.simpanConfigKop         = simpanConfigKop
+window.isiDefaultSatker        = isiDefaultSatker
+
 if (window._PBDebug) window._PBDebug.lifecycle('SCRIPT COMPLETE', {
   functions: typeof api === 'function' && typeof showPage === 'function'
     ? '✅ api, showPage, openFormKuitansi, openModalPenyedia, hnTambahBaris — semua siap'
