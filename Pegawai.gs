@@ -101,14 +101,14 @@ function updatePegawai(payload) {
   if (!existing) throw new Error(`Pegawai ID "${payload.id}" tidak ditemukan`)
 
   const data = {}
-  if (payload.nip)        data['NIP']         = String(payload.nip).trim()
-  if (payload.nama)       data['Nama']        = String(payload.nama).trim()
-  if (payload.jabatan)    data['Jabatan']     = String(payload.jabatan).trim()
-  if (payload.golongan)   data['Golongan']    = String(payload.golongan).trim()
-  if (payload.unitKerja)  data['Unit Kerja']  = String(payload.unitKerja).trim()
-  if (payload.npwp !== undefined)       data['NPWP']        = String(payload.npwp).trim()
-  if (payload.statusNpwp) data['Status NPWP'] = payload.statusNpwp
-  if (payload.aktif !== undefined) data['Aktif'] = payload.aktif
+  if (payload.nip !== undefined)       data['NIP']         = String(payload.nip || '').trim()
+  if (payload.nama)                    data['Nama']        = String(payload.nama).trim()
+  if (payload.jabatan !== undefined)   data['Jabatan']     = String(payload.jabatan || '').trim()
+  if (payload.golongan)                data['Golongan']    = String(payload.golongan).trim()
+  if (payload.unitKerja !== undefined) data['Unit Kerja']  = String(payload.unitKerja || '').trim()
+  if (payload.npwp !== undefined)      data['NPWP']        = String(payload.npwp || '').trim()
+  if (payload.statusNpwp)              data['Status NPWP'] = payload.statusNpwp
+  if (payload.aktif !== undefined)     data['Aktif']       = payload.aktif
 
   const updated = sheetUpdate(CONFIG.SHEETS.MASTER_PEGAWAI, existing._rowIndex, data)
   Logger.log(`[updatePegawai] ID=${payload.id} diupdate`)

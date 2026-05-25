@@ -121,6 +121,7 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
 .autocomplete-wrap{position:relative}
 .autocomplete-list{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:300;max-height:200px;overflow-y:auto;display:none}
 .autocomplete-list.show{display:block}
+.hn-ac-list{position:absolute;top:100%;left:0;right:0;z-index:301}
 .autocomplete-item{padding:9px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--border)}
 .autocomplete-item:hover{background:var(--surface2)}
 .autocomplete-item .ai-nama{font-weight:700}
@@ -1477,7 +1478,7 @@ function simpanTransaksi() {
     npwpPenyedia: document.getElementById('k_npwp_penyedia').value,
     tglTransaksi: document.getElementById('k_tgl_transaksi').value,
     tahunPajak:   document.getElementById('k_tahun_pajak').value,
-    masaPajak:    new Date(document.getElementById('k_tgl_transaksi').value).getMonth()+1,
+    masaPajak:    (() => { const d = new Date(document.getElementById('k_tgl_transaksi').value); return isNaN(d) ? new Date().getMonth()+1 : d.getMonth()+1 })(),
     sumberDana:   S.sumber,
     keterangan:   document.getElementById('k_keterangan').value,
   }
@@ -3021,7 +3022,7 @@ function hnTambahBaris(prefill) {
     <td>
       <div class="ac-wrap">
         <input type="text" class="hn-nama" placeholder="Nama..." oninput="hnAutocompletePegawai(this)" autocomplete="off">
-        <div class="ac-list hn-ac-list"></div>
+        <div class="autocomplete-list hn-ac-list"></div>
       </div>
       <input type="text" class="hn-nip" placeholder="NIP" style="margin-top:4px;font-size:11px">
     </td>
@@ -3124,14 +3125,22 @@ function hnPilihPegawai(div, p) {
   tr.querySelector('.hn-nip').value      = p.nip || ''
   tr.querySelector('.hn-jabatan').value  = p.jabatan || ''
   if (p.golongan) {
-    // Map golongan ke kode dropdown — toleransi 'III' atau 'Gol III' atau lainnya
-    const golKey = String(p.golongan).trim().toUpperCase().replace(/^GOL\s+/, '')
-    const opts = ['I','II','III','IV','PEJABAT NEGARA']
-    const found = opts.find(o => o === golKey)
-    if (found) tr.querySelector('.hn-golongan').value = found.charAt(0) + found.slice(1).toLowerCase().split(' ').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ').replace('Iii','III').replace('Iv','IV').replace('Ii','II')
-    // sederhanakan: kalau 'III'/'IV'/'I'/'II' langsung set
-    if (['I','II','III','IV'].includes(golKey)) tr.querySelector('.hn-golongan').value = golKey
-    if (golKey === 'PEJABAT NEGARA') tr.querySelector('.hn-golongan').value = 'Pejabat Negara'
+    const golonganRaw = String(p.golongan).trim()
+    const golUpper = golonganRaw.toUpperCase().replace(/^GOL[\.\s]+/, '')
+    let targetVal = null
+    // PNS by golongan huruf
+    if (['I','II','III','IV'].includes(golUpper)) targetVal = golUpper
+    else if (golUpper === 'PEJABAT NEGARA') targetVal = 'Pejabat Negara'
+    // Non-PNS
+    else if (golUpper.includes('NON') && (golUpper.includes('III') || golUpper.includes('5%'))) targetVal = 'Non-PNS Setara III'
+    else if (golUpper.includes('NON') && (golUpper.includes('IV')  || golUpper.includes('15%'))) targetVal = 'Non-PNS Setara IV'
+    // Fallback: coba langsung
+    else {
+      const sel = tr.querySelector('.hn-golongan')
+      const options = Array.from(sel.options).map(o => o.value)
+      if (options.includes(golonganRaw)) targetVal = golonganRaw
+    }
+    if (targetVal) tr.querySelector('.hn-golongan').value = targetVal
   }
   hnHitungBaris(tr.querySelector('.hn-golongan'))
   div.parentElement.classList.remove('show')
