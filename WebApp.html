@@ -130,6 +130,7 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
 /* ── MODAL ── */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
 .modal-overlay.show{display:flex}
+.d-none{display:none!important}
 .modal-box{background:#fff;border-radius:12px;padding:24px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.2)}
 .modal-title{font-size:15px;font-weight:700;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
 .modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3);padding:2px 6px}
@@ -263,13 +264,13 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
   </div>
 
   <!-- HASIL -->
-  <div id="hasil-section" style="display:none">
+  <div id="hasil-section" class="d-none">
     <div class="card">
       <div class="card-title">④ Hasil Perhitungan</div>
-      <div id="warn_nonNpwp" class="warn-box" style="display:none">
+      <div id="warn_nonNpwp" class="warn-box d-none">
         ⚠️ Rekanan <b>NON-NPWP</b> — tarif PPh dikenakan <b>2×</b> lipat dari tarif normal.
       </div>
-      <div id="warn_ppn_threshold" class="warn-box" style="display:none;background:#e8f5e9;border-left-color:#43a047;color:#2e7d32">
+      <div id="warn_ppn_threshold" class="warn-box d-none" style="background:#e8f5e9;border-left-color:#43a047;color:#2e7d32">
         ℹ️ DPP ≤ Rp2.000.000 — <b>PPN tidak dipungut</b> oleh Bendahara Pemerintah.<br>
         <small>Dasar: PMK No. 231/PMK.03/2019 Pasal 32 ayat (1)</small>
       </div>
@@ -446,7 +447,7 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
   </div>
 
   <!-- FORM (disembunyikan default) -->
-  <div class="card" id="kw-form-card" style="display:none">
+  <div class="card d-none" id="kw-form-card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
       <div class="card-title" style="margin-bottom:0"><span id="kw-form-mode">Buat Kuitansi Baru</span></div>
       <button class="btn btn-outline" onclick="closeFormKuitansi()">← Kembali ke Daftar</button>
@@ -455,7 +456,7 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
     <input type="hidden" id="kw_id">
     <input type="hidden" id="kw_riwayat_id">
 
-    <div class="info-box" id="kw_info_riwayat" style="display:none">
+    <div class="info-box d-none" id="kw_info_riwayat">
       🔗 Kuitansi ini terkait dengan transaksi riwayat: <b id="kw_info_riwayat_text"></b>
     </div>
 
@@ -538,7 +539,7 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
       </div>
       <button class="btn btn-primary btn-full" type="button" onclick="kwHitungPajak()">⚡ Hitung Pajak & Auto-isi Form</button>
 
-      <div id="kw_ah_hasil" style="display:none;margin-top:12px;padding:10px;background:#fff;border-radius:6px;border:1px solid var(--accent)">
+      <div id="kw_ah_hasil" class="d-none" style="margin-top:12px;padding:10px;background:#fff;border-radius:6px;border:1px solid var(--accent)">
         <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px">HASIL PERHITUNGAN</div>
         <table class="info-table">
           <tr><td>DPP / Jenis</td><td id="kw_ah_dpp">—</td></tr>
@@ -546,7 +547,7 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
           <tr><td>PPN dipungut</td><td id="kw_ah_ppn" style="color:var(--accent2);font-weight:700">—</td></tr>
           <tr><td>Diterima Penyedia</td><td id="kw_ah_bayar" style="color:var(--yellow);font-weight:700">—</td></tr>
         </table>
-        <div id="kw_ah_threshold_note" style="display:none;margin-top:8px;font-size:11px;color:#2e7d32;background:#e8f5e9;padding:6px 8px;border-radius:4px;border-left:3px solid #43a047">
+        <div id="kw_ah_threshold_note" class="d-none" style="margin-top:8px;font-size:11px;color:#2e7d32;background:#e8f5e9;padding:6px 8px;border-radius:4px;border-left:3px solid #43a047">
           ℹ️ DPP ≤ Rp2.000.000 — PPN tidak dipungut (PMK 231/PMK.03/2019 Psl. 32)
         </div>
       </div>
@@ -595,7 +596,7 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
             oninput="kwAutocompletePenerima(this.value)" autocomplete="off">
           <div class="autocomplete-list" id="kw_ac_list"></div>
         </div>
-        <div class="hint" id="kw_penerima_info" style="display:none;color:var(--accent2)">✓ <span id="kw_penerima_info_text"></span></div>
+        <div class="hint d-none" id="kw_penerima_info" style="color:var(--accent2)">✓ <span id="kw_penerima_info_text"></span></div>
       </div>
       <div class="field">
         <label>Tempat (Kota)</label>
@@ -616,7 +617,7 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
         <div>👤 <b>PPK:</b> <span id="kw_ppk_display" style="color:var(--accent)">—</span> <span style="color:var(--text3);font-size:11px" id="kw_ppk_nip_display">—</span></div>
         <div>💼 <b>Bendahara:</b> <span id="kw_bend_display" style="color:var(--accent2)">—</span> <span style="color:var(--text3);font-size:11px" id="kw_bend_nip_display">—</span></div>
       </div>
-      <div id="kw_pejabat_inputs" style="display:none;margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)">
+      <div id="kw_pejabat_inputs" class="d-none" style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)">
         <div class="grid-2" style="margin-bottom:10px">
           <div class="field"><label>Nama PPK</label><input type="text" id="kw_ppk_nama" oninput="kwUpdatePejabatDisplay()"></div>
           <div class="field"><label>NIP PPK</label><input type="text" id="kw_ppk_nip" oninput="kwUpdatePejabatDisplay()"></div>
@@ -788,7 +789,7 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
         <div>👤 <b>PPK:</b> <span id="hn_ppk_display" style="color:var(--accent)">—</span> <span style="color:var(--text3);font-size:11px" id="hn_ppk_nip_display">—</span></div>
         <div>💼 <b>Bendahara:</b> <span id="hn_bend_display" style="color:var(--accent2)">—</span> <span style="color:var(--text3);font-size:11px" id="hn_bend_nip_display">—</span></div>
       </div>
-      <div id="hn_pejabat_inputs" style="display:none;margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)">
+      <div id="hn_pejabat_inputs" class="d-none" style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)">
         <div class="grid-2" style="margin-bottom:10px">
           <div class="field"><label>Nama PPK</label><input type="text" id="hn_ppk_nama" oninput="hnUpdatePejabatDisplay()"></div>
           <div class="field"><label>NIP PPK</label><input type="text" id="hn_ppk_nip" oninput="hnUpdatePejabatDisplay()"></div>
@@ -805,15 +806,15 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
     <div class="form-actions">
       <button class="btn btn-success" onclick="simpanNominatif()">💾 Simpan</button>
       <button class="btn btn-primary" onclick="previewNominatif()">👁️ Preview / Cetak</button>
-      <button class="btn btn-outline" id="hn_btn_kuitansi" onclick="hnBuatKuitansi()" style="display:none">🧾 Buat Kuitansi</button>
-      <button class="btn btn-outline" id="hn_btn_riwayat" onclick="hnCatatRiwayat()" style="display:none">📒 Catat PPh 21 ke Riwayat</button>
+      <button class="btn btn-outline d-none" id="hn_btn_kuitansi" onclick="hnBuatKuitansi()">🧾 Buat Kuitansi</button>
+      <button class="btn btn-outline d-none" id="hn_btn_riwayat" onclick="hnCatatRiwayat()">📒 Catat PPh 21 ke Riwayat</button>
       <button class="btn btn-outline" onclick="resetFormHonor()">↺ Reset</button>
     </div>
   </div>
 </div>
 
 <!-- MODAL KELOLA PEGAWAI -->
-<div id="modal_pegawai" class="modal-overlay" style="display:none" onclick="if(event.target===this) closeModalPegawai()">
+<div id="modal_pegawai" class="modal-overlay" onclick="if(event.target===this) closeModalPegawai()">
   <div class="modal-box" style="max-width:720px">
     <div class="modal-title">
       <span>👥 Kelola Master Pegawai</span>
@@ -1017,10 +1018,10 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
         💡 <b>Bisa langsung paste URL share Drive</b> (format <code>https://drive.google.com/file/d/.../view</code>) — otomatis dikonversi.<br>
         Penting: file di Drive harus di-share <b>"Anyone with the link → Viewer"</b> agar bisa diakses.
       </div>
-      <div id="cfg_kop_logo_note" style="display:none;margin-top:6px;font-size:11px;color:var(--accent);background:#e8f0fe;padding:6px 8px;border-radius:4px"></div>
-      <div id="cfg_kop_logo_box" style="margin-top:8px;padding:10px;background:#fff;border:1px dashed var(--border);border-radius:6px;display:none;text-align:center">
-        <img id="cfg_kop_logo_preview" alt="logo" style="max-width:120px;max-height:120px;object-fit:contain" onerror="this.style.display='none';document.getElementById('cfg_kop_logo_err').style.display='block'">
-        <div id="cfg_kop_logo_err" style="display:none;color:var(--accent3);font-size:11px">⚠️ Gambar tidak bisa dimuat. Pastikan file di Drive di-share "Anyone with the link".</div>
+      <div id="cfg_kop_logo_note" class="d-none" style="margin-top:6px;font-size:11px;color:var(--accent);background:#e8f0fe;padding:6px 8px;border-radius:4px"></div>
+      <div id="cfg_kop_logo_box" class="d-none" style="margin-top:8px;padding:10px;background:#fff;border:1px dashed var(--border);border-radius:6px;text-align:center">
+        <img id="cfg_kop_logo_preview" alt="logo" style="max-width:120px;max-height:120px;object-fit:contain" onerror="this.classList.add('d-none');document.getElementById('cfg_kop_logo_err').classList.remove('d-none')">
+        <div id="cfg_kop_logo_err" class="d-none" style="color:var(--accent3);font-size:11px">⚠️ Gambar tidak bisa dimuat. Pastikan file di Drive di-share "Anyone with the link".</div>
       </div>
     </div>
     <div class="field" style="margin-bottom:10px">
@@ -1377,9 +1378,9 @@ function hitungPajak() {
 }
 
 function tampilkanHasil(h) {
-  document.getElementById('hasil-section').style.display = 'block'
-  document.getElementById('warn_nonNpwp').style.display = h.isNonNpwp && h.nilaiPph > 0 ? 'flex' : 'none'
-  document.getElementById('warn_ppn_threshold').style.display = h.ppnDibawahThreshold ? 'block' : 'none'
+  document.getElementById('hasil-section').classList.remove('d-none')
+  document.getElementById('warn_nonNpwp').classList.toggle('d-none', !(h.isNonNpwp && h.nilaiPph > 0))
+  document.getElementById('warn_ppn_threshold').classList.toggle('d-none', !h.ppnDibawahThreshold)
 
   document.getElementById('r_pph').textContent = fmtRp(h.nilaiPph)
   document.getElementById('r_pph_sub').textContent = h.nilaiPph === 0
@@ -1459,7 +1460,7 @@ function hitungLokal(kode, nilai, inclPpn, statusNpwp) {
 }
 
 function resetKalkulator() {
-  document.getElementById('hasil-section').style.display = 'none'
+  document.getElementById('hasil-section').classList.add('d-none')
   S.lastHasil = null
   window.scrollTo({top:0, behavior:'smooth'})
 }
@@ -1730,7 +1731,7 @@ let acKwTimer = null
 function kwAutocompletePenerima(q) {
   clearTimeout(acKwTimer)
   const list = document.getElementById('kw_ac_list')
-  document.getElementById('kw_penerima_info').style.display = 'none'
+  document.getElementById('kw_penerima_info').classList.add('d-none')
   if (!q || q.length < 2) { list.classList.remove('show'); return }
   acKwTimer = setTimeout(() => {
     api('penyedia.cari', {q}).then(items => {
@@ -1758,7 +1759,7 @@ function kwPilihPenerima(p) {
   // Tampilkan info penyedia terpilih
   const infoEl = document.getElementById('kw_penerima_info')
   const infoText = document.getElementById('kw_penerima_info_text')
-  infoEl.style.display = 'block'
+  infoEl.classList.remove('d-none')
   infoText.textContent = `${p.statusNpwp || ''}${p.npwp ? ' · NPWP ' + p.npwp : ' · tanpa NPWP'}${p.kota ? ' · ' + p.kota : ''}`
 
   // Auto-sync status NPWP ke toggle auto-hitung pajak (agar tarif PPh akurat)
@@ -1979,8 +1980,8 @@ function loadKuitansi() {
 
 function openFormKuitansi() {
   try {
-    document.getElementById('kw-list-card').style.display = 'none'
-    document.getElementById('kw-form-card').style.display = 'block'
+    document.getElementById('kw-list-card').classList.add('d-none')
+    document.getElementById('kw-form-card').classList.remove('d-none')
     document.getElementById('kw-form-mode').textContent = 'Buat Kuitansi Baru'
     resetFormKuitansi()
     window.scrollTo({top:0, behavior:'smooth'})
@@ -1991,9 +1992,9 @@ function openFormKuitansi() {
 }
 
 function closeFormKuitansi() {
-  document.getElementById('kw-form-card').style.display = 'none'
-  document.getElementById('kw-list-card').style.display = 'block'
-  document.getElementById('kw_info_riwayat').style.display = 'none'
+  document.getElementById('kw-form-card').classList.add('d-none')
+  document.getElementById('kw-list-card').classList.remove('d-none')
+  document.getElementById('kw_info_riwayat').classList.add('d-none')
   loadKuitansi()
 }
 
@@ -2010,9 +2011,9 @@ function resetFormKuitansi() {
   document.getElementById('kw_diterima').value = ''
   document.getElementById('kw_penerima').value = ''
   document.getElementById('kw_ket').value = ''
-  document.getElementById('kw_info_riwayat').style.display = 'none'
+  document.getElementById('kw_info_riwayat').classList.add('d-none')
   const penInfo = document.getElementById('kw_penerima_info')
-  if (penInfo) penInfo.style.display = 'none'
+  if (penInfo) penInfo.classList.add('d-none')
   const acList = document.getElementById('kw_ac_list')
   if (acList) acList.classList.remove('show')
 
@@ -2022,7 +2023,7 @@ function resetFormKuitansi() {
   const ahNilai = document.getElementById('kw_ah_nilai')
   if (ahNilai) ahNilai.value = ''
   const ahHasil = document.getElementById('kw_ah_hasil')
-  if (ahHasil) ahHasil.style.display = 'none'
+  if (ahHasil) ahHasil.classList.add('d-none')
 
   // Default dari config & tanggal hari ini
   const now = new Date()
@@ -2040,7 +2041,7 @@ function resetFormKuitansi() {
   // Update display ringkas & sembunyikan panel override
   kwUpdatePejabatDisplay()
   const ovBox = document.getElementById('kw_pejabat_inputs')
-  if (ovBox) ovBox.style.display = 'none'
+  if (ovBox) ovBox.classList.add('d-none')
   const ovBtn = document.getElementById('kw_btn_override_pejabat')
   if (ovBtn) ovBtn.textContent = '✏️ Override untuk kuitansi ini'
 
@@ -2214,11 +2215,11 @@ function editKuitansi(id) {
                  (r['Bendahara NIP']||'')  !== (cfg.NIP_BENDAHARA||'')
     const ovBox = document.getElementById('kw_pejabat_inputs')
     const ovBtn = document.getElementById('kw_btn_override_pejabat')
-    if (ovBox) ovBox.style.display = beda ? 'block' : 'none'
+    if (ovBox) ovBox.classList.toggle('d-none', !beda)
     if (ovBtn) ovBtn.textContent = beda ? '✕ Tutup Override' : '✏️ Override untuk kuitansi ini'
 
     if (r['Riwayat ID']) {
-      document.getElementById('kw_info_riwayat').style.display = 'block'
+      document.getElementById('kw_info_riwayat').classList.remove('d-none')
       document.getElementById('kw_info_riwayat_text').textContent = r['Riwayat ID']
     }
   }).catch(err => showToast('❌ ' + err.message, 'err'))
@@ -2242,7 +2243,7 @@ function buatKuitansiDariRiwayat(riwayatId) {
     openFormKuitansi()
     document.getElementById('kw_riwayat_id').value = draft.riwayatId || ''
     if (draft.riwayatId) {
-      document.getElementById('kw_info_riwayat').style.display = 'block'
+      document.getElementById('kw_info_riwayat').classList.remove('d-none')
       document.getElementById('kw_info_riwayat_text').textContent = draft.riwayatId
     }
     document.getElementById('kw_ta').value           = draft.tahunAnggaran || ''
@@ -2292,12 +2293,12 @@ function kwHitungPajak() {
 function kwTerapkanHasil(h) {
   // Tampilkan ringkasan
   const hasilBox = document.getElementById('kw_ah_hasil')
-  hasilBox.style.display = 'block'
+  hasilBox.classList.remove('d-none')
   document.getElementById('kw_ah_pph').textContent = fmtRp(h.nilaiPph)
   document.getElementById('kw_ah_ppn').textContent = fmtRp(h.nilaiPpn)
   document.getElementById('kw_ah_bayar').textContent = fmtRp(h.nilaiDibayar)
   document.getElementById('kw_ah_dpp').textContent = fmtRp(h.dpp) + ` (${h.labelKegiatan || ''})`
-  document.getElementById('kw_ah_threshold_note').style.display = h.ppnDibawahThreshold ? 'block' : 'none'
+  document.getElementById('kw_ah_threshold_note').classList.toggle('d-none', !h.ppnDibawahThreshold)
 
   // Auto-isi field kuitansi (gunakan nilai total termasuk PPN sebagai "Uang Sejumlah")
   const total = h.nilaiInclPpn || (h.dpp + h.nilaiPpn)
@@ -3041,11 +3042,11 @@ function resetFormHonor() {
   // Update display pejabat & sembunyikan override
   hnUpdatePejabatDisplay()
   const hnOvBox = document.getElementById('hn_pejabat_inputs')
-  if (hnOvBox) hnOvBox.style.display = 'none'
+  if (hnOvBox) hnOvBox.classList.add('d-none')
   const hnOvBtn = document.getElementById('hn_btn_override_pejabat')
   if (hnOvBtn) hnOvBtn.textContent = '✏️ Override untuk nominatif ini'
-  document.getElementById('hn_btn_kuitansi').style.display = 'none'
-  document.getElementById('hn_btn_riwayat').style.display = 'none'
+  document.getElementById('hn_btn_kuitansi').classList.add('d-none')
+  document.getElementById('hn_btn_riwayat').classList.add('d-none')
   document.getElementById('hn_detail_body').innerHTML = ''
   hnTambahBaris()
   hnHitungTotal()
@@ -3243,8 +3244,8 @@ function simpanNominatif() {
   api(action, p).then(saved => {
     showToast('✅ Nominatif tersimpan: ' + (saved.ID || ''), 'ok')
     document.getElementById('hn_id').value = saved.ID || p.id
-    document.getElementById('hn_btn_kuitansi').style.display = ''
-    document.getElementById('hn_btn_riwayat').style.display = ''
+    document.getElementById('hn_btn_kuitansi').classList.remove('d-none')
+    document.getElementById('hn_btn_riwayat').classList.remove('d-none')
     loadHonor()
   }).catch(err => showToast('❌ ' + err.message, 'err'))
 }
@@ -3277,15 +3278,15 @@ function editNominatif(id) {
                    (n['Bendahara NIP']||'') !== (hnCfg.NIP_BENDAHARA||'')
     const hnOvBox2 = document.getElementById('hn_pejabat_inputs')
     const hnOvBtn2 = document.getElementById('hn_btn_override_pejabat')
-    if (hnOvBox2) hnOvBox2.style.display = hnBeda ? 'block' : 'none'
+    if (hnOvBox2) hnOvBox2.classList.toggle('d-none', !hnBeda)
     if (hnOvBtn2) hnOvBtn2.textContent = hnBeda ? '✕ Tutup Override' : '✏️ Override untuk nominatif ini'
 
     document.getElementById('hn_detail_body').innerHTML = ''
     ;(n.detail || []).forEach(d => hnTambahBaris(d))
     if (!n.detail || !n.detail.length) hnTambahBaris()
     hnHitungTotal()
-    document.getElementById('hn_btn_kuitansi').style.display = ''
-    document.getElementById('hn_btn_riwayat').style.display = ''
+    document.getElementById('hn_btn_kuitansi').classList.remove('d-none')
+    document.getElementById('hn_btn_riwayat').classList.remove('d-none')
     document.getElementById('hn_form_card').scrollIntoView({behavior:'smooth'})
   }).catch(err => showToast('❌ ' + err.message, 'err'))
 }
@@ -3367,7 +3368,7 @@ function hnCatatRiwayat() {
 // ─────────────────────────────────────────────────────────────
 function openModalPegawai() {
   try {
-    document.getElementById('modal_pegawai').style.display = 'flex'
+    document.getElementById('modal_pegawai').classList.add('show')
     resetFormPegawai()
     loadPegawaiTable()
   } catch(e) {
@@ -3376,7 +3377,7 @@ function openModalPegawai() {
   }
 }
 function closeModalPegawai() {
-  document.getElementById('modal_pegawai').style.display = 'none'
+  document.getElementById('modal_pegawai').classList.remove('show')
 }
 
 function loadPegawaiTable() {
@@ -3480,8 +3481,8 @@ function kwTogglePejabat() {
   const box = document.getElementById('kw_pejabat_inputs')
   const btn = document.getElementById('kw_btn_override_pejabat')
   if (!box) return
-  const open = box.style.display === 'none'
-  box.style.display = open ? 'block' : 'none'
+  const open = box.classList.contains('d-none')
+  box.classList.toggle('d-none', !open)
   if (btn) btn.textContent = open ? '✕ Tutup Override' : '✏️ Override untuk kuitansi ini'
 }
 function hnUpdatePejabatDisplay() {
@@ -3507,8 +3508,8 @@ function hnTogglePejabat() {
   const box = document.getElementById('hn_pejabat_inputs')
   const btn = document.getElementById('hn_btn_override_pejabat')
   if (!box) return
-  const open = box.style.display === 'none'
-  box.style.display = open ? 'block' : 'none'
+  const open = box.classList.contains('d-none')
+  box.classList.toggle('d-none', !open)
   if (btn) btn.textContent = open ? '✕ Tutup Override' : '✏️ Override untuk nominatif ini'
 }
 
@@ -3520,20 +3521,20 @@ function updateLogoPreview() {
   const err = document.getElementById('cfg_kop_logo_err')
   if (!input || !box || !img) return
   const rawUrl = (input.value || '').trim()
-  if (!rawUrl) { box.style.display = 'none'; return }
+  if (!rawUrl) { box.classList.add('d-none'); return }
   const normalized = normalizeLogoUrl(rawUrl)
   const note = document.getElementById('cfg_kop_logo_note')
   if (note) {
     if (normalized !== rawUrl) {
-      note.style.display = 'block'
+      note.classList.remove('d-none')
       note.innerHTML = `🔄 URL akan disimpan sebagai: <code style="font-size:10px">${normalized}</code>`
     } else {
-      note.style.display = 'none'
+      note.classList.add('d-none')
     }
   }
-  box.style.display = 'block'
-  img.style.display = 'inline-block'
-  if (err) err.style.display = 'none'
+  box.classList.remove('d-none')
+  img.classList.remove('d-none')
+  if (err) err.classList.add('d-none')
   img.src = normalized
 }
 
