@@ -130,6 +130,7 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
 /* ── MODAL ── */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
 .modal-overlay.show{display:flex}
+.d-none{display:none!important}
 .modal-box{background:#fff;border-radius:12px;padding:24px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.2)}
 .modal-title{font-size:15px;font-weight:700;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
 .modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3);padding:2px 6px}
@@ -446,7 +447,7 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
   </div>
 
   <!-- FORM (disembunyikan default) -->
-  <div class="card" id="kw-form-card" style="display:none">
+  <div class="card d-none" id="kw-form-card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
       <div class="card-title" style="margin-bottom:0"><span id="kw-form-mode">Buat Kuitansi Baru</span></div>
       <button class="btn btn-outline" onclick="closeFormKuitansi()">← Kembali ke Daftar</button>
@@ -455,7 +456,7 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
     <input type="hidden" id="kw_id">
     <input type="hidden" id="kw_riwayat_id">
 
-    <div class="info-box" id="kw_info_riwayat" style="display:none">
+    <div class="info-box d-none" id="kw_info_riwayat">
       🔗 Kuitansi ini terkait dengan transaksi riwayat: <b id="kw_info_riwayat_text"></b>
     </div>
 
@@ -805,15 +806,15 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
     <div class="form-actions">
       <button class="btn btn-success" onclick="simpanNominatif()">💾 Simpan</button>
       <button class="btn btn-primary" onclick="previewNominatif()">👁️ Preview / Cetak</button>
-      <button class="btn btn-outline" id="hn_btn_kuitansi" onclick="hnBuatKuitansi()" style="display:none">🧾 Buat Kuitansi</button>
-      <button class="btn btn-outline" id="hn_btn_riwayat" onclick="hnCatatRiwayat()" style="display:none">📒 Catat PPh 21 ke Riwayat</button>
+      <button class="btn btn-outline d-none" id="hn_btn_kuitansi" onclick="hnBuatKuitansi()">🧾 Buat Kuitansi</button>
+      <button class="btn btn-outline d-none" id="hn_btn_riwayat" onclick="hnCatatRiwayat()">📒 Catat PPh 21 ke Riwayat</button>
       <button class="btn btn-outline" onclick="resetFormHonor()">↺ Reset</button>
     </div>
   </div>
 </div>
 
 <!-- MODAL KELOLA PEGAWAI -->
-<div id="modal_pegawai" class="modal-overlay" style="display:none" onclick="if(event.target===this) closeModalPegawai()">
+<div id="modal_pegawai" class="modal-overlay" onclick="if(event.target===this) closeModalPegawai()">
   <div class="modal-box" style="max-width:720px">
     <div class="modal-title">
       <span>👥 Kelola Master Pegawai</span>
@@ -1979,8 +1980,8 @@ function loadKuitansi() {
 
 function openFormKuitansi() {
   try {
-    document.getElementById('kw-list-card').style.display = 'none'
-    document.getElementById('kw-form-card').style.display = 'block'
+    document.getElementById('kw-list-card').classList.add('d-none')
+    document.getElementById('kw-form-card').classList.remove('d-none')
     document.getElementById('kw-form-mode').textContent = 'Buat Kuitansi Baru'
     resetFormKuitansi()
     window.scrollTo({top:0, behavior:'smooth'})
@@ -1991,9 +1992,9 @@ function openFormKuitansi() {
 }
 
 function closeFormKuitansi() {
-  document.getElementById('kw-form-card').style.display = 'none'
-  document.getElementById('kw-list-card').style.display = 'block'
-  document.getElementById('kw_info_riwayat').style.display = 'none'
+  document.getElementById('kw-form-card').classList.add('d-none')
+  document.getElementById('kw-list-card').classList.remove('d-none')
+  document.getElementById('kw_info_riwayat').classList.add('d-none')
   loadKuitansi()
 }
 
@@ -2010,9 +2011,9 @@ function resetFormKuitansi() {
   document.getElementById('kw_diterima').value = ''
   document.getElementById('kw_penerima').value = ''
   document.getElementById('kw_ket').value = ''
-  document.getElementById('kw_info_riwayat').style.display = 'none'
+  document.getElementById('kw_info_riwayat').classList.add('d-none')
   const penInfo = document.getElementById('kw_penerima_info')
-  if (penInfo) penInfo.style.display = 'none'
+  if (penInfo) penInfo.classList.add('d-none')
   const acList = document.getElementById('kw_ac_list')
   if (acList) acList.classList.remove('show')
 
@@ -2022,7 +2023,7 @@ function resetFormKuitansi() {
   const ahNilai = document.getElementById('kw_ah_nilai')
   if (ahNilai) ahNilai.value = ''
   const ahHasil = document.getElementById('kw_ah_hasil')
-  if (ahHasil) ahHasil.style.display = 'none'
+  if (ahHasil) ahHasil.classList.add('d-none')
 
   // Default dari config & tanggal hari ini
   const now = new Date()
@@ -2040,7 +2041,7 @@ function resetFormKuitansi() {
   // Update display ringkas & sembunyikan panel override
   kwUpdatePejabatDisplay()
   const ovBox = document.getElementById('kw_pejabat_inputs')
-  if (ovBox) ovBox.style.display = 'none'
+  if (ovBox) ovBox.classList.add('d-none')
   const ovBtn = document.getElementById('kw_btn_override_pejabat')
   if (ovBtn) ovBtn.textContent = '✏️ Override untuk kuitansi ini'
 
@@ -3041,11 +3042,11 @@ function resetFormHonor() {
   // Update display pejabat & sembunyikan override
   hnUpdatePejabatDisplay()
   const hnOvBox = document.getElementById('hn_pejabat_inputs')
-  if (hnOvBox) hnOvBox.style.display = 'none'
+  if (hnOvBox) hnOvBox.classList.add('d-none')
   const hnOvBtn = document.getElementById('hn_btn_override_pejabat')
   if (hnOvBtn) hnOvBtn.textContent = '✏️ Override untuk nominatif ini'
-  document.getElementById('hn_btn_kuitansi').style.display = 'none'
-  document.getElementById('hn_btn_riwayat').style.display = 'none'
+  document.getElementById('hn_btn_kuitansi').classList.add('d-none')
+  document.getElementById('hn_btn_riwayat').classList.add('d-none')
   document.getElementById('hn_detail_body').innerHTML = ''
   hnTambahBaris()
   hnHitungTotal()
@@ -3367,7 +3368,7 @@ function hnCatatRiwayat() {
 // ─────────────────────────────────────────────────────────────
 function openModalPegawai() {
   try {
-    document.getElementById('modal_pegawai').style.display = 'flex'
+    document.getElementById('modal_pegawai').classList.add('show')
     resetFormPegawai()
     loadPegawaiTable()
   } catch(e) {
@@ -3376,7 +3377,7 @@ function openModalPegawai() {
   }
 }
 function closeModalPegawai() {
-  document.getElementById('modal_pegawai').style.display = 'none'
+  document.getElementById('modal_pegawai').classList.remove('show')
 }
 
 function loadPegawaiTable() {
