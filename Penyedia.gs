@@ -124,18 +124,18 @@ function updatePenyedia(payload) {
   if (!existing) throw new Error(`Penyedia ID "${payload.id}" tidak ditemukan`)
 
   const data = {}
-  if (payload.nama)        data['Nama']        = String(payload.nama).trim()
-  if (payload.npwp)        data['NPWP']        = String(payload.npwp).trim()
-  if (payload.statusNpwp)  data['Status NPWP'] = payload.statusNpwp
-  if (payload.alamat)      data['Alamat']      = String(payload.alamat).trim()
-  if (payload.kota)        data['Kota']        = String(payload.kota).trim()
-  if (payload.noTelp)      data['No Telp']     = String(payload.noTelp).trim()
-  if (payload.email)       data['Email']       = String(payload.email).trim().toLowerCase()
-  if (payload.bank)        data['Bank']        = String(payload.bank).trim()
-  if (payload.noRekening)  data['No Rekening'] = String(payload.noRekening).trim()
-  if (payload.atasNama)    data['Atas Nama']   = String(payload.atasNama).trim()
-  if (payload.kualifikasi) data['Kualifikasi'] = String(payload.kualifikasi).trim()
-  if (payload.aktif !== undefined) data['Aktif'] = payload.aktif
+  if (payload.nama)                 data['Nama']        = String(payload.nama).trim()
+  if (payload.npwp !== undefined)   data['NPWP']        = String(payload.npwp || '').trim()
+  if (payload.statusNpwp)           data['Status NPWP'] = payload.statusNpwp
+  if (payload.alamat !== undefined) data['Alamat']      = String(payload.alamat || '').trim()
+  if (payload.kota !== undefined)   data['Kota']        = String(payload.kota || '').trim()
+  if (payload.noTelp !== undefined) data['No Telp']     = String(payload.noTelp || '').trim()
+  if (payload.email !== undefined)  data['Email']       = String(payload.email || '').trim().toLowerCase()
+  if (payload.bank !== undefined)   data['Bank']        = String(payload.bank || '').trim()
+  if (payload.noRekening !== undefined) data['No Rekening'] = String(payload.noRekening || '').trim()
+  if (payload.atasNama !== undefined)   data['Atas Nama']   = String(payload.atasNama || '').trim()
+  if (payload.kualifikasi !== undefined) data['Kualifikasi'] = String(payload.kualifikasi || '').trim()
+  if (payload.aktif !== undefined)  data['Aktif']       = payload.aktif
 
   const updated = sheetUpdate(CONFIG.SHEETS.MASTER_PENYEDIA, existing._rowIndex, data)
   Logger.log(`[updatePenyedia] ID=${payload.id} diupdate`)
