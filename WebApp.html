@@ -965,6 +965,10 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
   <div class="card">
     <div class="card-title">⚙️ Konfigurasi Satker</div>
     <div class="info-box">Pengaturan ini digunakan untuk mengisi data SSP, header laporan, dan identitas instansi.</div>
+    <div style="margin-bottom:14px">
+      <button class="btn btn-outline btn-sm" onclick="isiDefaultSatker()" style="border-color:var(--accent2);color:var(--accent2)">📋 Isi Default Poltek KP Sorong</button>
+      <span style="font-size:11px;color:var(--text3);margin-left:8px">Isi otomatis data instansi — periksa dan simpan kembali jika ada perubahan</span>
+    </div>
     <div class="grid-2" style="margin-bottom:12px">
       <div class="field"><label>Nama Satker</label><input type="text" id="cfg_nama_satker" placeholder="Politeknik KP Sorong"></div>
       <div class="field"><label>NPWP Satker</label><input type="text" id="cfg_npwp_satker" placeholder="00.000.000.0-000.000"></div>
@@ -1081,30 +1085,23 @@ table.data-tbl .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radi
 
 <!-- Tab navigation — script TERPISAH, tidak terpengaruh error di script utama -->
 <script>
-(function() {
-  function switchTab(name, tab) {
-    document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
-    document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
-    var el = document.getElementById('page-' + name);
-    if (el) el.classList.add('active');
-    if (tab) tab.classList.add('active');
-  }
-  document.addEventListener('DOMContentLoaded', function() {
+// Tab navigation fallback — hanya aktif jika showPage belum terdefinisi
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof showPage !== 'function') {
     document.querySelectorAll('.nav-tab').forEach(function(tab) {
       var m = (tab.getAttribute('onclick') || '').match(/showPage\('([^']+)'/);
       if (!m) return;
-      var pageName = m[1];
+      var name = m[1];
       tab.addEventListener('click', function() {
-        if (typeof showPage === 'function') {
-          showPage(pageName, tab);
-        } else {
-          switchTab(pageName, tab);
-        }
+        document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+        document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
+        var el = document.getElementById('page-' + name);
+        if (el) el.classList.add('active');
+        tab.classList.add('active');
       });
     });
-    console.log('[TabNav] listener registered, showPage available:', typeof showPage === 'function');
-  });
-})();
+  }
+});
 </script>
 
 <script>
@@ -1981,11 +1978,16 @@ function loadKuitansi() {
 }
 
 function openFormKuitansi() {
-  document.getElementById('kw-list-card').style.display = 'none'
-  document.getElementById('kw-form-card').style.display = 'block'
-  document.getElementById('kw-form-mode').textContent = 'Buat Kuitansi Baru'
-  resetFormKuitansi()
-  window.scrollTo({top:0, behavior:'smooth'})
+  try {
+    document.getElementById('kw-list-card').style.display = 'none'
+    document.getElementById('kw-form-card').style.display = 'block'
+    document.getElementById('kw-form-mode').textContent = 'Buat Kuitansi Baru'
+    resetFormKuitansi()
+    window.scrollTo({top:0, behavior:'smooth'})
+  } catch(e) {
+    console.error('[openFormKuitansi]', e)
+    showToast('❌ Error: ' + e.message, 'err')
+  }
 }
 
 function closeFormKuitansi() {
@@ -2678,23 +2680,28 @@ function loadPenyedia() {
 }
 
 function openModalPenyedia(p) {
-  const isEdit = p && p['ID']
-  document.getElementById('modal-penyedia-title').textContent = isEdit ? 'Edit Penyedia' : 'Tambah Penyedia Baru'
-  document.getElementById('mp_id').value         = isEdit ? p['ID'] : ''
-  document.getElementById('mp_nama').value       = isEdit ? p['Nama']||'' : ''
-  document.getElementById('mp_npwp').value       = isEdit ? p['NPWP']||'' : ''
-  document.getElementById('mp_alamat').value     = isEdit ? p['Alamat']||'' : ''
-  document.getElementById('mp_kota').value       = isEdit ? p['Kota']||'' : ''
-  document.getElementById('mp_telp').value       = isEdit ? p['No Telp']||'' : ''
-  document.getElementById('mp_bank').value       = isEdit ? p['Bank']||'' : ''
-  document.getElementById('mp_rekening').value   = isEdit ? p['No Rekening']||'' : ''
-  document.getElementById('mp_atas_nama').value  = isEdit ? p['Atas Nama']||'' : ''
-  document.getElementById('mp_kualifikasi').value= isEdit ? p['Kualifikasi']||'' : ''
-  const isNon = isEdit && String(p['Status NPWP']||'').includes('NON')
-  S.mp_npwp_status = isNon ? 'NON-NPWP' : 'BER-NPWP'
-  document.querySelector('#modal-penyedia .toggle-group')
-    .querySelectorAll('.toggle-btn').forEach((b,i) => b.classList.toggle('active', isNon ? i===1 : i===0))
-  document.getElementById('modal-penyedia').classList.add('show')
+  try {
+    const isEdit = p && p['ID']
+    document.getElementById('modal-penyedia-title').textContent = isEdit ? 'Edit Penyedia' : 'Tambah Penyedia Baru'
+    document.getElementById('mp_id').value         = isEdit ? p['ID'] : ''
+    document.getElementById('mp_nama').value       = isEdit ? p['Nama']||'' : ''
+    document.getElementById('mp_npwp').value       = isEdit ? p['NPWP']||'' : ''
+    document.getElementById('mp_alamat').value     = isEdit ? p['Alamat']||'' : ''
+    document.getElementById('mp_kota').value       = isEdit ? p['Kota']||'' : ''
+    document.getElementById('mp_telp').value       = isEdit ? p['No Telp']||'' : ''
+    document.getElementById('mp_bank').value       = isEdit ? p['Bank']||'' : ''
+    document.getElementById('mp_rekening').value   = isEdit ? p['No Rekening']||'' : ''
+    document.getElementById('mp_atas_nama').value  = isEdit ? p['Atas Nama']||'' : ''
+    document.getElementById('mp_kualifikasi').value= isEdit ? p['Kualifikasi']||'' : ''
+    const isNon = isEdit && String(p['Status NPWP']||'').includes('NON')
+    S.mp_npwp_status = isNon ? 'NON-NPWP' : 'BER-NPWP'
+    const tg = document.querySelector('#modal-penyedia .toggle-group')
+    if (tg) tg.querySelectorAll('.toggle-btn').forEach((b,i) => b.classList.toggle('active', isNon ? i===1 : i===0))
+    document.getElementById('modal-penyedia').classList.add('show')
+  } catch(e) {
+    console.error('[openModalPenyedia]', e)
+    showToast('❌ Error buka form penyedia: ' + e.message, 'err')
+  }
 }
 
 function simpanPenyedia() {
@@ -2838,6 +2845,40 @@ function loadConfig() {
     document.getElementById('cfg_kw_prefix').value      = cfg['KUITANSI_PREFIX']||'KWT'
     if (typeof updateLogoPreview === 'function') updateLogoPreview()
   }).catch(() => {})
+}
+
+// Isi form Pengaturan dengan data default Poltek KP Sorong
+function isiDefaultSatker() {
+  const now = new Date().getFullYear()
+  const D = {
+    'cfg_nama_satker':    'Politeknik Kelautan dan Perikanan Sorong',
+    'cfg_npwp_satker':    '00.172.581.1-951.000',
+    'cfg_alamat_satker':  'Jl. Kapitan Pattimura No. 1, Sorong',
+    'cfg_nama_bendahara': 'Abdul Rauf M. Saleh',
+    'cfg_nip_bendahara':  '198309122007011001',
+    'cfg_nama_kpa':       'Daniel Heintje Ndahawali, S.Pi., M.Si.',
+    'cfg_nip_kpa':        '197207172002121003',
+    'cfg_nama_ppk':       'Firdaus Dabamona, S.T.',
+    'cfg_nip_ppk':        '198201032007011002',
+    'cfg_kppn':           'KPPN Sorong',
+    'cfg_tahun_anggaran': String(now),
+    'cfg_kop_b1':         'KEMENTERIAN KELAUTAN DAN PERIKANAN',
+    'cfg_kop_b2':         'BADAN PENYULUHAN DAN PENGEMBANGAN',
+    'cfg_kop_b3':         'SUMBER DAYA MANUSIA KELAUTAN DAN PERIKANAN',
+    'cfg_kop_b4':         'POLITEKNIK KELAUTAN DAN PERIKANAN SORONG',
+    'cfg_kop_alamat':     'JALAN KAPITAN PATTIMURA, TANJUNG KASUARI - SUPRAU',
+    'cfg_kop_kotak_pos':  'KOTAK POS 118 KOTA SORONG, PAPUA BARAT DAYA 98411',
+    'cfg_kop_laman':      'www.polikpsorong.ac.id',
+    'cfg_kop_surel':      'polteksorong@kkp.go.id',
+    'cfg_kw_terima_dari': 'Pejabat Pembuat Komitmen Politeknik Kelautan dan Perikanan Sorong',
+    'cfg_kw_mak':         '1',
+    'cfg_kw_prefix':      'KWT',
+  }
+  Object.entries(D).forEach(([id, val]) => {
+    const el = document.getElementById(id)
+    if (el && !el.value) el.value = val
+  })
+  showToast('✅ Default Poltek KP Sorong diisi — periksa lalu klik Simpan', 'ok')
 }
 
 // Normalisasi URL logo (Drive sharing URL → format yang bisa dimuat sebagai gambar)
@@ -3012,11 +3053,12 @@ function resetFormHonor() {
 
 // ── Tambah baris penerima ──────────────────────────────────────
 function hnTambahBaris(prefill) {
+  try {
   const tbody = document.getElementById('hn_detail_body')
   const idx = tbody.children.length
   const tr = document.createElement('tr')
   tr.className = 'hn-row'
-  const golOpts = GOLONGAN_OPTIONS.map(g => `<option value="${g.kode}">${g.label}</option>`).join('')
+  const golOpts = (typeof GOLONGAN_OPTIONS !== 'undefined' ? GOLONGAN_OPTIONS : []).map(g => `<option value="${g.kode}">${g.label}</option>`).join('')
   tr.innerHTML = `
     <td style="text-align:center">${idx + 1}</td>
     <td>
@@ -3048,6 +3090,10 @@ function hnTambahBaris(prefill) {
   // Default golongan III
   if (!prefill) tr.querySelector('.hn-golongan').value = 'III'
   hnRenumber()
+  } catch(e) {
+    console.error('[hnTambahBaris]', e)
+    showToast('❌ Error tambah baris: ' + e.message, 'err')
+  }
 }
 
 function hnHapusBaris(btn) {
@@ -3320,9 +3366,14 @@ function hnCatatRiwayat() {
 // MASTER PEGAWAI (modal)
 // ─────────────────────────────────────────────────────────────
 function openModalPegawai() {
-  document.getElementById('modal_pegawai').style.display = 'flex'
-  resetFormPegawai()
-  loadPegawaiTable()
+  try {
+    document.getElementById('modal_pegawai').style.display = 'flex'
+    resetFormPegawai()
+    loadPegawaiTable()
+  } catch(e) {
+    console.error('[openModalPegawai]', e)
+    showToast('❌ Error buka kelola pegawai: ' + e.message, 'err')
+  }
 }
 function closeModalPegawai() {
   document.getElementById('modal_pegawai').style.display = 'none'
