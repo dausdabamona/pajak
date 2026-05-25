@@ -1562,10 +1562,10 @@ body{font-family:Arial,sans-serif;background:#eee;padding:10mm}
 .ssp-kode{font-size:7pt;text-align:right;color:#aaa;margin-top:1mm}
 .btn-print{position:fixed;top:10px;right:10px;background:#1a73e8;color:#fff;border:none;border-radius:6px;padding:10px 22px;font-size:14px;font-weight:bold;cursor:pointer;z-index:999}
 @media print{body{background:#fff;padding:0}.btn-print{display:none}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
-</style></head><body>
+\x3C/style>\x3C/head>\x3Cbody>
 <button class="btn-print" onclick="window.print()">🖨️ Print / Simpan PDF</button>
 ${pages}
-</body></html>`
+\x3C/body>\x3C/html>`
 }
 
 // Generate SSP di sisi client (fallback)
@@ -2508,10 +2508,10 @@ body{font-family:'Crimson Text','Times New Roman',Georgia,serif;background:#dcdc
   .kw-page{box-shadow:none;margin:0;border-width:1pt}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact}
 }
-</style></head><body>
+\x3C/style>\x3C/head>\x3Cbody>
 <button class="btn-print" onclick="window.print()">🖨️ Print / Simpan PDF</button>
 ${content}
-</body></html>`
+\x3C/body>\x3C/html>`
 }
 
 // Generate kuitansi HTML di sisi client (fallback)
