@@ -1588,13 +1588,18 @@ function cetakSSP(jenis) {
     tahunPajak:   document.getElementById('k_tahun_pajak').value,
   }
 
-  api('setup.ssp', payload).then(res => {
-    bukaWindowCetak(res.html, payload)
-  }).catch(() => {
-    // Fallback: generate HTML SSP di client
+  if (S.cfgSatker && S.cfgSatker['NAMA_SATKER']) {
+    // Config sudah ada di client — generate langsung tanpa server round-trip
     const html = generateSSPClient(payload, S.cfgSatker)
     bukaWindowCetak(html, payload)
-  })
+  } else {
+    api('setup.ssp', payload).then(res => {
+      bukaWindowCetak(res.html, payload)
+    }).catch(() => {
+      const html = generateSSPClient(payload, S.cfgSatker)
+      bukaWindowCetak(html, payload)
+    })
+  }
 }
 
 // ─── Helper cetak — fallback ke overlay bila popup diblokir ───
