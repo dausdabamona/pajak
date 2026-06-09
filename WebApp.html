@@ -1375,66 +1375,73 @@ function onNilaiInput(el) {
 // ─────────────────────────────────────────────────────────────
 // KALKULATOR — LOAD DROPDOWN
 // ─────────────────────────────────────────────────────────────
+// Data jenis kegiatan lengkap — statis, tidak perlu server
+var KEGIATAN_LIST = [
+  {g:'Belanja Barang',         kode:'1',  label:'Barang/Modal (ATK, Meja, Mobil, Kapal, dll)'},
+  {g:'Belanja Barang',         kode:'2',  label:'Barang Tambang/Galian (Pasir, Batu belum dibentuk)'},
+  {g:'Belanja Barang',         kode:'3',  label:'BBM, Listrik, Air Minum/PDAM, Benda Pos'},
+  {g:'Belanja Barang',         kode:'4',  label:'Pelumas (Oli)'},
+  {g:'Belanja Barang',         kode:'5',  label:'Barang dengan Dana BOS'},
+  {g:'Belanja Barang',         kode:'6',  label:'Sembako (Beras, Sagu, dll belum diolah)'},
+  {g:'Belanja Barang',         kode:'7',  label:'Vaksin Polio (Pekan Imunisasi Nasional)'},
+  {g:'Belanja Barang',         kode:'8',  label:'Buku Pelajaran Umum, Kitab Suci, Buku Agama'},
+  {g:'Belanja Barang',         kode:'9',  label:'Pakan Ternak / Ikan'},
+  {g:'Belanja Barang',         kode:'10', label:'Bibit / Benih'},
+  {g:'Belanja Barang',         kode:'11', label:'Hasil Pertanian (dipetik langsung)'},
+  {g:'Hak atas Tanah/Bangunan',kode:'12', label:'Pembebasan Tanah/Bangunan — Kepentingan Umum (Jalan, Waduk, dll)'},
+  {g:'Hak atas Tanah/Bangunan',kode:'13', label:'Pembebasan Tanah/Bangunan — Bangunan Lainnya'},
+  {g:'Jasa',                   kode:'14', label:'Jasa (servis, instalasi, perawatan, dll)'},
+  {g:'Jasa',                   kode:'15', label:'Jasa Makan Minum (Rumah Makan, Katering)'},
+  {g:'Jasa',                   kode:'16', label:'Jasa Kesenian & Hiburan (kelompok)'},
+  {g:'Jasa',                   kode:'17', label:'Jasa Pengiriman Surat dengan Perangko'},
+  {g:'Jasa',                   kode:'18', label:'Jasa Pengiriman Surat tanpa Perangko'},
+  {g:'Jasa',                   kode:'19', label:'Jasa Pengiriman Barang (Ekspedisi)'},
+  {g:'Jasa',                   kode:'20', label:'Jasa Penyiaran Non-Komersil'},
+  {g:'Sewa',                   kode:'21', label:'Sewa Mobilitas Laut (perusahaan pelayaran dalam negeri)'},
+  {g:'Sewa',                   kode:'22', label:'Sewa Mobilitas Udara (penerbangan dalam negeri)'},
+  {g:'Sewa',                   kode:'23', label:'Sewa Mobilitas Laut & Udara (perusahaan luar negeri)'},
+  {g:'Sewa',                   kode:'24', label:'Sewa Mobilitas Darat (kendaraan)'},
+  {g:'Sewa',                   kode:'25', label:'Sewa Mobilitas Laut Lainnya'},
+  {g:'Sewa',                   kode:'26', label:'Sewa Mobilitas Udara Lainnya'},
+  {g:'Sewa',                   kode:'27', label:'Sewa Tanah dan/atau Bangunan (selain Hotel)'},
+  {g:'Sewa',                   kode:'28', label:'Sewa Tempat di Hotel'},
+  {g:'Hak atas Tanah/Bangunan',kode:'29', label:'Pengalihan Hak atas Tanah dan/atau Bangunan'},
+  {g:'Pekerjaan Konstruksi',   kode:'30', label:'Pelaksana Konstruksi — Menengah Besar / PT'},
+  {g:'Pekerjaan Konstruksi',   kode:'31', label:'Pelaksana Konstruksi — Grade 5/6/7'},
+  {g:'Pekerjaan Konstruksi',   kode:'32', label:'Pelaksana Konstruksi — Kualifikasi Kecil (Grade 1/2/3/4, CV)'},
+  {g:'Pekerjaan Konstruksi',   kode:'33', label:'Pelaksana Konstruksi — Non Kualifikasi'},
+  {g:'Pekerjaan Konstruksi',   kode:'34', label:'Perencana/Pengawas Konstruksi — Berkualifikasi'},
+  {g:'Pekerjaan Konstruksi',   kode:'35', label:'Perencana/Pengawas Konstruksi — Non Kualifikasi'},
+]
+
 function loadJenisKegiatan() {
-  api('kalkulator.list').then(list => {
-    const sel = document.getElementById('k_jenis_kegiatan')
-    sel.innerHTML = '<option value="">— Pilih Jenis Kegiatan —</option>'
-
-    const groups = {
-      'Belanja Barang':          [],
-      'Jasa':                    [],
-      'Sewa':                    [],
-      'Hak atas Tanah/Bangunan': [],
-      'Pekerjaan Konstruksi':    [],
-    }
-
-    ;(list || []).forEach(item => {
-      const k = parseInt(item.kode)
-      if (k>=1&&k<=11)       groups['Belanja Barang'].push(item)
-      else if (k>=14&&k<=20) groups['Jasa'].push(item)
-      else if (k>=21&&k<=28) groups['Sewa'].push(item)
-      else if ([12,13,29].includes(k)) groups['Hak atas Tanah/Bangunan'].push(item)
-      else if (k>=30&&k<=35) groups['Pekerjaan Konstruksi'].push(item)
-    })
-
-    Object.entries(groups).forEach(([grp, items]) => {
-      if (!items.length) return
-      const og = document.createElement('optgroup')
-      og.label = grp
-      items.forEach(item => {
-        const opt = document.createElement('option')
-        opt.value = item.kode
-        opt.textContent = item.label
-        og.appendChild(opt)
-      })
-      sel.appendChild(og)
-    })
-
-    // Duplikasi opsi ke dropdown form kuitansi
-    const kwSel = document.getElementById('kw_ah_jenis')
-    if (kwSel) {
-      kwSel.innerHTML = sel.innerHTML
-    }
-  }).catch(() => {
-    // Fallback: pakai data lokal jika API gagal
-    loadJenisKegiatanLokal()
-  })
-}
-
-// Fallback jika google.script.run belum siap (preview mode)
-function loadJenisKegiatanLokal() {
-  const ITEMS = [
-    {kode:'1',label:'Barang/Modal (ATK, Meja, Mobil, Kapal, dll)'},{kode:'2',label:'Barang Tambang/Galian'},
-    {kode:'3',label:'BBM, Listrik, Air Minum/PDAM, Benda Pos'},{kode:'4',label:'Pelumas (Oli)'},
-    {kode:'6',label:'Sembako (Beras, Sagu, dll)'},{kode:'14',label:'Jasa (servis, instalasi, dll)'},
-    {kode:'15',label:'Jasa Makan Minum / Katering'},{kode:'24',label:'Sewa Mobilitas Darat (kendaraan)'},
-    {kode:'27',label:'Sewa Tanah dan/atau Bangunan'},{kode:'28',label:'Sewa Tempat di Hotel'},
-    {kode:'32',label:'Pelaksana Konstruksi — Kualifikasi Kecil (CV)'},{kode:'30',label:'Pelaksana Konstruksi — Menengah Besar / PT'},
-    {kode:'34',label:'Perencana/Pengawas — Berkualifikasi'},{kode:'35',label:'Perencana/Pengawas — Non Kualifikasi'},
-  ]
-  const sel = document.getElementById('k_jenis_kegiatan')
+  var sel = document.getElementById('k_jenis_kegiatan')
   sel.innerHTML = '<option value="">— Pilih Jenis Kegiatan —</option>'
-  ITEMS.forEach(({kode,label}) => sel.add(new Option(label, kode)))
+
+  var groups = {}
+  var groupOrder = ['Belanja Barang','Jasa','Sewa','Hak atas Tanah/Bangunan','Pekerjaan Konstruksi']
+  KEGIATAN_LIST.forEach(function(item) {
+    if (!groups[item.g]) groups[item.g] = []
+    groups[item.g].push(item)
+  })
+
+  groupOrder.forEach(function(grp) {
+    var items = groups[grp]
+    if (!items || !items.length) return
+    var og = document.createElement('optgroup')
+    og.label = grp
+    items.forEach(function(item) {
+      var opt = document.createElement('option')
+      opt.value = item.kode
+      opt.textContent = item.label
+      og.appendChild(opt)
+    })
+    sel.appendChild(og)
+  })
+
+  // Duplikasi ke dropdown form kuitansi
+  var kwSel = document.getElementById('kw_ah_jenis')
+  if (kwSel) kwSel.innerHTML = sel.innerHTML
 }
 
 // ─────────────────────────────────────────────────────────────
