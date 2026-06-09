@@ -1193,7 +1193,7 @@ const S = {
   kw_npwp: 'BER-NPWP', kw_incl_ppn: true,
   lastHasil: null,
   riwayatOffset: 0, riwayatTotal: 0,
-  cfgSatker: {},
+  cfgSatker: {}, cfgReady: false,
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -1280,6 +1280,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load config satker
     api('config.get').then(cfg => {
       S.cfgSatker = cfg || {}
+      S.cfgReady  = true
     }).catch(() => {})
 
     // Load dropdown jenis kegiatan
@@ -1441,7 +1442,10 @@ function loadJenisKegiatan() {
 
   // Duplikasi ke dropdown form kuitansi
   var kwSel = document.getElementById('kw_ah_jenis')
-  if (kwSel) kwSel.innerHTML = sel.innerHTML
+  if (kwSel) {
+    kwSel.innerHTML = ''
+    Array.from(sel.childNodes).forEach(function(n) { kwSel.appendChild(n.cloneNode(true)) })
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -1595,7 +1599,7 @@ function cetakSSP(jenis) {
     tahunPajak:   document.getElementById('k_tahun_pajak').value,
   }
 
-  if (S.cfgSatker && S.cfgSatker['NAMA_SATKER']) {
+  if (S.cfgReady) {
     // Config sudah ada di client — generate langsung tanpa server round-trip
     const html = generateSSPClient(payload, S.cfgSatker)
     bukaWindowCetak(html, payload)
@@ -1603,6 +1607,7 @@ function cetakSSP(jenis) {
     api('setup.ssp', payload).then(res => {
       bukaWindowCetak(res.html, payload)
     }).catch(() => {
+      showToast('Data satker belum dimuat, beberapa kolom SSP mungkin kosong', 'warn')
       const html = generateSSPClient(payload, S.cfgSatker)
       bukaWindowCetak(html, payload)
     })
@@ -3662,58 +3667,26 @@ function toIsoDate(s) {
 // scope compartment, BUKAN ke window/globalThis yang diakses
 // onclick="foo()". Tanpa registrasi eksplisit: ReferenceError.
 // ─────────────────────────────────────────────────────────────
-window.showPage                = showPage
-window.hitungPajak             = hitungPajak
-window.resetKalkulator         = resetKalkulator
-window.simpanTransaksi         = simpanTransaksi
-window.cetakSSP                = cetakSSP
-window.pilihPenyedia           = pilihPenyedia
-window.kwPilihPenerima         = kwPilihPenerima
-window.kwTambahPenyediaBaru    = kwTambahPenyediaBaru
-window.kwHitungPajak           = kwHitungPajak
-window.kwTogglePejabat         = kwTogglePejabat
-window.exportCSV               = exportCSV
-window.loadRiwayat             = loadRiwayat
-window.hapusRiwayat            = hapusRiwayat
-window.lihatDetailRiwayat      = lihatDetailRiwayat
-window.buatKuitansiDariRiwayat = buatKuitansiDariRiwayat
-window.openFormKuitansi        = openFormKuitansi
-window.closeFormKuitansi       = closeFormKuitansi
-window.resetFormKuitansi       = resetFormKuitansi
-window.loadKuitansi            = loadKuitansi
-window.previewKuitansi         = previewKuitansi
-window.cetakKuitansiTersimpan  = cetakKuitansiTersimpan
-window.editKuitansi            = editKuitansi
-window.hapusKuitansi           = hapusKuitansi
-window.simpanKuitansi          = simpanKuitansi
-window.loadHonor               = loadHonor
-window.resetFormHonor          = resetFormHonor
-window.hnTambahBaris           = hnTambahBaris
-window.hnHapusBaris            = hnHapusBaris
-window.hnPilihPegawai          = hnPilihPegawai
-window.hnTogglePejabat         = hnTogglePejabat
-window.hnBuatKuitansi          = hnBuatKuitansi
-window.hnCatatRiwayat          = hnCatatRiwayat
-window.simpanNominatif         = simpanNominatif
-window.editNominatif           = editNominatif
-window.hapusNominatif          = hapusNominatif
-window.cetakNominatif          = cetakNominatif
-window.previewNominatif        = previewNominatif
-window.openModalPenyedia       = openModalPenyedia
-window.hapusPenyedia           = hapusPenyedia
-window.simpanPenyedia          = simpanPenyedia
-window.loadDashboard           = loadDashboard
-window.openModalPegawai        = openModalPegawai
-window.closeModalPegawai       = closeModalPegawai
-window.resetFormPegawai        = resetFormPegawai
-window.editPegawai             = editPegawai
-window.hapusPegawai            = hapusPegawai
-window.simpanPegawai           = simpanPegawai
-window.closeModal              = closeModal
-window.setToggle               = setToggle
-window.simpanConfig            = simpanConfig
-window.simpanConfigKop         = simpanConfigKop
-window.isiDefaultSatker        = isiDefaultSatker
+Object.assign(window, {
+  showPage, hitungPajak, resetKalkulator, simpanTransaksi,
+  cetakSSP, pilihPenyedia,
+  kwPilihPenerima, kwTambahPenyediaBaru, kwHitungPajak, kwTogglePejabat,
+  exportCSV,
+  loadRiwayat, hapusRiwayat, lihatDetailRiwayat, buatKuitansiDariRiwayat,
+  openFormKuitansi, closeFormKuitansi, resetFormKuitansi,
+  loadKuitansi, previewKuitansi, cetakKuitansiTersimpan,
+  editKuitansi, hapusKuitansi, simpanKuitansi,
+  loadHonor, resetFormHonor,
+  hnTambahBaris, hnHapusBaris, hnPilihPegawai, hnTogglePejabat,
+  hnBuatKuitansi, hnCatatRiwayat,
+  simpanNominatif, editNominatif, hapusNominatif, cetakNominatif, previewNominatif,
+  openModalPenyedia, hapusPenyedia, simpanPenyedia,
+  loadDashboard,
+  openModalPegawai, closeModalPegawai, resetFormPegawai,
+  editPegawai, hapusPegawai, simpanPegawai,
+  closeModal, setToggle,
+  simpanConfig, simpanConfigKop, isiDefaultSatker,
+})
 
 if (window._PBDebug) window._PBDebug.lifecycle('SCRIPT COMPLETE', {
   functions: typeof api === 'function' && typeof showPage === 'function'
